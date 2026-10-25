@@ -8,40 +8,41 @@
      raw ad listings for pay dirt, Ofertas is the bench where the ones
      worth keeping get built out into copy, creative and a real offer. */
   :root{
-    --bg:#F3F0E6; --surface:#FFFFFF; --surface-2:#E9E3D2; --border:#D2C9AE;
-    --fg:#1C2027; --fg-muted:#5B6270;
-    --accent:#AD7A24; --accent-fg:#FFFFFF; --accent-soft:#EEDFB8;
-    --good:#3C7A52; --good-soft:#DCEBDE;
-    --warn:#A6432E; --warn-soft:#F0D6CC;
-    --info:#345E7C; --info-soft:#D8E5EC;
-    --neutral:#787160; --neutral-soft:#E4DDC9;
-    --accent2:#2E6E63; --accent2-soft:#D7E7E2;
+    /* Diamonds of Favela brand board: periwinkle, mint, terracotta, warm brown ink, cream */
+    --bg:#F4F1EB; --surface:#FFFFFF; --surface-2:#EBE4D8; --border:#DCD1BE;
+    --fg:#372B22; --fg-muted:#8A7A6B;
+    --accent:#8C6B4F; --accent-fg:#FFFFFF; --accent-soft:#EDE1D4;
+    --good:#4C8C5B; --good-soft:#DFF0DD;
+    --warn:#BD4534; --warn-soft:#F7DED8;
+    --info:#5B76D6; --info-soft:#E2E7FB;
+    --neutral:#6B5D4F; --neutral-soft:#E6DECE;
+    --accent2:#5B76D6; --accent2-soft:#E2E7FB;
     --font-display:'Fraunces',Georgia,serif;
     --font-body:'IBM Plex Sans',system-ui,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,monospace;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#10141C; --surface:#161B25; --surface-2:#1F2531; --border:#323A49;
-      --fg:#E9E6DC; --fg-muted:#9AA2B1;
-      --accent:#DCA847; --accent-fg:#10141C; --accent-soft:#3A2E15;
-      --good:#6FAE82; --good-soft:#1E2E24;
-      --warn:#DD8266; --warn-soft:#352019;
-      --info:#7FAFCF; --info-soft:#1C2A34;
-      --neutral:#9199A6; --neutral-soft:#232A36;
-      --accent2:#5FBFA8; --accent2-soft:#17302B;
+      --bg:#1B1611; --surface:#241E17; --surface-2:#2E2619; --border:#473C2C;
+      --fg:#EFE7DA; --fg-muted:#AC9C89;
+      --accent:#D6B393; --accent-fg:#241E17; --accent-soft:#3B2F22;
+      --good:#8FCB98; --good-soft:#223325;
+      --warn:#E08A74; --warn-soft:#3A2420;
+      --info:#AEBEF7; --info-soft:#232A42;
+      --neutral:#B7A58F; --neutral-soft:#2E2619;
+      --accent2:#AEBEF7; --accent2-soft:#232A42;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#10141C; --surface:#161B25; --surface-2:#1F2531; --border:#323A49;
-    --fg:#E9E6DC; --fg-muted:#9AA2B1;
-    --accent:#DCA847; --accent-fg:#10141C; --accent-soft:#3A2E15;
-    --good:#6FAE82; --good-soft:#1E2E24;
-    --warn:#DD8266; --warn-soft:#352019;
-    --info:#7FAFCF; --info-soft:#1C2A34;
-    --neutral:#9199A6; --neutral-soft:#232A36;
-    --accent2:#5FBFA8; --accent2-soft:#17302B;
+    --bg:#1B1611; --surface:#241E17; --surface-2:#2E2619; --border:#473C2C;
+    --fg:#EFE7DA; --fg-muted:#AC9C89;
+    --accent:#D6B393; --accent-fg:#241E17; --accent-soft:#3B2F22;
+    --good:#8FCB98; --good-soft:#223325;
+    --warn:#E08A74; --warn-soft:#3A2420;
+    --info:#AEBEF7; --info-soft:#232A42;
+    --neutral:#B7A58F; --neutral-soft:#2E2619;
+    --accent2:#AEBEF7; --accent2-soft:#232A42;
     color-scheme: dark;
   }
 
@@ -293,15 +294,46 @@
     form.add-form{grid-template-columns:1fr}
     .stats{grid-template-columns:repeat(2,1fr)}
   }
+
+  /* ---------- entrance animation + brand mark ---------- */
+  @keyframes dfFadeInUp{
+    from{ opacity:0; transform:translateY(14px) }
+    to{ opacity:1; transform:translateY(0) }
+  }
+  header{ animation:dfFadeInUp .55s cubic-bezier(.16,1,.3,1) both }
+  header .df-mark{ animation:dfFadeInUp .6s cubic-bezier(.16,1,.3,1) .04s both }
+  nav.tabs{ animation:dfFadeInUp .55s cubic-bezier(.16,1,.3,1) .09s both }
+  main .view.active{ animation:dfFadeInUp .6s cubic-bezier(.16,1,.3,1) .16s both }
+  @media (prefers-reduced-motion: reduce){
+    header, header .df-mark, nav.tabs, main .view.active{ animation:none }
+  }
+  .df-mark{ display:inline-flex; flex:0 0 auto; color:var(--info); align-self:center }
+
+  /* ---------- charts ---------- */
+  .charts-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:4px }
+  @media (max-width:640px){ .charts-row{ grid-template-columns:1fr } }
+  .chart-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:14px 14px 10px;
+  }
+  .chart-card h4{
+    margin:0 0 10px; font-family:var(--font-display); font-weight:600; font-size:.88rem; color:var(--fg);
+  }
+  .chart-card .chart-wrap{ position:relative; height:190px }
+  .chart-card .chart-empty{ color:var(--fg-muted); font-size:.8rem; text-align:center; padding:40px 0 }
 </style>
 
 <header>
   <div class="header-top">
+    <svg class="df-mark" width="34" height="34" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <path d="M12 18 L24 6 L36 18 L24 42 Z" fill="var(--info-soft)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M12 18 L36 18 M18 18 L24 6 L30 18 M18 18 L24 42 M30 18 L24 42" stroke="currentColor" stroke-width="1.3" opacity=".55"/>
+    </svg>
     <div>
       <div class="eyebrow">Garimpo → Oficina</div>
       <h1 id="pageTitle">Oficina de Ofertas</h1>
     </div>
-    <div style="display:flex; align-items:center; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
       <div class="store-note" id="storeNote">conectando…</div>
       <button type="button" id="btnReloadData" title="Forçar reconexão com os dados salvos" style="font-size:12px; padding:4px 10px; border-radius:6px; cursor:pointer;">🔄 Recarregar dados</button>
     </div>
@@ -348,6 +380,26 @@
     </section>
 
     <section class="stats" id="statsPainel"></section>
+
+    <section>
+      <h3 class="section-title">Visão geral</h3>
+      <div class="charts-row">
+        <div class="chart-card">
+          <h4>Ofertas do garimpo por status</h4>
+          <div class="chart-wrap">
+            <canvas id="chartStatus"></canvas>
+            <div class="chart-empty" id="chartStatusEmpty" style="display:none">Registre ofertas no Garimpo pra ver o gráfico aqui.</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4>Budget alocado vs. investido</h4>
+          <div class="chart-wrap">
+            <canvas id="chartBudget"></canvas>
+            <div class="chart-empty" id="chartBudgetEmpty" style="display:none">Lance um budget em "Minhas Ofertas" pra ver o gráfico aqui.</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section>
       <h3 class="section-title">Ofertas que pedem atenção</h3>
@@ -591,6 +643,7 @@
   </section>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -1335,6 +1388,75 @@
   }
 
   // ===================== PAINEL render =====================
+  // ===================== charts (Chart.js) =====================
+  var chartStatus = null, chartBudget = null;
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function chartFonts(){
+    return { family: "'IBM Plex Sans', system-ui, sans-serif", color: cssVar("--fg-muted") };
+  }
+  function renderChartStatus(){
+    var el = document.getElementById("chartStatus");
+    var emptyEl = document.getElementById("chartStatusEmpty");
+    if (!el || typeof Chart === "undefined") return;
+    var counts = { unclassified:0, copiable:0, expert:0, discarded:0 };
+    state.offers.forEach(function(o){ var s = o.status || "unclassified"; if (counts.hasOwnProperty(s)) counts[s]++; });
+    var labels = [STATUS_LABEL.unclassified, STATUS_LABEL.copiable, STATUS_LABEL.expert, STATUS_LABEL.discarded];
+    var data = [counts.unclassified, counts.copiable, counts.expert, counts.discarded];
+    var colors = [cssVar("--neutral"), cssVar("--good"), cssVar("--warn"), cssVar("--fg-muted")];
+    var hasData = data.some(function(n){ return n>0; });
+    el.style.display = hasData ? "" : "none";
+    if (emptyEl) emptyEl.style.display = hasData ? "none" : "";
+    if (!hasData) return;
+    if (chartStatus){ chartStatus.data.datasets[0].data = data; chartStatus.data.datasets[0].backgroundColor = colors; chartStatus.update(); return; }
+    var f = chartFonts();
+    chartStatus = new Chart(el.getContext("2d"), {
+      type: "doughnut",
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: cssVar("--surface"), borderWidth: 2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom", labels: { color: f.color, font: { family: f.family, size: 11 }, boxWidth: 10, padding: 10 } } }
+      }
+    });
+  }
+  function renderChartBudget(){
+    var el = document.getElementById("chartBudget");
+    var emptyEl = document.getElementById("chartBudgetEmpty");
+    if (!el || typeof Chart === "undefined") return;
+    var offers = state.myOffers.filter(function(o){ return Number(o.allocatedBudget) > 0; });
+    var f = chartFonts();
+    el.style.display = offers.length ? "" : "none";
+    if (emptyEl) emptyEl.style.display = offers.length ? "none" : "";
+    if (!offers.length) return;
+    var labels = offers.map(function(o){ return (o.title||"Sem título").slice(0,18); });
+    var budget = offers.map(function(o){ return Number(o.allocatedBudget)||0; });
+    var spent = offers.map(function(o){ return Number(o.spent)||0; });
+    if (chartBudget){
+      chartBudget.data.labels = labels;
+      chartBudget.data.datasets[0].data = budget;
+      chartBudget.data.datasets[1].data = spent;
+      chartBudget.update();
+      return;
+    }
+    chartBudget = new Chart(el.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          { label: "Budget (€)", data: budget, backgroundColor: cssVar("--info-soft"), borderColor: cssVar("--info"), borderWidth: 1.5, borderRadius: 4 },
+          { label: "Investido (€)", data: spent, backgroundColor: cssVar("--accent"), borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: f.color, font: { family: f.family, size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: f.color, font: { family: f.family, size: 10 } }, grid: { color: cssVar("--border") }, beginAtZero: true }
+        },
+        plugins: { legend: { position: "bottom", labels: { color: f.color, font: { family: f.family, size: 11 }, boxWidth: 10, padding: 10 } } }
+      }
+    });
+  }
+
   function renderPainel(){
     var totalRevenue = state.myOffers.reduce(function(s,o){ return s + (Number(o.revenue)||0); }, 0);
     var totalSpent = state.myOffers.reduce(function(s,o){ return s + (Number(o.spent)||0); }, 0);
@@ -1368,6 +1490,9 @@
     var uList = document.getElementById("upcomingList");
     uList.innerHTML = upcoming.length ? upcoming.map(calItemHtml).join("") :
       '<div class="empty">Nada agendado — use a aba Calendário pra marcar seu próximo lançamento.</div>';
+
+    renderChartStatus();
+    renderChartBudget();
   }
 
   document.getElementById("goalSaveBtn").addEventListener("click", function(){
