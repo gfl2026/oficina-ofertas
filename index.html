@@ -8,41 +8,43 @@
      raw ad listings for pay dirt, Ofertas is the bench where the ones
      worth keeping get built out into copy, creative and a real offer. */
   :root{
-    /* Diamonds of Favela brand board: periwinkle, mint, terracotta, warm brown ink, cream */
-    --bg:#F4F1EB; --surface:#FFFFFF; --surface-2:#EBE4D8; --border:#DCD1BE;
-    --fg:#372B22; --fg-muted:#8A7A6B;
-    --accent:#8C6B4F; --accent-fg:#FFFFFF; --accent-soft:#EDE1D4;
-    --good:#4C8C5B; --good-soft:#DFF0DD;
-    --warn:#BD4534; --warn-soft:#F7DED8;
-    --info:#5B76D6; --info-soft:#E2E7FB;
-    --neutral:#6B5D4F; --neutral-soft:#E6DECE;
-    --accent2:#5B76D6; --accent2-soft:#E2E7FB;
+    /* Diamonds of Favela brand board: bold periwinkle as the lead color,
+       terracotta + mint as vivid accents, warm brown kept only for small
+       neutral details — not the whole UI. */
+    --bg:#F5F2EC; --surface:#FFFFFF; --surface-2:#ECE6DA; --border:#DDD3C2;
+    --fg:#28221D; --fg-muted:#8C7D6C;
+    --accent:#5468E0; --accent-fg:#FFFFFF; --accent-soft:#E1E5FC;
+    --good:#2F9E55; --good-soft:#DCF3E1;
+    --warn:#E2502E; --warn-soft:#FBDDD2;
+    --info:#5468E0; --info-soft:#E1E5FC;
+    --neutral:#8C6B4F; --neutral-soft:#EFE4D8;
+    --accent2:#2F9E55; --accent2-soft:#DCF3E1;
     --font-display:'Fraunces',Georgia,serif;
     --font-body:'IBM Plex Sans',system-ui,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,monospace;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#1B1611; --surface:#241E17; --surface-2:#2E2619; --border:#473C2C;
-      --fg:#EFE7DA; --fg-muted:#AC9C89;
-      --accent:#D6B393; --accent-fg:#241E17; --accent-soft:#3B2F22;
-      --good:#8FCB98; --good-soft:#223325;
-      --warn:#E08A74; --warn-soft:#3A2420;
-      --info:#AEBEF7; --info-soft:#232A42;
-      --neutral:#B7A58F; --neutral-soft:#2E2619;
-      --accent2:#AEBEF7; --accent2-soft:#232A42;
+      --bg:#181A22; --surface:#20232E; --surface-2:#282C39; --border:#3C4255;
+      --fg:#ECEAF5; --fg-muted:#9BA1B5;
+      --accent:#8C9BF2; --accent-fg:#161829; --accent-soft:#2B3050;
+      --good:#6FCB8B; --good-soft:#1C3024;
+      --warn:#F08A6C; --warn-soft:#3A2420;
+      --info:#8C9BF2; --info-soft:#2B3050;
+      --neutral:#C3A98B; --neutral-soft:#2E2619;
+      --accent2:#6FCB8B; --accent2-soft:#1C3024;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#1B1611; --surface:#241E17; --surface-2:#2E2619; --border:#473C2C;
-    --fg:#EFE7DA; --fg-muted:#AC9C89;
-    --accent:#D6B393; --accent-fg:#241E17; --accent-soft:#3B2F22;
-    --good:#8FCB98; --good-soft:#223325;
-    --warn:#E08A74; --warn-soft:#3A2420;
-    --info:#AEBEF7; --info-soft:#232A42;
-    --neutral:#B7A58F; --neutral-soft:#2E2619;
-    --accent2:#AEBEF7; --accent2-soft:#232A42;
+    --bg:#181A22; --surface:#20232E; --surface-2:#282C39; --border:#3C4255;
+    --fg:#ECEAF5; --fg-muted:#9BA1B5;
+    --accent:#8C9BF2; --accent-fg:#161829; --accent-soft:#2B3050;
+    --good:#6FCB8B; --good-soft:#1C3024;
+    --warn:#F08A6C; --warn-soft:#3A2420;
+    --info:#8C9BF2; --info-soft:#2B3050;
+    --neutral:#C3A98B; --neutral-soft:#2E2619;
+    --accent2:#6FCB8B; --accent2-soft:#1C3024;
     color-scheme: dark;
   }
 
@@ -643,7 +645,7 @@
   </section>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 (function(){
   "use strict";
