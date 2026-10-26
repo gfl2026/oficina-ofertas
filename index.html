@@ -419,17 +419,6 @@
   <section class="view" id="view-garimpo">
     <section class="stats" id="stats"></section>
 
-    <details class="panel" id="bookmarkletPanel">
-      <summary>⚡ Atalho: adicionar direto da Biblioteca de Anúncios</summary>
-      <div class="panel-body" style="display:flex; flex-direction:column; gap:10px">
-        <p style="margin:0; font-size:.85rem; color:var(--fg-muted)">
-          Arraste o botão abaixo pra barra de favoritos do seu navegador (uma vez só). Depois, toda vez que estiver vendo um anúncio interessante na Biblioteca de Anúncios do Facebook, clique nesse favorito — ele já abre a Oficina com o link e o título prontos, só falta o nicho.
-        </p>
-        <a id="garimpoBookmarklet" href="#" class="btn btn-accent" style="align-self:flex-start; text-decoration:none; cursor:grab" onclick="return false;">⚡ + Garimpo</a>
-        <p style="margin:0; font-size:.78rem; color:var(--fg-muted)">Não clique aqui — arraste pra barra de favoritos (Ctrl/Cmd+Shift+B pra mostrar a barra, se estiver escondida).</p>
-      </div>
-    </details>
-
     <details class="panel" id="addPanel">
       <summary>Registrar oferta encontrada na Biblioteca de Anúncios</summary>
       <div class="panel-body">
@@ -462,6 +451,9 @@
           </label>
           <label class="full">Link do anúncio (opcional)
             <input type="url" name="link" placeholder="https://www.facebook.com/ads/library/...">
+          </label>
+          <label class="full">Link do site da oferta / checkout (opcional)
+            <input type="url" name="siteLink" placeholder="https://site-da-oferta.com">
           </label>
           <label class="full">Notas
             <textarea name="notes" placeholder="o que chamou atenção, possível vantagem a aplicar..."></textarea>
@@ -701,32 +693,23 @@
     });
   }
 
-  // ---------- bookmarklet "+ Garimpo" ----------
-  // Built at runtime from the page's own URL, so it keeps working if the
-  // deploy URL ever changes. Dragged to the bookmarks bar, it captures the
-  // current tab's link + title and opens the Oficina with quickadd params.
-  (function setupBookmarklet(){
-    var el = document.getElementById("garimpoBookmarklet");
-    if (!el) return;
-    var base = window.location.origin + window.location.pathname;
-    var src = "javascript:(function(){var u='" + base + "?quickadd=1&link='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);window.open(u,'_blank');})();";
-    el.setAttribute("href", src);
-  })();
-
+  // ---------- quick-add via URL params ----------
+  // Lets a link like index.html?quickadd=1&link=...&title=...&niche=...&siteLink=...
+  // open straight into a pre-filled Garimpo form. Not currently linked from
+  // any UI (the bookmarklet approach was dropped), kept as a hook in case
+  // it's useful again later.
   function applyQuickAdd(){
     var params = new URLSearchParams(window.location.search);
     if (params.get("quickadd") !== "1") return;
     switchView("garimpo");
     var panel = document.getElementById("addPanel");
-    var bmPanel = document.getElementById("bookmarkletPanel");
-    if (bmPanel) bmPanel.open = false;
     if (panel) panel.open = true;
     var form = document.getElementById("addForm");
     if (form){
-      var link = params.get("link") || "";
-      var title = params.get("title") || "";
-      if (link) form.elements["link"].value = link;
-      if (title) form.elements["title"].value = title;
+      ["link","title","niche","siteLink","keyword"].forEach(function(key){
+        var val = params.get(key);
+        if (val && form.elements[key]) form.elements[key].value = val;
+      });
     }
     if (panel) panel.scrollIntoView({ behavior:"smooth", block:"start" });
     setTimeout(function(){
@@ -772,7 +755,7 @@
   var SUPABASE_URL = "https://gnqsgfnsqretbppogvqm.supabase.co";
   var SUPABASE_KEY = "sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4";
 
-  var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", niche:"niche", notes:"notes", status:"status", title:"title" };
+  var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", niche:"niche", notes:"notes", status:"status", title:"title" };
   var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title" };
   var EVENTS_FIELDS = { createdAt:"created_at", date:"date", notes:"notes", title:"title", type:"type" };
   var REGISTROS_FIELDS = { category:"category", createdAt:"created_at", label:"label", notes:"notes", status:"status", value:"value" };
@@ -1078,7 +1061,10 @@
         '<div class="metric"><div class="n">'+creatives+'</div><div class="l">criativos</div></div>' +
       '</div>' +
       (o.notes ? '<div class="notes">'+escapeHtml(o.notes)+'</div>' : '') +
-      (o.link ? '<div class="link-row"><a href="'+escapeHtml(o.link)+'" target="_blank" rel="noopener">ver anúncio ↗</a></div>' : '') +
+      ((o.link || o.siteLink) ? '<div class="link-row" style="display:flex; gap:12px; flex-wrap:wrap">' +
+        (o.link ? '<a href="'+escapeHtml(o.link)+'" target="_blank" rel="noopener">ver anúncio ↗</a>' : '') +
+        (o.siteLink ? '<a href="'+escapeHtml(o.siteLink)+'" target="_blank" rel="noopener">ver site/checkout ↗</a>' : '') +
+      '</div>' : '') +
       '<div class="card-actions">' + statusButtonsHtml(o.id, status) + '</div>' +
     '</article>';
   }
@@ -1760,6 +1746,7 @@
       daysActive: Number(fd.get("daysActive"))||0,
       creativeCount: Number(fd.get("creativeCount"))||0,
       link: (fd.get("link")||"").toString().trim(),
+      siteLink: (fd.get("siteLink")||"").toString().trim(),
       notes: (fd.get("notes")||"").toString().trim()
     };
     if (!data.title || !data.niche) return;
