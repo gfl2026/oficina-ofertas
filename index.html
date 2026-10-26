@@ -419,6 +419,17 @@
   <section class="view" id="view-garimpo">
     <section class="stats" id="stats"></section>
 
+    <details class="panel" id="bookmarkletPanel">
+      <summary>⚡ Atalho: adicionar direto da Biblioteca de Anúncios</summary>
+      <div class="panel-body" style="display:flex; flex-direction:column; gap:10px">
+        <p style="margin:0; font-size:.85rem; color:var(--fg-muted)">
+          Arraste o botão abaixo pra barra de favoritos do seu navegador (uma vez só). Depois, toda vez que estiver vendo um anúncio interessante na Biblioteca de Anúncios do Facebook, clique nesse favorito — ele já abre a Oficina com o link e o título prontos, só falta o nicho.
+        </p>
+        <a id="garimpoBookmarklet" href="#" class="btn btn-accent" style="align-self:flex-start; text-decoration:none; cursor:grab" onclick="return false;">⚡ + Garimpo</a>
+        <p style="margin:0; font-size:.78rem; color:var(--fg-muted)">Não clique aqui — arraste pra barra de favoritos (Ctrl/Cmd+Shift+B pra mostrar a barra, se estiver escondida).</p>
+      </div>
+    </details>
+
     <details class="panel" id="addPanel">
       <summary>Registrar oferta encontrada na Biblioteca de Anúncios</summary>
       <div class="panel-body">
@@ -690,6 +701,41 @@
     });
   }
 
+  // ---------- bookmarklet "+ Garimpo" ----------
+  // Built at runtime from the page's own URL, so it keeps working if the
+  // deploy URL ever changes. Dragged to the bookmarks bar, it captures the
+  // current tab's link + title and opens the Oficina with quickadd params.
+  (function setupBookmarklet(){
+    var el = document.getElementById("garimpoBookmarklet");
+    if (!el) return;
+    var base = window.location.origin + window.location.pathname;
+    var src = "javascript:(function(){var u='" + base + "?quickadd=1&link='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);window.open(u,'_blank');})();";
+    el.setAttribute("href", src);
+  })();
+
+  function applyQuickAdd(){
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("quickadd") !== "1") return;
+    switchView("garimpo");
+    var panel = document.getElementById("addPanel");
+    var bmPanel = document.getElementById("bookmarkletPanel");
+    if (bmPanel) bmPanel.open = false;
+    if (panel) panel.open = true;
+    var form = document.getElementById("addForm");
+    if (form){
+      var link = params.get("link") || "";
+      var title = params.get("title") || "";
+      if (link) form.elements["link"].value = link;
+      if (title) form.elements["title"].value = title;
+    }
+    if (panel) panel.scrollIntoView({ behavior:"smooth", block:"start" });
+    setTimeout(function(){
+      if (form && form.elements["niche"]) { form.elements["niche"].focus(); }
+    }, 350);
+    // Clean the URL so a page refresh doesn't keep reopening the panel.
+    history.replaceState({}, "", window.location.pathname);
+  }
+
   // ---------- tabs ----------
   function switchView(name){
     var target = document.getElementById("view-"+name);
@@ -817,6 +863,7 @@
       renderCalendario(); renderCadastros(); renderPainel();
       setStoreNote("biblioteca salva na nuvem (Supabase)");
       assetsNS = null; updateUploadHint();
+      applyQuickAdd();
     }catch(e){
       console.error("initStore (supabase)", e);
       setStoreNote("não foi possível conectar ao banco de dados — verifique sua internet e clique em Recarregar dados");
