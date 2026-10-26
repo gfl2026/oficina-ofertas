@@ -452,8 +452,11 @@
           <label class="full">Link do anúncio (opcional)
             <input type="url" name="link" placeholder="https://www.facebook.com/ads/library/...">
           </label>
-          <label class="full">Link do site da oferta / checkout (opcional)
+          <label class="full">Link do site da oferta (opcional)
             <input type="url" name="siteLink" placeholder="https://site-da-oferta.com">
+          </label>
+          <label class="full">Link do checkout (opcional)
+            <input type="url" name="checkoutLink" placeholder="https://checkout-da-oferta.com">
           </label>
           <label class="full">Notas
             <textarea name="notes" placeholder="o que chamou atenção, possível vantagem a aplicar..."></textarea>
@@ -706,7 +709,7 @@
     if (panel) panel.open = true;
     var form = document.getElementById("addForm");
     if (form){
-      ["link","title","niche","siteLink","keyword"].forEach(function(key){
+      ["link","title","niche","siteLink","checkoutLink","keyword"].forEach(function(key){
         var val = params.get(key);
         if (val && form.elements[key]) form.elements[key].value = val;
       });
@@ -755,7 +758,7 @@
   var SUPABASE_URL = "https://gnqsgfnsqretbppogvqm.supabase.co";
   var SUPABASE_KEY = "sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4";
 
-  var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", niche:"niche", notes:"notes", status:"status", title:"title" };
+  var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", checkoutLink:"checkout_link", niche:"niche", notes:"notes", status:"status", title:"title" };
   var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title" };
   var EVENTS_FIELDS = { createdAt:"created_at", date:"date", notes:"notes", title:"title", type:"type" };
   var REGISTROS_FIELDS = { category:"category", createdAt:"created_at", label:"label", notes:"notes", status:"status", value:"value" };
@@ -1061,9 +1064,10 @@
         '<div class="metric"><div class="n">'+creatives+'</div><div class="l">criativos</div></div>' +
       '</div>' +
       (o.notes ? '<div class="notes">'+escapeHtml(o.notes)+'</div>' : '') +
-      ((o.link || o.siteLink) ? '<div class="link-row" style="display:flex; gap:12px; flex-wrap:wrap">' +
+      ((o.link || o.siteLink || o.checkoutLink) ? '<div class="link-row" style="display:flex; gap:12px; flex-wrap:wrap">' +
         (o.link ? '<a href="'+escapeHtml(o.link)+'" target="_blank" rel="noopener">ver anúncio ↗</a>' : '') +
-        (o.siteLink ? '<a href="'+escapeHtml(o.siteLink)+'" target="_blank" rel="noopener">ver site/checkout ↗</a>' : '') +
+        (o.siteLink ? '<a href="'+escapeHtml(o.siteLink)+'" target="_blank" rel="noopener">ver site ↗</a>' : '') +
+        (o.checkoutLink ? '<a href="'+escapeHtml(o.checkoutLink)+'" target="_blank" rel="noopener">ver checkout ↗</a>' : '') +
       '</div>' : '') +
       '<div class="card-actions">' + statusButtonsHtml(o.id, status) + '</div>' +
     '</article>';
@@ -1747,6 +1751,7 @@
       creativeCount: Number(fd.get("creativeCount"))||0,
       link: (fd.get("link")||"").toString().trim(),
       siteLink: (fd.get("siteLink")||"").toString().trim(),
+      checkoutLink: (fd.get("checkoutLink")||"").toString().trim(),
       notes: (fd.get("notes")||"").toString().trim()
     };
     if (!data.title || !data.niche) return;
