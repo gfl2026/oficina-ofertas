@@ -164,6 +164,26 @@
   .btn-danger{border-color:var(--warn); color:var(--warn); margin-left:auto}
   .example-badge{position:absolute; top:-8px; right:10px; font-size:.64rem; background:var(--neutral); color:var(--surface); padding:2px 8px; border-radius:999px; font-family:var(--font-display); font-weight:600}
 
+  .preview-strip{display:flex; gap:6px; overflow-x:auto; margin:-2px -2px 0}
+  .preview-strip img{
+    height:72px; width:auto; border-radius:8px; border:1px solid var(--border); object-fit:cover;
+    cursor:zoom-in; flex:0 0 auto; background:var(--surface-2);
+  }
+  .preview-strip .more{
+    height:72px; min-width:40px; border-radius:8px; border:1px dashed var(--border); color:var(--fg-muted);
+    display:flex; align-items:center; justify-content:center; font-size:.72rem; flex:0 0 auto; cursor:zoom-in;
+  }
+  .lightbox{
+    position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.82);
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:min(92vw,720px); max-height:84vh; border-radius:10px; display:block}
+  .lightbox-close{position:absolute; top:16px; right:16px; background:none; border:none; color:#fff; font-size:1.6rem; cursor:pointer; line-height:1}
+  .lightbox-nav{position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.12); border:none; color:#fff; font-size:1.4rem; width:44px; height:44px; border-radius:999px; cursor:pointer}
+  .lightbox-nav.prev{left:12px} .lightbox-nav.next{right:12px}
+  .lightbox-count{position:absolute; bottom:16px; left:50%; transform:translateX(-50%); color:#fff; font-size:.74rem; font-family:var(--font-mono)}
+
   .based-on{font-size:.72rem; color:var(--fg-muted); background:var(--surface-2); border-radius:6px; padding:5px 8px}
   .progress-row{display:flex; flex-wrap:wrap; gap:5px}
   .progress-step{
@@ -651,6 +671,14 @@
   </section>
 </main>
 
+<div class="lightbox" id="lightbox">
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Fechar">×</button>
+  <button type="button" class="lightbox-nav prev" id="lightboxPrev" aria-label="Anterior">‹</button>
+  <img id="lightboxImg" src="" alt="preview ampliado">
+  <button type="button" class="lightbox-nav next" id="lightboxNext" aria-label="Próxima">›</button>
+  <div class="lightbox-count" id="lightboxCount"></div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 (function(){
@@ -758,7 +786,7 @@
   var SUPABASE_URL = "https://gnqsgfnsqretbppogvqm.supabase.co";
   var SUPABASE_KEY = "sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4";
 
-  var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", checkoutLink:"checkout_link", niche:"niche", notes:"notes", status:"status", title:"title" };
+  var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", checkoutLink:"checkout_link", niche:"niche", notes:"notes", status:"status", title:"title", previewImages:"preview_images" };
   var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title" };
   var EVENTS_FIELDS = { createdAt:"created_at", date:"date", notes:"notes", title:"title", type:"type" };
   var REGISTROS_FIELDS = { category:"category", createdAt:"created_at", label:"label", notes:"notes", status:"status", value:"value" };
@@ -1044,12 +1072,24 @@
     return btns;
   }
 
+  function previewStripHtml(o){
+    var imgs = Array.isArray(o.previewImages) ? o.previewImages.filter(Boolean) : [];
+    if (!imgs.length) return '';
+    var dataAttr = 'data-previews=\''+escapeHtml(JSON.stringify(imgs))+'\'';
+    var thumbs = imgs.slice(0,4).map(function(src, i){
+      return '<img src="'+escapeHtml(src)+'" loading="lazy" data-act="preview" data-idx="'+i+'" '+dataAttr+' alt="preview">';
+    }).join('');
+    var extra = imgs.length > 4 ? '<div class="more" data-act="preview" data-idx="4" '+dataAttr+'>+'+(imgs.length-4)+'</div>' : '';
+    return '<div class="preview-strip">'+thumbs+extra+'</div>';
+  }
+
   function cardHtml(o){
     var status = o.status || "unclassified";
     var days = Number(o.daysActive)||0;
     var creatives = Number(o.creativeCount)||0;
     return '<article class="card">' +
       (o.isExample ? '<span class="example-badge">exemplo</span>' : '') +
+      previewStripHtml(o) +
       '<div class="top">' +
         '<div class="title">'+escapeHtml(o.title||"Sem título")+'</div>' +
         '<span class="status '+status+'">'+STATUS_LABEL[status]+'</span>' +
@@ -1826,6 +1866,40 @@
       if (o) document.getElementById("basedOnSelect").value = o.id;
       form.title.scrollIntoView({behavior:"smooth", block:"start"});
     }
+  });
+
+  // ===================== Preview lightbox =====================
+  var lightboxState = { imgs: [], idx: 0 };
+  function renderLightbox(){
+    var box = document.getElementById("lightbox");
+    if (!lightboxState.imgs.length){ box.classList.remove("open"); return; }
+    document.getElementById("lightboxImg").src = lightboxState.imgs[lightboxState.idx];
+    document.getElementById("lightboxCount").textContent = (lightboxState.idx+1)+" / "+lightboxState.imgs.length;
+    document.getElementById("lightboxPrev").style.display = lightboxState.imgs.length>1 ? "" : "none";
+    document.getElementById("lightboxNext").style.display = lightboxState.imgs.length>1 ? "" : "none";
+    box.classList.add("open");
+  }
+  function openLightbox(imgs, idx){ lightboxState = { imgs: imgs, idx: idx||0 }; renderLightbox(); }
+  function closeLightbox(){ lightboxState = { imgs: [], idx: 0 }; document.getElementById("lightbox").classList.remove("open"); }
+  function stepLightbox(delta){
+    if (!lightboxState.imgs.length) return;
+    lightboxState.idx = (lightboxState.idx + delta + lightboxState.imgs.length) % lightboxState.imgs.length;
+    renderLightbox();
+  }
+  document.getElementById("grid").addEventListener("click", function(e){
+    var el = e.target.closest('[data-act="preview"]'); if (!el) return;
+    var imgs; try{ imgs = JSON.parse(el.dataset.previews); }catch(_){ imgs = []; }
+    openLightbox(imgs, Number(el.dataset.idx)||0);
+  });
+  document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+  document.getElementById("lightboxPrev").addEventListener("click", function(){ stepLightbox(-1); });
+  document.getElementById("lightboxNext").addEventListener("click", function(){ stepLightbox(1); });
+  document.getElementById("lightbox").addEventListener("click", function(e){ if (e.target.id === "lightbox") closeLightbox(); });
+  document.addEventListener("keydown", function(e){
+    if (!document.getElementById("lightbox").classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowLeft") stepLightbox(-1);
+    else if (e.key === "ArrowRight") stepLightbox(1);
   });
 
   function onOfertaToggle(e){
