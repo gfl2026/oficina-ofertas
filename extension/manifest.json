@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Oficina de Ofertas — Captura rápida",
+  "version": "1.0.0",
+  "description": "Botão na Biblioteca de Anúncios da Meta pra enviar ofertas direto pro Supabase da Oficina de Ofertas.",
+  "permissions": [],
+  "host_permissions": [
+    "https://www.facebook.com/ads/library/*",
+    "https://gnqsgfnsqretbppogvqm.supabase.co/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.facebook.com/ads/library/*"],
+      "js": ["content.js"],
+      "css": ["style.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
