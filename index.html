@@ -147,9 +147,23 @@
   .status.expert{background:var(--warn-soft); color:var(--warn)}
   .status.discarded{background:var(--neutral-soft); color:var(--fg-muted); text-decoration:line-through}
   .status.rascunho{background:var(--neutral-soft); color:var(--fg-muted)}
+  .status.ideia{background:var(--neutral-soft); color:var(--fg-muted)}
   .status.pronta{background:var(--info-soft); color:var(--info)}
   .status.ativa{background:var(--good-soft); color:var(--good)}
   .status.pausada{background:var(--warn-soft); color:var(--warn)}
+  .next-step{font-size:.74rem; color:var(--accent); background:var(--accent-soft); border-radius:6px; padding:5px 9px; display:inline-block; font-weight:600}
+
+  .rank-list{display:flex; flex-direction:column; gap:10px}
+  .rank-item{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; flex-direction:column; gap:8px}
+  .rank-top{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+  .rank-top .title{font-family:var(--font-display); font-weight:600; font-size:.9rem}
+  .rank-signal{font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap}
+  .rank-signal.verde{background:var(--good-soft); color:var(--good)}
+  .rank-signal.amarelo{background:var(--warn-soft); color:var(--warn)}
+  .rank-signal.vermelho{background:var(--warn-soft); color:var(--warn)}
+  .rank-signal.azul{background:var(--info-soft); color:var(--info)}
+  .rank-metrics{display:flex; flex-wrap:wrap; gap:14px}
+  .rank-label{font-size:.78rem; color:var(--fg-muted)}
   .metrics{display:flex; gap:14px}
   .metric .n{font-family:var(--font-mono); font-weight:600; font-size:1rem}
   .metric .l{font-size:.68rem; color:var(--fg-muted)}
@@ -498,9 +512,15 @@
     </section>
 
     <section>
-      <h3 class="section-title">Ofertas que pedem atenção</h3>
-      <div class="section-sub">com base no % do budget já investido vs. vendas</div>
+      <h3 class="section-title">O que fazer hoje</h3>
+      <div class="section-sub">próxima ação pendente, checkpoint de campanha ou sinal de atenção</div>
       <div class="grid" id="attentionGrid" style="margin-top:10px"></div>
+    </section>
+
+    <section>
+      <h3 class="section-title">Pixel &amp; funil</h3>
+      <div class="section-sub">ofertas com campanha lançada, ranqueadas pelo sinal de validação</div>
+      <div class="rank-list" id="funnelRank" style="margin-top:10px"></div>
     </section>
 
     <section>
@@ -799,15 +819,27 @@
   "use strict";
 
   var STATUS_LABEL = {unclassified:"Não classificado", copiable:"Copiável", expert:"Tem expert", discarded:"Descartado"};
-  var OFERTA_STATUS_LABEL = {rascunho:"Rascunho", pronta:"Pronta", ativa:"Ativa", pausada:"Pausada"};
+  var OFERTA_STATUS_LABEL = {ideia:"Ideia", rascunho:"Rascunho", pronta:"Pronta", ativa:"Ativa", pausada:"Pausada"};
   var COUNTRY_LABEL = {"BR":"Brasil", "DE-EU":"Alemanha/UE", "outro":"Outro"};
+  // 8 etapas do sistema de validação — Garimpo fica de fora porque já é
+  // uma aba própria (uma myOffer nasce "baseada em" uma oferta minerada).
   var PROGRESS_STEPS = [
     {key:"modelada", label:"Modelada"},
-    {key:"produzida", label:"Produzida"},
-    {key:"pagina", label:"Página/checkout"},
+    {key:"entregavel", label:"Entregável pronto"},
+    {key:"checkout", label:"Checkout no ar"},
+    {key:"copy", label:"Copy escrita"},
+    {key:"pagina", label:"Página de vendas"},
     {key:"pixel", label:"Pixel instalado"},
-    {key:"lancada", label:"Lançada"}
+    {key:"criativos", label:"Criativos prontos"},
+    {key:"lancada", label:"Campanha lançada"}
   ];
+  function nextStepLabel(o){
+    var prog = o.progress || {};
+    for (var i=0; i<PROGRESS_STEPS.length; i++){
+      if (!prog[PROGRESS_STEPS[i].key]) return PROGRESS_STEPS[i].label;
+    }
+    return null;
+  }
 
   var state = {
     offers: [],
@@ -901,7 +933,7 @@
   var SUPABASE_KEY = "sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4";
 
   var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", checkoutLink:"checkout_link", niche:"niche", notes:"notes", status:"status", title:"title", previewImages:"preview_images" };
-  var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title" };
+  var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", campaignStart:"campaign_start", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title" };
   var EVENTS_FIELDS = { createdAt:"created_at", date:"date", notes:"notes", title:"title", type:"type" };
   var REGISTROS_FIELDS = { category:"category", createdAt:"created_at", label:"label", notes:"notes", status:"status", value:"value" };
   var SETTINGS_FIELDS = { goal:"goal" };
@@ -1401,16 +1433,43 @@
     var alloc = Number(o.allocatedBudget)||0, spent = Number(o.spent)||0;
     return alloc>0 ? (spent/alloc*100) : 0;
   }
-  function semaforo(o){
-    var sales = Number(o.sales)||0;
-    var pct = budgetPct(o);
-    if (sales>0) return "verde";
-    if (pct>=100) return "vermelho";
-    if (pct>=60) return "amarelo";
-    return "azul";
-  }
   var SEMAFORO_EMOJI = {verde:"🟢", amarelo:"🟡", vermelho:"🔴", azul:"🔵"};
-  var SEMAFORO_LABEL = {verde:"vendendo", amarelo:"atenção — 60%+ do budget sem venda", vermelho:"cortar — 100% do budget sem venda", azul:"testando"};
+
+  function daysSinceCampaign(o){
+    if (!o.campaignStart) return null;
+    var start = new Date(o.campaignStart + "T00:00:00").getTime();
+    if (isNaN(start)) return null;
+    return (Date.now() - start) / 86400000;
+  }
+
+  // Sistema de validação de ofertas — 3 checkpoints definidos pra não
+  // confundir "sem dado ainda" com "oferta ruim":
+  //  - 24h: checagem técnica (entrega, pixel, cliques) — não mata nem escala.
+  //  - 72h: só reage a sinal inequívoco de criativo morto (CTR ~0 com impressão real).
+  //  - dia 7: veredito final com os 3 desfechos (validou / funil parcial / morta).
+  function offerSignal(o){
+    var sales = Number(o.sales)||0;
+    if (sales>0) return {level:"verde", label:"validou — já teve venda. Escale o criativo que vendeu."};
+    var days = daysSinceCampaign(o);
+    if (days==null){
+      var pct = budgetPct(o);
+      if (pct>=100) return {level:"vermelho", label:"budget 100% investido sem venda — reavalie antes de continuar"};
+      if (pct>=60) return {level:"amarelo", label:"60%+ do budget investido sem venda — fique de olho"};
+      return {level:"azul", label:"ainda não lançou a campanha"};
+    }
+    var imp = Number(o.impressions)||0, clk = Number(o.clicks)||0;
+    var ctr = imp>0 ? (clk/imp*100) : null;
+    if (days < 1) return {level:"azul", label:"checkpoint técnico (24h) — confira entrega, Pixel e cliques"};
+    if (days < 3){
+      if (ctr!=null && imp>=300 && ctr<0.3) return {level:"vermelho", label:"CTR muito baixo já nas primeiras 72h — considere trocar o criativo"};
+      return {level:"azul", label:"em aquecimento — próxima leitura no checkpoint de 72h"};
+    }
+    if (days < 7) return {level:"azul", label:"em teste — aguardando o dia 7 pra decidir"};
+    var co = Number(o.checkoutStarted)||0;
+    if (co>0 || (ctr!=null && ctr>=1)) return {level:"amarelo", label:"funil parcial — teve interesse mas nenhuma venda em 7 dias; ajuste copy ou preço"};
+    return {level:"vermelho", label:"morta — sem sinal de interesse em 7 dias; parta pra próxima oferta"};
+  }
+  function semaforo(o){ return offerSignal(o).level; }
 
   function populateBasedOnSelect(){
     var sel = document.getElementById("basedOnSelect");
@@ -1523,12 +1582,15 @@
     {key:"revenue", label:"Faturamento (€)"}
   ];
   function funnelBlockHtml(o){
-    var sf = semaforo(o);
+    var sig = offerSignal(o);
     var rates = funnelRates(o);
     var pct = budgetPct(o);
+    var days = daysSinceCampaign(o);
+    var daysLabel = days==null ? "campanha não lançada" : "dia " + Math.max(1, Math.ceil(days)) + " de 7";
     return '<details class="funnel" data-id="'+o.id+'"'+(state.openFunnels[o.id]?' open':'')+'>' +
-      '<summary><span><span class="semaforo">'+SEMAFORO_EMOJI[sf]+'</span>Funil &amp; Budget</span><span class="hint">'+Math.round(pct)+'% do budget</span></summary>' +
+      '<summary><span><span class="semaforo">'+SEMAFORO_EMOJI[sig.level]+'</span>Funil &amp; Budget</span><span class="hint">'+Math.round(pct)+'% do budget · '+daysLabel+'</span></summary>' +
       '<div class="funnel-body">' +
+        '<label>Início da campanha<input type="date" data-funnel-date="campaignStart" data-id="'+o.id+'" value="'+(o.campaignStart||"")+'"></label>' +
         FUNNEL_FIELDS.map(function(f){
           var v = o[f.key];
           return '<label>'+f.label+'<input type="number" min="0" step="0.01" data-funnel="'+f.key+'" data-id="'+o.id+'" value="'+(v==null?"":v)+'"></label>';
@@ -1538,7 +1600,7 @@
           '<div class="metric"><div class="n">'+(rates.checkoutRate==null?"—":rates.checkoutRate.toFixed(1)+"%")+'</div><div class="l">clique→checkout</div></div>' +
           '<div class="metric"><div class="n">'+(rates.closeRate==null?"—":rates.closeRate.toFixed(1)+"%")+'</div><div class="l">checkout→venda</div></div>' +
         '</div>' +
-        '<div class="hint full" style="grid-column:1/-1">'+SEMAFORO_EMOJI[sf]+' '+SEMAFORO_LABEL[sf]+'</div>' +
+        '<div class="hint full" style="grid-column:1/-1">'+SEMAFORO_EMOJI[sig.level]+' '+sig.label+'</div>' +
       '</div>' +
     '</details>';
   }
@@ -1546,6 +1608,7 @@
   function myOfferCardHtml(o){
     var status = o.status || "rascunho";
     var based = o.basedOnId ? state.offers.find(function(x){ return x.id===o.basedOnId; }) : null;
+    var next = nextStepLabel(o);
     return '<article class="card">' +
       '<div class="top">' +
         '<div class="title">'+escapeHtml(o.title||"Sem título")+'</div>' +
@@ -1553,6 +1616,7 @@
       '</div>' +
       '<div class="tags">' + (o.niche ? '<span class="tag niche">'+escapeHtml(o.niche)+'</span>' : '') + '</div>' +
       (based ? '<div class="based-on">baseada em: '+escapeHtml(based.title)+'</div>' : '') +
+      (next ? '<div class="next-step">próxima ação: '+escapeHtml(next)+'</div>' : '') +
       priceRowHtml(o) +
       progressHtml(o) +
       funnelBlockHtml(o) +
@@ -1673,10 +1737,42 @@
       '<div class="stat"><div class="n mono">'+fmtEUR(totalBudget)+'</div><div class="l">budget total alocado</div></div>' +
       '<div class="stat"><div class="n mono">'+ativas+'</div><div class="l">ofertas ativas</div></div>';
 
-    var attention = state.myOffers.filter(function(o){ var sf = semaforo(o); return sf==="amarelo" || sf==="vermelho"; });
+    var todo = state.myOffers.filter(function(o){
+      if (o.status === "pausada" || o.status === "ideia") return false;
+      var sig = offerSignal(o);
+      if (sig.level === "amarelo" || sig.level === "vermelho") return true;
+      if (!o.campaignStart && nextStepLabel(o)) return true;
+      return false;
+    }).sort(function(a,b){
+      var rank = {vermelho:0, amarelo:1, azul:2, verde:3};
+      return rank[offerSignal(a).level] - rank[offerSignal(b).level];
+    });
     var aGrid = document.getElementById("attentionGrid");
-    aGrid.innerHTML = attention.length ? attention.map(myOfferCardHtml).join("") :
-      '<div class="empty" style="grid-column:1/-1">Nenhuma oferta pedindo atenção agora — ou você ainda não tem ofertas com budget lançado.</div>';
+    aGrid.innerHTML = todo.length ? todo.map(myOfferCardHtml).join("") :
+      '<div class="empty" style="grid-column:1/-1">Nada pedindo ação agora — todas as ofertas ativas estão com a próxima etapa em dia.</div>';
+
+    var withCampaign = state.myOffers.filter(function(o){ return !!o.campaignStart; })
+      .sort(function(a,b){
+        var rank = {verde:0, amarelo:1, vermelho:2, azul:3};
+        return rank[offerSignal(a).level] - rank[offerSignal(b).level];
+      });
+    var rankEl = document.getElementById("funnelRank");
+    rankEl.innerHTML = withCampaign.length ? withCampaign.map(function(o){
+      var sig = offerSignal(o);
+      var rates = funnelRates(o);
+      var sales = Number(o.sales)||0;
+      return '<div class="rank-item">' +
+        '<div class="rank-top">' +
+          '<span class="title">'+escapeHtml(o.title||"Sem título")+'</span>' +
+          '<span class="rank-signal '+sig.level+'">'+SEMAFORO_EMOJI[sig.level]+' '+escapeHtml(sig.label)+'</span>' +
+        '</div>' +
+        '<div class="rank-metrics">' +
+          '<span class="rank-label">CTR: <strong class="mono">'+(rates.ctr==null?"—":rates.ctr.toFixed(1)+"%")+'</strong></span>' +
+          '<span class="rank-label">checkouts: <strong class="mono">'+(o.checkoutStarted==null?"—":o.checkoutStarted)+'</strong></span>' +
+          '<span class="rank-label">vendas: <strong class="mono">'+sales+'</strong></span>' +
+        '</div>' +
+      '</div>';
+    }).join("") : '<div class="empty">Nenhuma oferta com campanha lançada ainda — assim que uma for ao ar, ela aparece aqui ranqueada.</div>';
 
     var upcoming = state.events.filter(function(e){ return e.date >= todayStr(); })
       .sort(function(a,b){ return a.date.localeCompare(b.date); }).slice(0,4);
@@ -2022,6 +2118,15 @@
     state.openFunnels[det.dataset.id] = det.open;
   }
   function onOfertaChange(e){
+    var dateInput = e.target.closest("input[data-funnel-date]");
+    if (dateInput){
+      var did = dateInput.dataset.id;
+      var dkey = dateInput.dataset.funnelDate;
+      var patch = {}; patch[dkey] = dateInput.value === "" ? null : dateInput.value;
+      state.openFunnels[did] = true;
+      updateMyOffer(did, patch);
+      return;
+    }
     var input = e.target.closest("input[data-funnel]");
     if (!input) return;
     var id = input.dataset.id;
