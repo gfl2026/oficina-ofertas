@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>70 Conselhos de Salomão</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F2A44">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Salomão">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --bg:#F7F2E7; --surface:#FFFFFF; --border:#E3D9BF;
+    --navy:#1F2A44; --navy-soft:#48557A;
+    --gold:#B8923F; --gold-soft:#F0E3C0;
+    --font-display:'Georgia','Times New Roman',serif;
+    --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--navy); font-family:var(--font-body); min-height:100vh; }
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); box-shadow:0 0 40px rgba(0,0,0,.06); }
+
+  header{ background:var(--navy); color:#fff; padding:18px 20px 14px; text-align:center; position:relative; }
+  header .eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
+  header h1{ font-family:var(--font-display); font-size:20px; font-weight:normal; }
+  .streak{ display:inline-flex; align-items:center; gap:6px; background:rgba(184,146,63,.18); border:1px solid var(--gold); border-radius:20px; padding:4px 12px; margin-top:10px; font-size:12px; color:var(--gold-soft); }
+  .streak b{ color:#fff; }
+
+  nav.tabs{ display:flex; background:var(--surface); border-bottom:1px solid var(--border); }
+  nav.tabs button{ flex:1; padding:12px 4px; background:none; border:none; font-size:13px; color:var(--navy-soft); font-weight:600; cursor:pointer; border-bottom:2px solid transparent; }
+  nav.tabs button.active{ color:var(--navy); border-bottom-color:var(--gold); }
+
+  main{ flex:1; padding:20px; overflow-y:auto; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .today-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px 22px; text-align:center; box-shadow:0 4px 16px rgba(31,42,68,.06); }
+  .today-day{ font-size:11px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; }
+  .today-cat{ display:inline-block; background:var(--gold-soft); color:#8a6a1f; font-size:11px; padding:3px 10px; border-radius:12px; margin-bottom:14px; }
+  .today-text{ font-family:var(--font-display); font-size:19px; line-height:1.5; color:var(--navy); margin-bottom:18px; }
+  .today-actions{ display:flex; gap:10px; justify-content:center; }
+  .btn{ border:1px solid var(--border); background:#fff; color:var(--navy); padding:9px 16px; border-radius:10px; font-size:13px; cursor:pointer; font-weight:600; }
+  .btn.fav{ border-color:var(--gold); color:#8a6a1f; }
+  .btn.fav.active{ background:var(--gold); color:#fff; }
+  .btn.primary{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  .reflect{ margin-top:22px; text-align:left; }
+  .reflect label{ font-size:12px; color:var(--navy-soft); font-weight:600; display:block; margin-bottom:6px; }
+  .reflect textarea{ width:100%; min-height:70px; border:1px solid var(--border); border-radius:10px; padding:10px; font-family:var(--font-body); font-size:13px; resize:vertical; background:#fff; }
+  .reflect .saved-note{ font-size:11px; color:var(--gold); margin-top:4px; height:14px; }
+
+  .filters{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+  .filters button{ font-size:11px; padding:5px 10px; border-radius:14px; border:1px solid var(--border); background:#fff; color:var(--navy-soft); cursor:pointer; }
+  .filters button.active{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  .list-item{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer; }
+  .list-item .num{ font-family:var(--font-display); color:var(--gold); font-size:13px; margin-bottom:3px; }
+  .list-item .txt{ font-size:13.5px; line-height:1.4; }
+  .list-item .star{ font-size:16px; color:var(--border); flex-shrink:0; }
+  .list-item .star.active{ color:var(--gold); }
+  .empty{ text-align:center; color:var(--navy-soft); font-size:13px; padding:40px 10px; }
+
+  .progress-row{ display:flex; gap:10px; margin-bottom:16px; }
+  .progress-stat{ flex:1; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
+  .progress-stat .n{ font-family:var(--font-display); font-size:22px; color:var(--navy); }
+  .progress-stat .l{ font-size:10px; color:var(--navy-soft); text-transform:uppercase; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="eyebrow">Sabedoria para o dia a dia</div>
+    <h1>70 Conselhos de Salomão</h1>
+    <div class="streak">🔥 <b id="streakCount">0</b> dias seguidos</div>
+  </header>
+
+  <nav class="tabs">
+    <button data-view="hoje" class="active">Hoje</button>
+    <button data-view="todos">Todos</button>
+    <button data-view="favoritos">Favoritos</button>
+  </nav>
+
+  <main>
+    <section class="view active" id="view-hoje"></section>
+    <section class="view" id="view-todos">
+      <div class="progress-row" id="progressRow"></div>
+      <div class="filters" id="filters"></div>
+      <div id="listTodos"></div>
+    </section>
+    <section class="view" id="view-favoritos">
+      <div id="listFavoritos"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const CONSELHOS = [
+  {t:"Não fale no calor da raiva — espere, e sua resposta será mais sábia.", c:"palavras"},
+  {t:"Quem planeja com calma prospera; quem corre decide mal.", c:"trabalho"},
+  {t:"Ouça mais do que fala — é assim que se aprende de verdade.", c:"palavras"},
+  {t:"Uma palavra gentil acalma o que a briga não resolve.", c:"palavras"},
+  {t:"Poupe quando pode, não só quando sobra.", c:"dinheiro"},
+  {t:"Amizade de verdade se prova nas horas difíceis, não nas fáceis.", c:"amizade"},
+  {t:"Trabalho feito com cuidado hoje evita arrependimento amanhã.", c:"trabalho"},
+  {t:"Orgulho cega; humildade enxerga o que precisa mudar.", c:"humildade"},
+  {t:"Educar um filho com paciência rende mais que impor com grito.", c:"familia"},
+  {t:"Dívida que cresce sem controle rouba a paz antes de roubar o bolso.", c:"dinheiro"},
+  {t:"Quem aceita conselho cresce; quem só defende sua opinião estagna.", c:"humildade"},
+  {t:"A inveja adoece quem a sente, não quem é invejado.", c:"humildade"},
+  {t:"Fofoca destrói mais rápido do que qualquer mentira contada de frente.", c:"palavras"},
+  {t:"Planeje o dia de manhã; a noite já é tarde pra decidir com clareza.", c:"trabalho"},
+  {t:"Generosidade sincera volta pra quem a pratica, de um jeito ou de outro.", c:"familia"},
+];
+// Produto final terá 70 — protótipo roda com os 15 já escritos, ciclando.
+
+const CATS = {
+  dinheiro:"Dinheiro", familia:"Família", trabalho:"Trabalho",
+  amizade:"Amizade", palavras:"Palavras", humildade:"Humildade"
+};
+
+const KEY = "salomao_v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function save(data){ try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} }
+
+let state = load();
+state.favorites = state.favorites || {};
+state.reflections = state.reflections || {};
+state.lastOpen = state.lastOpen || null;
+state.streak = state.streak || 0;
+state.startDate = state.startDate || new Date().toISOString().slice(0,10);
+
+(function updateStreak(){
+  const today = new Date().toISOString().slice(0,10);
+  if(state.lastOpen !== today){
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+    state.streak = (state.lastOpen === yesterday) ? state.streak + 1 : 1;
+    state.lastOpen = today;
+    save(state);
+  }
+})();
+
+function dayIndex(){
+  const start = new Date(state.startDate);
+  const today = new Date(new Date().toISOString().slice(0,10));
+  const diff = Math.floor((today - start) / 86400000);
+  return diff % CONSELHOS.length;
+}
+
+let currentFilter = "todos";
+
+function renderHoje(){
+  const idx = dayIndex();
+  const item = CONSELHOS[idx];
+  const isFav = !!state.favorites[idx];
+  const reflection = state.reflections[idx] || "";
+  document.getElementById("view-hoje").innerHTML = `
+    <div class="today-card">
+      <div class="today-day">Dia ${idx+1} de ${CONSELHOS.length}</div>
+      <div class="today-cat">${CATS[item.c]}</div>
+      <div class="today-text">"${item.t}"</div>
+      <div class="today-actions">
+        <button class="btn fav ${isFav?'active':''}" onclick="toggleFav(${idx})">${isFav?'★ Favoritado':'☆ Favoritar'}</button>
+      </div>
+      <div class="reflect">
+        <label>Sua reflexão (só você vê, fica salva no seu aparelho)</label>
+        <textarea id="reflectInput" placeholder="O que esse conselho significa pra você hoje?">${reflection}</textarea>
+        <div class="saved-note" id="savedNote"></div>
+      </div>
+    </div>
+  `;
+  document.getElementById("streakCount").textContent = state.streak;
+  const ta = document.getElementById("reflectInput");
+  let t;
+  ta.addEventListener("input", function(){
+    clearTimeout(t);
+    t = setTimeout(function(){
+      state.reflections[idx] = ta.value;
+      save(state);
+      const note = document.getElementById("savedNote");
+      note.textContent = "Salvo.";
+      setTimeout(()=>{ if(note) note.textContent=""; }, 1500);
+    }, 500);
+  });
+}
+
+window.toggleFav = function(idx){
+  if(state.favorites[idx]) delete state.favorites[idx];
+  else state.favorites[idx] = true;
+  save(state);
+  renderHoje(); renderTodos(); renderFavoritos();
+};
+
+function renderFilters(){
+  const cats = ["todos", ...Object.keys(CATS)];
+  document.getElementById("filters").innerHTML = cats.map(c =>
+    `<button class="${c===currentFilter?'active':''}" onclick="setFilter('${c}')">${c==='todos'?'Todos':CATS[c]}</button>`
+  ).join("");
+}
+window.setFilter = function(c){ currentFilter = c; renderTodos(); };
+
+function renderTodos(){
+  renderFilters();
+  const readCount = Object.keys(state.reflections).length;
+  const favCount = Object.keys(state.favorites).length;
+  document.getElementById("progressRow").innerHTML = `
+    <div class="progress-stat"><div class="n">${dayIndex()+1}/${CONSELHOS.length}</div><div class="l">Progresso</div></div>
+    <div class="progress-stat"><div class="n">${readCount}</div><div class="l">Reflexões</div></div>
+    <div class="progress-stat"><div class="n">${favCount}</div><div class="l">Favoritos</div></div>
+  `;
+  const list = CONSELHOS.map((item, idx) => ({item, idx}))
+    .filter(x => currentFilter==="todos" || x.item.c===currentFilter);
+  document.getElementById("listTodos").innerHTML = list.length ? list.map(x => `
+    <div class="list-item" onclick="toggleFav(${x.idx})">
+      <div><div class="num">Conselho ${x.idx+1} · ${CATS[x.item.c]}</div><div class="txt">${x.item.t}</div></div>
+      <div class="star ${state.favorites[x.idx]?'active':''}">★</div>
+    </div>
+  `).join("") : `<div class="empty">Nenhum conselho nessa categoria ainda.</div>`;
+}
+
+function renderFavoritos(){
+  const favIdxs = Object.keys(state.favorites).map(Number);
+  document.getElementById("listFavoritos").innerHTML = favIdxs.length ? favIdxs.map(idx => `
+    <div class="list-item" onclick="toggleFav(${idx})">
+      <div><div class="num">Conselho ${idx+1} · ${CATS[CONSELHOS[idx].c]}</div><div class="txt">${CONSELHOS[idx].t}</div></div>
+      <div class="star active">★</div>
+    </div>
+  `).join("") : `<div class="empty">Você ainda não favoritou nenhum conselho.<br>Toque na estrela ★ pra guardar os que mais tocarem você.</div>`;
+}
+
+document.querySelectorAll("nav.tabs button").forEach(btn=>{
+  btn.addEventListener("click", function(){
+    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("view-"+btn.dataset.view).classList.add("active");
+  });
+});
+
+renderHoje();
+renderTodos();
+renderFavoritos();
+</script>
+</body>
+</html>
