@@ -27,6 +27,7 @@
   header{ background:var(--navy); color:#fff; padding:18px 20px 14px; text-align:center; position:relative; }
   header .eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
   header h1{ font-family:var(--font-display); font-size:20px; font-weight:normal; }
+  header .greet{ font-size:12px; color:var(--gold-soft); margin-top:4px; }
   .streak{ display:inline-flex; align-items:center; gap:6px; background:rgba(184,146,63,.18); border:1px solid var(--gold); border-radius:20px; padding:4px 12px; margin-top:10px; font-size:12px; color:var(--gold-soft); }
   .streak b{ color:#fff; }
 
@@ -68,54 +69,251 @@
   .progress-stat{ flex:1; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
   .progress-stat .n{ font-family:var(--font-display); font-size:22px; color:var(--navy); }
   .progress-stat .l{ font-size:10px; color:var(--navy-soft); text-transform:uppercase; letter-spacing:1px; }
+
+  /* ---------- top-level pages ---------- */
+  .page{ display:none; }
+  .page.active{ display:flex; flex-direction:column; gap:22px; }
+  nav.subtabs{ display:flex; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:4px; margin-bottom:4px; }
+  nav.subtabs button{ flex:1; padding:8px 4px; background:none; border:none; border-radius:7px; font-size:12px; font-weight:600; color:var(--navy-soft); cursor:pointer; }
+  nav.subtabs button.active{ background:var(--navy); color:#fff; }
+
+  /* ---------- dashboard (Início) ---------- */
+  .greeting{ font-family:var(--font-display); font-size:21px; color:var(--navy); }
+  .greeting-sub{ font-size:13px; color:var(--navy-soft); margin-top:3px; }
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .stat-box{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 6px; text-align:center; }
+  .stat-box .n{ font-family:var(--font-display); font-size:18px; color:var(--navy); }
+  .stat-box .l{ font-size:9px; color:var(--navy-soft); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; line-height:1.3; }
+  .moment-card{ background:linear-gradient(160deg,var(--navy),#2b3a5c); color:#fff; border-radius:18px; padding:24px 20px; text-align:center; }
+  .moment-card .eyebrow{ font-size:10px; letter-spacing:2px; color:var(--gold-soft); text-transform:uppercase; }
+  .moment-card .theme{ font-family:var(--font-display); font-size:19px; margin:8px 0 6px; }
+  .moment-card .time{ font-size:12px; color:rgba(255,255,255,.65); margin-bottom:16px; }
+  .moment-card button{ background:var(--gold); color:var(--navy); border:none; padding:12px 22px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; font-family:var(--font-body); }
+  .dash-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; cursor:pointer; }
+  .dash-row.soon{ cursor:default; opacity:.6; }
+  .dash-row .t{ font-size:14px; font-weight:600; }
+  .dash-row .s{ font-size:11px; color:var(--navy-soft); margin-top:2px; }
+  .dash-row .tag{ font-size:10px; background:var(--gold-soft); color:#8a6a1f; padding:3px 8px; border-radius:20px; flex-shrink:0; }
+  .dash-row .arrow{ color:var(--gold); font-size:16px; flex-shrink:0; }
+
+  /* ---------- Jornada ---------- */
+  .journey-day-row{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .journey-day-row .num{ width:30px; height:30px; border-radius:50%; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:13px; flex-shrink:0; }
+  .journey-day-row.done .num{ background:var(--gold); color:#fff; border-color:var(--gold); }
+  .journey-day-row .info{ flex:1; min-width:0; }
+  .journey-day-row .title{ font-size:13.5px; font-weight:600; }
+  .journey-day-row .theme{ font-size:11px; color:var(--navy-soft); }
+  .journey-day-row .check{ color:var(--gold); font-size:16px; }
+  .moment-detail{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; }
+  .moment-detail .kicker{ font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:6px; }
+  .moment-detail h3{ font-family:var(--font-display); font-size:19px; margin-bottom:14px; }
+  .verse-box{ background:var(--gold-soft); border-radius:12px; padding:16px; margin-bottom:16px; }
+  .verse-box .txt{ font-family:var(--font-display); font-size:15.5px; line-height:1.5; color:#5a461c; font-style:italic; }
+  .verse-box .ref{ font-size:11px; color:#8a6a1f; font-weight:700; margin-top:8px; }
+  .verse-box .tr{ font-size:9.5px; color:#8a6a1f; opacity:.75; margin-top:2px; }
+  .moment-block{ margin-bottom:16px; }
+  .moment-block .lbl{ font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--navy-soft); margin-bottom:5px; }
+  .moment-block .txt{ font-size:13.5px; line-height:1.55; }
+  .moment-block.prayer{ background:var(--bg); border-radius:10px; padding:12px 14px; }
+  .moment-detail textarea{ width:100%; min-height:80px; border:1px solid var(--border); border-radius:10px; padding:10px; font-family:var(--font-body); font-size:13px; resize:vertical; background:#fff; }
+  .journal-entry{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .journal-entry .d{ font-size:10px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .journal-entry .t{ font-size:13px; margin-top:4px; line-height:1.4; }
+
+  /* ---------- Conquistas ---------- */
+  .level-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; text-align:center; }
+  .level-card .pts{ font-family:var(--font-display); font-size:30px; color:var(--navy); }
+  .level-card .pts-l{ font-size:11px; color:var(--navy-soft); text-transform:uppercase; letter-spacing:1px; }
+  .level-card .lvl{ display:inline-block; margin-top:10px; background:var(--gold-soft); color:#8a6a1f; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700; }
+  .badge-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .badge-card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; opacity:.4; }
+  .badge-card.unlocked{ opacity:1; border-color:var(--gold); }
+  .badge-card .ic{ width:40px; height:40px; border-radius:50%; background:var(--gold-soft); margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:16px; color:#8a6a1f; }
+  .badge-card.unlocked .ic{ background:var(--gold); color:#fff; }
+  .badge-card .n{ font-size:12px; font-weight:700; }
+  .badge-card .d{ font-size:10px; color:var(--navy-soft); margin-top:3px; line-height:1.3; }
+
+  /* ---------- Premium offer / paywall ---------- */
+  .prem-back{ background:none; border:none; color:var(--navy-soft); font-size:13px; cursor:pointer; padding:4px 0; text-align:left; align-self:flex-start; }
+  .prem-hero{ text-align:center; padding:8px 4px 4px; }
+  .prem-hero .eyebrow{ font-size:11px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; }
+  .prem-hero h2{ font-family:var(--font-display); font-size:24px; color:var(--navy); margin:8px 0 6px; font-weight:normal; }
+  .prem-hero p{ font-size:13.5px; color:var(--navy-soft); line-height:1.5; }
+  .prem-benefits{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .prem-benefits li{ list-style:none; font-size:13.5px; line-height:1.5; padding-left:24px; position:relative; margin-bottom:10px; }
+  .prem-benefits li:last-child{ margin-bottom:0; }
+  .prem-benefits li:before{ content:"✓"; color:var(--gold); font-weight:700; position:absolute; left:0; }
+  .prem-price-box{ background:var(--navy); color:#fff; border-radius:16px; padding:22px; text-align:center; }
+  .prem-price-box .amount{ font-family:var(--font-display); font-size:30px; }
+  .prem-price-box .cond{ font-size:11px; color:rgba(255,255,255,.65); margin-top:4px; }
+  .prem-price-box button{ margin-top:16px; width:100%; background:var(--gold); color:var(--navy); border:none; padding:14px; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; font-family:var(--font-body); }
+  .prem-price-box button:disabled{ opacity:.55; cursor:default; }
+  .prem-note{ font-size:11.5px; color:var(--navy-soft); text-align:center; line-height:1.5; }
+
+  /* ---------- Conta / autenticação ---------- */
+  .acct-btn{ position:absolute; top:14px; right:16px; background:rgba(184,146,63,.18); border:1px solid var(--gold); color:var(--gold-soft); font-size:11px; padding:5px 11px; border-radius:20px; cursor:pointer; font-family:var(--font-body); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .acct-tabs{ display:flex; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:4px; }
+  .acct-tabs button{ flex:1; padding:8px; background:none; border:none; border-radius:7px; font-size:12px; font-weight:600; color:var(--navy-soft); cursor:pointer; font-family:var(--font-body); }
+  .acct-tabs button.active{ background:var(--navy); color:#fff; }
+  .acct-field{ display:flex; flex-direction:column; gap:5px; }
+  .acct-field label{ font-size:11px; color:var(--navy-soft); font-weight:600; }
+  .acct-error{ font-size:12px; color:#a3372f; background:#fbe9e7; border-radius:8px; padding:9px 12px; }
+  .acct-ok{ font-size:12px; color:#2f6a3f; background:#e6f3e8; border-radius:8px; padding:9px 12px; }
+  .acct-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; display:flex; flex-direction:column; gap:10px; }
+  .acct-row{ display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid var(--border); }
+  .acct-row:last-child{ border-bottom:none; }
+
+  /* ---------- onboarding ---------- */
+  .onb{ max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); }
+  .onb-progress{ height:4px; background:var(--border); flex-shrink:0; }
+  .onb-progress-fill{ height:100%; background:var(--gold); transition:width .3s ease; }
+  .onb-step{ display:none; flex:1; flex-direction:column; justify-content:center; padding:36px 24px; text-align:center; gap:18px; }
+  .onb-step.active{ display:flex; }
+  .onb-eyebrow{ font-size:11px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .onb-step h2{ font-family:var(--font-display); font-size:23px; color:var(--navy); line-height:1.35; font-weight:normal; }
+  .onb-step p.sub{ font-size:14px; color:var(--navy-soft); line-height:1.6; }
+  .onb-input{ width:100%; padding:14px 16px; border:1px solid var(--border); border-radius:12px; font-size:15px; font-family:var(--font-body); text-align:center; background:#fff; color:var(--navy); }
+  .onb-options{ display:flex; flex-direction:column; gap:10px; text-align:left; }
+  .onb-opt{ width:100%; padding:14px 16px; border:1px solid var(--border); border-radius:12px; background:#fff; color:var(--navy); font-size:14px; text-align:left; cursor:pointer; font-family:var(--font-body); }
+  .onb-opt.selected{ border-color:var(--gold); background:var(--gold-soft); color:#8a6a1f; font-weight:600; }
+  .onb-btn{ background:var(--navy); color:#fff; border:none; padding:14px 20px; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; font-family:var(--font-body); }
+  .onb-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .onb-back{ background:none; border:none; color:var(--navy-soft); font-size:13px; cursor:pointer; padding:6px; }
+  .onb-summary-row{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; text-align:left; }
+  .onb-summary-row b{ color:var(--navy); }
+  .onb-included{ text-align:left; background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .onb-included li{ font-size:13px; color:var(--navy-soft); margin-bottom:8px; list-style:none; padding-left:20px; position:relative; }
+  .onb-included li:before{ content:"✓"; color:var(--gold); position:absolute; left:0; font-weight:700; }
 </style>
 </head>
 <body>
-<div class="app">
+
+<div class="onb" id="onbRoot">
+  <div class="onb-progress"><div class="onb-progress-fill" id="onbProgressFill"></div></div>
+  <div id="onbSteps"></div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
   <header>
+    <button type="button" class="acct-btn" id="acctBtn" onclick="switchPage('conta')">Entrar</button>
     <div class="eyebrow">Sabedoria para o dia a dia</div>
     <h1>70 Conselhos de Salomão</h1>
+    <div class="greet" id="greetLine"></div>
     <div class="streak">🔥 <b id="streakCount">0</b> dias seguidos</div>
   </header>
 
-  <nav class="tabs">
-    <button data-view="hoje" class="active">Hoje</button>
-    <button data-view="todos">Todos</button>
-    <button data-view="favoritos">Favoritos</button>
+  <nav class="tabs" id="mainTabs">
+    <button data-page="inicio" class="active">Início</button>
+    <button data-page="jornada">Jornada</button>
+    <button data-page="conselhos">Conselhos</button>
+    <button data-page="conquistas">Conquistas</button>
   </nav>
 
   <main>
-    <section class="view active" id="view-hoje"></section>
-    <section class="view" id="view-todos">
-      <div class="progress-row" id="progressRow"></div>
-      <div class="filters" id="filters"></div>
-      <div id="listTodos"></div>
+    <section class="page active" id="page-inicio"></section>
+
+    <section class="page" id="page-jornada"></section>
+
+    <section class="page" id="page-conselhos">
+      <nav class="subtabs" id="subTabsConselhos">
+        <button data-view="hoje" class="active">Hoje</button>
+        <button data-view="todos">Todos</button>
+        <button data-view="favoritos">Favoritos</button>
+      </nav>
+      <section class="view active" id="view-hoje"></section>
+      <section class="view" id="view-todos">
+        <div class="progress-row" id="progressRow"></div>
+        <div class="filters" id="filters"></div>
+        <div id="listTodos"></div>
+      </section>
+      <section class="view" id="view-favoritos">
+        <div id="listFavoritos"></div>
+      </section>
     </section>
-    <section class="view" id="view-favoritos">
-      <div id="listFavoritos"></div>
-    </section>
+
+    <section class="page" id="page-conquistas"></section>
+
+    <section class="page" id="page-premium"></section>
+
+    <section class="page" id="page-conta"></section>
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const CONSELHOS = [
-  {t:"Não fale no calor da raiva — espere, e sua resposta será mais sábia.", c:"palavras"},
-  {t:"Quem planeja com calma prospera; quem corre decide mal.", c:"trabalho"},
-  {t:"Ouça mais do que fala — é assim que se aprende de verdade.", c:"palavras"},
-  {t:"Uma palavra gentil acalma o que a briga não resolve.", c:"palavras"},
   {t:"Poupe quando pode, não só quando sobra.", c:"dinheiro"},
-  {t:"Amizade de verdade se prova nas horas difíceis, não nas fáceis.", c:"amizade"},
-  {t:"Trabalho feito com cuidado hoje evita arrependimento amanhã.", c:"trabalho"},
-  {t:"Orgulho cega; humildade enxerga o que precisa mudar.", c:"humildade"},
   {t:"Educar um filho com paciência rende mais que impor com grito.", c:"familia"},
+  {t:"Quem planeja com calma prospera; quem corre decide mal.", c:"trabalho"},
+  {t:"Amizade de verdade se prova nas horas difíceis, não nas fáceis.", c:"amizade"},
+  {t:"Não fale no calor da raiva — espere, e sua resposta será mais sábia.", c:"palavras"},
+  {t:"Orgulho cega; humildade enxerga o que precisa mudar.", c:"humildade"},
   {t:"Dívida que cresce sem controle rouba a paz antes de roubar o bolso.", c:"dinheiro"},
-  {t:"Quem aceita conselho cresce; quem só defende sua opinião estagna.", c:"humildade"},
-  {t:"A inveja adoece quem a sente, não quem é invejado.", c:"humildade"},
-  {t:"Fofoca destrói mais rápido do que qualquer mentira contada de frente.", c:"palavras"},
-  {t:"Planeje o dia de manhã; a noite já é tarde pra decidir com clareza.", c:"trabalho"},
   {t:"Generosidade sincera volta pra quem a pratica, de um jeito ou de outro.", c:"familia"},
+  {t:"Trabalho feito com cuidado hoje evita arrependimento amanhã.", c:"trabalho"},
+  {t:"Amigo de verdade diz o que você precisa ouvir, não só o que você quer ouvir.", c:"amizade"},
+  {t:"Ouça mais do que fala — é assim que se aprende de verdade.", c:"palavras"},
+  {t:"Quem aceita conselho cresce; quem só defende sua opinião estagna.", c:"humildade"},
+  {t:"Riqueza ganha depressa escorre pelos dedos; riqueza construída com paciência fica.", c:"dinheiro"},
+  {t:"Tempo de qualidade não substitui tempo de verdade — os filhos sabem a diferença.", c:"familia"},
+  {t:"Planeje o dia de manhã; a noite já é tarde pra decidir com clareza.", c:"trabalho"},
+  {t:"Cercar-se de gente sábia é um dos atalhos mais seguros pra crescer.", c:"amizade"},
+  {t:"Uma palavra gentil acalma o que a briga não resolve.", c:"palavras"},
+  {t:"A inveja adoece quem a sente, não quem é invejado.", c:"humildade"},
+  {t:"Gastar pra impressionar quem nem repara é o jeito mais caro de ficar pobre.", c:"dinheiro"},
+  {t:"Uma casa em paz vale mais que uma casa em ordem.", c:"familia"},
+  {t:"Fazer bem o que ninguém está vendo é o que forma o caráter que todos acabam vendo.", c:"trabalho"},
+  {t:"Uma amizade que só pede e nunca oferece cansa antes do tempo.", c:"amizade"},
+  {t:"Fofoca destrói mais rápido do que qualquer mentira contada de frente.", c:"palavras"},
+  {t:"Admitir o erro antes que alguém aponte é o caminho mais rápido pra consertar.", c:"humildade"},
+  {t:"Antes de comprar, pergunte se é necessidade ou impulso — a resposta honesta economiza meses de trabalho.", c:"dinheiro"},
+  {t:"Perdoar dentro de casa primeiro é o que sustenta perdoar lá fora.", c:"familia"},
+  {t:"Trocar de direção não é fracasso quando o caminho antigo já não leva a lugar nenhum.", c:"trabalho"},
+  {t:"Celebrar a vitória do outro sem inveja é teste de amizade madura.", c:"amizade"},
+  {t:"Palavra solta não volta — pense antes de falar o que não dá pra desfalar.", c:"palavras"},
+  {t:"Quem acha que já sabe tudo parou de aprender há muito tempo.", c:"humildade"},
+  {t:"Quem vive acima do que ganha empresta do seu próprio futuro.", c:"dinheiro"},
+  {t:"Criança aprende mais vendo do que ouvindo.", c:"familia"},
+  {t:"Produtividade sem descanso vira cansaço disfarçado de disciplina.", c:"trabalho"},
+  {t:"Amigo que corrige com carinho vale mais que cem que só aplaudem.", c:"amizade"},
+  {t:"Prometer menos e cumprir mais constrói mais confiança que o contrário.", c:"palavras"},
+  {t:"Pedir ajuda não é fraqueza — é economia de tempo e orgulho mal gasto.", c:"humildade"},
+  {t:"Um orçamento simples vale mais que mil boas intenções sem plano.", c:"dinheiro"},
+  {t:"Elogiar o esforço, não só o resultado, cria coragem pra tentar de novo.", c:"familia"},
+  {t:"Quem termina o que começa constrói reputação; quem só começa constrói desculpas.", c:"trabalho"},
+  {t:"Silêncio ao lado de quem se confia também é companhia.", c:"amizade"},
+  {t:"Elogio sincero custa pouco e rende muito.", c:"palavras"},
+  {t:"Servir sem esperar reconhecimento é onde a humildade de verdade aparece.", c:"humildade"},
+  {t:"Investir é plantar hoje uma sombra que você só vai sentar debaixo depois.", c:"dinheiro"},
+  {t:"Discordar sem gritar ensina mais sobre respeito do que qualquer sermão.", c:"familia"},
+  {t:"Ambiente de trabalho honesto rende mais do que talento sem ética.", c:"trabalho"},
+  {t:"Más companhias moldam devagar, sem avisar — escolha as suas com cuidado.", c:"amizade"},
+  {t:"Discurso bonito sem ação vira apenas ruído depois de um tempo.", c:"palavras"},
+  {t:"Comparar-se menos com os outros deixa mais espaço pra crescer no próprio ritmo.", c:"humildade"},
+  {t:"Dinheiro emprestado a amigo sem acordo claro custa mais que o próprio dinheiro.", c:"dinheiro"},
+  {t:"A mesa em família é onde muita coisa importante é dita sem parecer importante.", c:"familia"},
+  {t:"Pergunte antes de supor — economiza tempo e evita retrabalho.", c:"trabalho"},
+  {t:"Estar presente nos dias difíceis constrói mais vínculo do que mil mensagens nos dias fáceis.", c:"amizade"},
+  {t:"Perguntar \"o que você quis dizer?\" evita metade das brigas desnecessárias.", c:"palavras"},
+  {t:"Reconhecer o mérito alheio sem se diminuir é sinal de segurança, não de fraqueza.", c:"humildade"},
+  {t:"Trabalhar com honestidade rende menos rápido, mas nunca cobra juros de consciência.", c:"dinheiro"},
+  {t:"Cuidar dos pais quando envelhecem paga uma dívida que nunca foi cobrada em palavras.", c:"familia"},
+  {t:"Trabalho bem feito fala por si, não precisa de propaganda constante.", c:"trabalho"},
+  {t:"Reatar depois de uma briga honesta fortalece mais que nunca ter brigado.", c:"amizade"},
+  {t:"Quem fala demais de si geralmente escuta de menos os outros.", c:"palavras"},
+  {t:"Ouvir uma crítica justa dói menos quando o ego está no lugar certo.", c:"humildade"},
+  {t:"Guardar um pouco todo mês ensina mais disciplina do que guardar muito uma vez por ano.", c:"dinheiro"},
+  {t:"Casa que tem rotina tem raiz — e raiz segura quando o vento aperta.", c:"familia"},
+  {t:"Um bom líder escuta mais do que manda.", c:"trabalho"},
+  {t:"A verdade dita com gentileza chega mais longe que a verdade dita com dureza.", c:"palavras"},
+  {t:"Quem aceita ser corrigido em público mostra mais força do que quem se defende.", c:"humildade"},
+  {t:"A segurança não está em ter muito, mas em gastar menos do que se tem.", c:"dinheiro"},
+  {t:"Descansar um dia pra trabalhar melhor os outros seis não é preguiça, é estratégia.", c:"trabalho"},
+  {t:"Guardar segredo alheio é prova de caráter, não só de lealdade.", c:"palavras"},
+  {t:"Humildade não é se achar menos, é pensar menos em si o tempo todo.", c:"humildade"},
+  {t:"Palavras de ânimo ditas na hora certa podem mudar o rumo do dia de alguém.", c:"palavras"},
 ];
-// Produto final terá 70 — protótipo roda com os 15 já escritos, ciclando.
+// 70 conselhos completos — paráfrase/sabedoria própria, não citação bíblica literal.
 
 const CATS = {
   dinheiro:"Dinheiro", familia:"Família", trabalho:"Trabalho",
@@ -132,7 +330,584 @@ state.reflections = state.reflections || {};
 state.lastOpen = state.lastOpen || null;
 state.streak = state.streak || 0;
 state.startDate = state.startDate || new Date().toISOString().slice(0,10);
+state.onb = state.onb || { done:false, step:1, nome:"", momento:"", deseja:"", tempo:"", horario:"" };
+state.points = state.points || 0;
+state.journey7 = state.journey7 || { completedDays:{}, notes:{}, completedDates:{}, openDay:null };
 
+// ===================== CONTA / AUTENTICAÇÃO (Supabase) =====================
+// Mesmo projeto Supabase já usado na Oficina de Ofertas — só tabelas novas
+// (salomao_*). Login é opcional: o conteúdo gratuito funciona sem conta,
+// igual já funcionava. Conta existe pra (a) reivindicar acesso premium
+// depois de uma compra real na Hotmart e (b) levar favoritos/progresso/
+// diário pra outro aparelho, se a pessoa quiser.
+const SUPABASE_URL = "https://gnqsgfnsqretbppogvqm.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let authSession = null;
+let authMode = "login"; // "login" | "signup"
+let authError = "";
+let authBusy = false;
+let authPremium = false;
+
+function authEmail(){ return authSession ? authSession.user.email : null; }
+
+function updateAcctBtn(){
+  var btn = document.getElementById("acctBtn");
+  if (!btn) return;
+  if (authSession){
+    btn.textContent = (authPremium ? "★ " : "") + authEmail();
+  } else {
+    btn.textContent = "Entrar";
+  }
+}
+
+async function refreshPremiumStatus(){
+  authPremium = false;
+  if (!authSession) { updateAcctBtn(); return; }
+  try{
+    const { data, error } = await supabaseClient
+      .from("salomao_access_grants")
+      .select("id")
+      .eq("user_id", authSession.user.id)
+      .eq("granted", true)
+      .limit(1);
+    if (!error && data && data.length) authPremium = true;
+  } catch(e){ /* sem internet ou RLS bloqueando — trata como não-premium */ }
+  updateAcctBtn();
+}
+
+window.authSetMode = function(mode){ authMode = mode; authError = ""; renderConta(); };
+
+window.authSubmit = async function(){
+  var email = (document.getElementById("acctEmail")||{}).value || "";
+  var pass = (document.getElementById("acctPass")||{}).value || "";
+  authError = "";
+  if (!email || !pass){ authError = "Preencha e-mail e senha."; renderConta(); return; }
+  if (pass.length < 6){ authError = "A senha precisa ter pelo menos 6 caracteres."; renderConta(); return; }
+  authBusy = true; renderConta();
+  try{
+    if (authMode === "signup"){
+      const { data, error } = await supabaseClient.auth.signUp({ email: email, password: pass });
+      if (error) throw error;
+      authSession = data.session || null;
+      if (!authSession){
+        authBusy = false;
+        authError = "";
+        document.getElementById("page-conta").innerHTML = '<button type="button" class="prem-back" onclick="switchPage(\'inicio\')">← voltar</button>' +
+          '<div class="acct-card"><div class="acct-ok">Conta criada! Verifique seu e-mail pra confirmar antes de entrar.</div></div>';
+        return;
+      }
+    } else {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
+      if (error) throw error;
+      authSession = data.session;
+    }
+    await supabaseClient.from("salomao_profiles").upsert({
+      id: authSession.user.id,
+      nome: state.onb.nome || null,
+      momento: state.onb.momento || null,
+      deseja: state.onb.deseja || null,
+      tempo: state.onb.tempo || null,
+      horario: state.onb.horario || null
+    });
+    await refreshPremiumStatus();
+    authBusy = false;
+    switchPage("conta");
+  } catch(e){
+    authBusy = false;
+    authError = (e && e.message) ? e.message : "Não foi possível entrar. Tente de novo.";
+    renderConta();
+  }
+};
+
+window.authLogout = async function(){
+  await supabaseClient.auth.signOut();
+  authSession = null; authPremium = false;
+  updateAcctBtn();
+  switchPage("inicio");
+};
+
+window.authSync = async function(){
+  if (!authSession) return;
+  authBusy = true; renderConta();
+  try{
+    var uid = authSession.user.id;
+    await supabaseClient.from("salomao_profiles").upsert({
+      id: uid, nome: state.onb.nome||null, momento: state.onb.momento||null,
+      deseja: state.onb.deseja||null, tempo: state.onb.tempo||null, horario: state.onb.horario||null
+    });
+    var favRows = Object.keys(state.favorites).map(function(idx){ return { user_id: uid, conselho_idx: Number(idx) }; });
+    if (favRows.length) await supabaseClient.from("salomao_favorites").upsert(favRows, { onConflict: "user_id,conselho_idx" });
+    var progRows = Object.keys(state.journey7.completedDays).map(function(d){
+      return { user_id: uid, journey: "jornada7", day: Number(d), completed: true, note: state.journey7.notes[d]||null };
+    });
+    if (progRows.length) await supabaseClient.from("salomao_progress").upsert(progRows, { onConflict: "user_id,journey,day" });
+    authBusy = false;
+    document.getElementById("page-conta").innerHTML = '<button type="button" class="prem-back" onclick="switchPage(\'inicio\')">← voltar</button>' +
+      '<div class="acct-card"><div class="acct-ok">Sincronizado — seus favoritos, progresso da jornada e reflexões agora também estão salvos na sua conta.</div>' +
+      '<button type="button" class="onb-btn" onclick="switchPage(\'conta\')">Voltar pra conta</button></div>';
+  } catch(e){
+    authBusy = false;
+    authError = (e && e.message) ? e.message : "Não consegui sincronizar agora.";
+    renderConta();
+  }
+};
+
+function renderConta(){
+  var el = document.getElementById("page-conta");
+  if (!el) return;
+  if (authSession){
+    el.innerHTML =
+      '<button type="button" class="prem-back" onclick="switchPage(\'inicio\')">← voltar</button>' +
+      '<div><div class="section-title">Sua conta</div><div class="section-sub">dados ficam só entre você e o app — não usamos pra publicidade</div></div>' +
+      '<div class="acct-card">' +
+        '<div class="acct-row"><span>E-mail</span><b>'+authEmail()+'</b></div>' +
+        '<div class="acct-row"><span>Acesso</span><b>'+(authPremium?'Premium':'Gratuito')+'</b></div>' +
+      '</div>' +
+      (authPremium ? '' : '<button type="button" class="onb-btn" onclick="switchPage(\'premium\')">Ver acesso completo</button>') +
+      '<button type="button" class="onb-btn" style="background:var(--gold-soft);color:#8a6a1f" '+(authBusy?'disabled':'')+' onclick="authSync()">'+(authBusy?'Sincronizando…':'Sincronizar meus dados nessa conta')+'</button>' +
+      (authError ? '<div class="acct-error">'+authError+'</div>' : '') +
+      '<button type="button" class="prem-back" onclick="authLogout()">Sair da conta</button>';
+    return;
+  }
+  el.innerHTML =
+    '<button type="button" class="prem-back" onclick="switchPage(\'inicio\')">← voltar</button>' +
+    '<div><div class="section-title">'+(authMode==="signup"?"Criar conta":"Entrar")+'</div><div class="section-sub">opcional — o conteúdo gratuito funciona sem conta. Crie uma se quiser levar seu progresso pra outro aparelho, ou depois de comprar o acesso completo.</div></div>' +
+    '<div class="acct-tabs">' +
+      '<button type="button" class="'+(authMode==="login"?"active":"")+'" onclick="authSetMode(\'login\')">Entrar</button>' +
+      '<button type="button" class="'+(authMode==="signup"?"active":"")+'" onclick="authSetMode(\'signup\')">Criar conta</button>' +
+    '</div>' +
+    '<div class="acct-field"><label>E-mail</label><input type="email" class="onb-input" id="acctEmail" placeholder="seu@email.com"></div>' +
+    '<div class="acct-field"><label>Senha</label><input type="password" class="onb-input" id="acctPass" placeholder="mínimo 6 caracteres"></div>' +
+    (authError ? '<div class="acct-error">'+authError+'</div>' : '') +
+    '<button type="button" class="onb-btn" '+(authBusy?'disabled':'')+' onclick="authSubmit()">'+(authBusy?'Enviando…':(authMode==="signup"?"Criar conta":"Entrar"))+'</button>';
+}
+
+// ===================== ONBOARDING =====================
+const MOMENTOS = [
+  "Preciso encontrar paz.",
+  "Quero fortalecer minha fé.",
+  "Estou buscando direção.",
+  "Quero cuidar melhor da minha família.",
+  "Quero desenvolver sabedoria financeira.",
+  "Estou passando por uma fase difícil.",
+  "Quero me aproximar mais de Deus."
+];
+const DESEJOS = [
+  "Uma rotina de oração.",
+  "Conhecimento bíblico.",
+  "Disciplina espiritual.",
+  "Gratidão.",
+  "Sabedoria nas decisões.",
+  "Propósito de vida."
+];
+const TEMPOS = ["3 minutos", "5 minutos", "10 minutos", "15 minutos"];
+const HORARIOS = ["Manhã", "Tarde", "Noite"];
+const JORNADA7 = [
+  "Entregando suas preocupações", "Encontrando paz", "Desenvolvendo gratidão",
+  "Fortalecendo a confiança", "Buscando sabedoria", "Aprendendo a esperar", "Renovando a fé"
+];
+const ONB_TOTAL = 8;
+
+function onbSave(){ save(state); }
+function onbGoto(n){
+  state.onb.step = Math.max(1, Math.min(ONB_TOTAL, n));
+  onbSave();
+  onbRender();
+}
+window.onbSelectSingle = function(field, value, el){
+  state.onb[field] = value;
+  onbSave();
+  var group = el.parentElement;
+  Array.prototype.forEach.call(group.children, function(c){ c.classList.remove("selected"); });
+  el.classList.add("selected");
+  onbRenderNavState();
+};
+window.onbNomeInput = function(el){
+  state.onb.nome = el.value;
+  onbSave();
+  onbRenderNavState();
+};
+function onbRenderNavState(){
+  var btn = document.getElementById("onbNextBtn");
+  if (!btn) return;
+  var step = state.onb.step;
+  var ok = true;
+  if (step===2) ok = (state.onb.nome||"").trim().length>0;
+  if (step===3) ok = !!state.onb.momento;
+  if (step===4) ok = !!state.onb.deseja;
+  if (step===5) ok = !!state.onb.tempo;
+  if (step===6) ok = !!state.onb.horario;
+  btn.disabled = !ok;
+}
+function onbOptionsHtml(field, options, current){
+  return '<div class="onb-options">' + options.map(function(o){
+    return '<button type="button" class="onb-opt'+(current===o?' selected':'')+'" onclick="onbSelectSingle(\''+field+'\',\''+o.replace(/'/g,"\\'")+'\',this)">'+o+'</button>';
+  }).join("") + '</div>';
+}
+function onbStepHtml(step){
+  var nome = state.onb.nome || "";
+  if (step===1){
+    return '<div class="onb-eyebrow">70 Conselhos de Salomão</div>' +
+      '<h2>Uma nova jornada de fé, sabedoria e propósito começa aqui.</h2>' +
+      '<button type="button" class="onb-btn" onclick="onbGoto(2)">COMEÇAR MINHA JORNADA</button>';
+  }
+  if (step===2){
+    return '<h2>Como podemos chamar você?</h2>' +
+      '<input type="text" class="onb-input" placeholder="Seu nome" value="'+nome.replace(/"/g,"&quot;")+'" oninput="onbNomeInput(this)" autofocus>' +
+      onbNavButtonsHtml();
+  }
+  if (step===3){
+    return '<h2>Qual momento você está vivendo?</h2>' +
+      onbOptionsHtml("momento", MOMENTOS, state.onb.momento) +
+      onbNavButtonsHtml();
+  }
+  if (step===4){
+    return '<h2>O que você deseja desenvolver?</h2>' +
+      onbOptionsHtml("deseja", DESEJOS, state.onb.deseja) +
+      onbNavButtonsHtml();
+  }
+  if (step===5){
+    return '<h2>Quanto tempo você consegue dedicar diariamente?</h2>' +
+      onbOptionsHtml("tempo", TEMPOS, state.onb.tempo) +
+      onbNavButtonsHtml();
+  }
+  if (step===6){
+    return '<h2>Qual horário combina mais com sua rotina?</h2>' +
+      onbOptionsHtml("horario", HORARIOS, state.onb.horario) +
+      onbNavButtonsHtml();
+  }
+  if (step===7){
+    return '<div class="onb-eyebrow">Antes de começar</div>' +
+      '<h2>'+(nome?nome+', a':'A')+' partir de hoje, você não está sozinho(a) nessa caminhada.</h2>' +
+      '<p class="sub">Um passo por dia é suficiente — não precisa ser perfeito, só constante. Estamos aqui pra te acompanhar nisso.</p>' +
+      '<button type="button" class="onb-btn" onclick="onbGoto(8)">Continuar</button>' +
+      '<button type="button" class="onb-back" onclick="onbGoto(6)">← voltar</button>';
+  }
+  if (step===8){
+    return '<h2>Esta é sua jornada, '+(nome||"")+'!</h2>' +
+      '<div class="onb-summary-row"><span>Objetivo escolhido</span><b>'+(state.onb.deseja||"—")+'</b></div>' +
+      '<div class="onb-summary-row"><span>Plano recomendado</span><b>Jornada de 7 dias</b></div>' +
+      '<div class="onb-summary-row"><span>Duração</span><b>7 dias</b></div>' +
+      '<div class="onb-summary-row"><span>Tempo diário</span><b>'+(state.onb.tempo||"—")+'</b></div>' +
+      '<div class="onb-included"><b style="display:block;margin-bottom:8px;font-size:12px;color:var(--navy-soft);text-transform:uppercase;letter-spacing:1px">O que está incluído</b>' +
+        '<ul>' + JORNADA7.map(function(d){ return '<li>'+d+'</li>'; }).join("") + '</ul>' +
+      '</div>' +
+      '<button type="button" class="onb-btn" onclick="onbFinish()">COMEÇAR MINHA JORNADA</button>';
+  }
+  return "";
+}
+function onbNavButtonsHtml(){
+  return '<div style="display:flex;flex-direction:column;gap:8px">' +
+    '<button type="button" class="onb-btn" id="onbNextBtn" onclick="onbGoto('+(state.onb.step+1)+')">Continuar</button>' +
+    (state.onb.step>1 ? '<button type="button" class="onb-back" onclick="onbGoto('+(state.onb.step-1)+')">← voltar</button>' : '') +
+  '</div>';
+}
+function onbRender(){
+  var step = state.onb.step;
+  document.getElementById("onbProgressFill").style.width = (step/ONB_TOTAL*100)+"%";
+  document.getElementById("onbSteps").innerHTML = '<div class="onb-step active">' + onbStepHtml(step) + '</div>';
+  onbRenderNavState();
+}
+window.onbFinish = function(){
+  state.onb.done = true;
+  onbSave();
+  showMainApp();
+};
+
+function showOnboarding(){
+  document.getElementById("onbRoot").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
+  onbRender();
+}
+function showMainApp(){
+  document.getElementById("onbRoot").style.display = "none";
+  document.getElementById("mainApp").style.display = "flex";
+  var greetEl = document.getElementById("greetLine");
+  if (greetEl) greetEl.textContent = state.onb.nome ? "Olá, " + state.onb.nome : "";
+  renderHoje(); renderTodos(); renderFavoritos();
+  renderInicio();
+}
+
+// ===================== JORNADA DE 7 DIAS =====================
+// Versículos conferidos na tradução João Ferreira de Almeida, edição
+// Atualizada (1911) — domínio público (fonte: biblestudytools.com/aa/ e
+// bibliaparalela.com, ambos hospedando essa edição). Explicação, devocional,
+// oração e aplicação são texto autoral, não citação bíblica.
+const TRADUCAO = "João Ferreira de Almeida, edição Atualizada (1911) — domínio público";
+const JOURNEY7_DATA = [
+  { day:1, title:"Entregando suas preocupações", tema:"Confiança",
+    verseRef:"Salmos 55:22",
+    verseText:"Lança o teu fardo sobre o Senhor, e ele te susterá; nunca permitirá que o justo seja abalado.",
+    explicacao:"Esse versículo foi escrito por alguém atravessando uma traição profunda — e mesmo assim, o conselho não é “resolva sozinho”, é “entregue o peso”. Carregar preocupação não é sinal de responsabilidade; muitas vezes é só um peso que não precisava ser seu sozinho.",
+    devocional:"Pense em algo que você está carregando hoje — uma decisão, uma preocupação, um medo recorrente. Não precisa ter resposta pronta. O convite de hoje é simples: nomear o peso e, por um momento, soltar as mãos dele.",
+    oracao:"Senhor, hoje eu trago a Ti o que tenho carregado sozinho(a). Ajuda-me a confiar que não preciso resolver tudo com minhas próprias forças. Sustente-me enquanto eu aprendo a soltar. Amém.",
+    aplicacao:"Escreva abaixo uma preocupação específica. Em vez de tentar resolvê-la agora, apenas nomeie-a — esse já é o primeiro passo de entregar o peso.",
+    pergunta:"O que você está carregando hoje que talvez não precisasse carregar sozinho(a))?" },
+  { day:2, title:"Encontrando paz", tema:"Paz",
+    verseRef:"João 14:27",
+    verseText:"Deixo-vos a paz, a minha paz vos dou; eu não vo-la dou como o mundo a dá. Não se turbe o vosso coração, nem se atemorize.",
+    explicacao:"A paz oferecida aqui não depende das circunstâncias estarem resolvidas — é diferente da paz que o mundo costuma dar (que normalmente só vem quando tudo dá certo). É uma paz possível mesmo em meio ao que ainda está incerto.",
+    devocional:"Muitas vezes esperamos que a paz chegue depois que os problemas acabarem. Mas e se parte dela pudesse começar antes disso — não como ausência de problema, mas como uma presença no meio dele?",
+    oracao:"Senhor, eu não preciso que tudo esteja resolvido pra ter paz hoje. Acalma o meu coração nessa área da minha vida que ainda está incerta. Me ajuda a descansar mesmo sem todas as respostas. Amém.",
+    aplicacao:"Antes de resolver o próximo problema da sua lista, pare por 60 segundos e respire fundo três vezes, lembrando que você não precisa carregar tudo de uma vez.",
+    pergunta:"Em que área da sua vida você está esperando a situação mudar pra só então sentir paz?" },
+  { day:3, title:"Desenvolvendo gratidão", tema:"Gratidão",
+    verseRef:"1 Tessalonicenses 5:18",
+    verseText:"Dai graças em toda e qualquer circunstância, porquanto essa é a vontade de Deus em Cristo Jesus para convosco.",
+    explicacao:"Repare que o texto não diz “seja grato pelas circunstâncias” (como se tudo fosse bom), mas “em toda circunstância” — é possível reconhecer algo bom mesmo em meio a um período difícil, sem negar a dificuldade.",
+    devocional:"Gratidão não é fingir que está tudo bem. É treinar o olhar pra notar o que, apesar de tudo, ainda está presente e é bom.",
+    oracao:"Senhor, hoje eu escolho notar o que tenho, não só o que falta. Obrigado(a) pelo que está bem na minha vida agora, mesmo pequeno. Me ensina a enxergar isso mais vezes. Amém.",
+    aplicacao:"Liste três coisas específicas (não genéricas) pelas quais você é grato(a) hoje — algo que aconteceu nas últimas 24 horas.",
+    pergunta:"O que de bom aconteceu essa semana que você quase deixou passar sem notar?" },
+  { day:4, title:"Fortalecendo a confiança", tema:"Confiança em Deus",
+    verseRef:"Provérbios 3:5-6",
+    verseText:"Confia no Senhor de todo o teu coração, e não te estribes no teu próprio entendimento. Reconhece-o em todos os teus caminhos, e ele endireitará as tuas veredas.",
+    explicacao:"“Não te estribes no teu próprio entendimento” não é um convite a parar de pensar — é um lembrete de que nossa visão é sempre parcial. Confiar é agir com o que sabemos, sem precisar ter certeza absoluta antes de dar o próximo passo.",
+    devocional:"Quantas vezes você já adiou uma decisão esperando ter 100% de certeza? Às vezes confiar significa dar o passo possível hoje, com a informação que você tem agora.",
+    oracao:"Senhor, eu não tenho todas as respostas sobre o que vem pela frente. Ajuda-me a confiar no próximo passo, mesmo sem ver o caminho inteiro. Amém.",
+    aplicacao:"Pense numa decisão que você está adiando por insegurança. Qual é o menor próximo passo possível que você poderia dar hoje, mesmo sem ter 100% de certeza?",
+    pergunta:"Onde você está esperando certeza total antes de agir — e o que mudaria se desse o próximo passo mesmo assim?" },
+  { day:5, title:"Buscando sabedoria", tema:"Sabedoria",
+    verseRef:"Tiago 1:5",
+    verseText:"Ora, se algum de vós tem falta de sabedoria, peça-a a Deus, que a todos dá liberalmente e não censura, e ser-lhe-á dada.",
+    explicacao:"O texto é direto: pedir sabedoria não é sinal de fraqueza, e a resposta não vem com julgamento (“não censura”). Isso muda a forma como encaramos não saber algo — de vergonha pra convite.",
+    devocional:"Tem alguma decisão hoje em que você sente que está decidindo no escuro? A sabedoria que esse texto promete não é uma resposta mágica instantânea — é a permissão pra pedir ajuda sem vergonha.",
+    oracao:"Senhor, eu admito que não sei o melhor caminho em uma área da minha vida agora. Peço sabedoria — pra pensar com clareza e decidir bem. Obrigado(a) por não me julgar por não saber tudo. Amém.",
+    aplicacao:"Identifique uma decisão pendente. Em vez de decidir sozinho(a) hoje, peça uma opinião sincera a alguém de confiança.",
+    pergunta:"Em que área da sua vida você tem decidido sozinho(a) quando poderia pedir ajuda?" },
+  { day:6, title:"Aprendendo a esperar", tema:"Paciência",
+    verseRef:"Salmos 27:14",
+    verseText:"Espera tu pelo Senhor; anima-te, e fortalece o teu coração; espera, pois, pelo Senhor.",
+    explicacao:"Repare na repetição: “espera... espera, pois”. Esperar aqui não é passividade — é uma espera ativa, acompanhada de ânimo e força, não de desistência.",
+    devocional:"Vivemos numa época que odeia esperar. Mas algumas coisas boas só acontecem no tempo certo, não no tempo que a gente escolheria.",
+    oracao:"Senhor, me ajuda a esperar sem perder o ânimo. Fortalece meu coração enquanto eu não vejo ainda o resultado que espero. Me ensina a confiar no tempo certo. Amém.",
+    aplicacao:"Pense em algo que você está esperando há um tempo. Em vez de só esperar passivamente, escolha uma ação pequena e construtiva que você pode fazer hoje enquanto espera.",
+    pergunta:"O que você está esperando agora — e como seria esperar com ânimo em vez de ansiedade?" },
+  { day:7, title:"Renovando a fé", tema:"Fé",
+    verseRef:"Romanos 10:17",
+    verseText:"Logo a fé é pelo ouvir, e o ouvir pela palavra de Cristo.",
+    explicacao:"Fé, segundo esse texto, não nasce do nada — ela se constrói ao ouvir, repetidamente. Depois de 7 dias de jornada, faz sentido parar e perceber: a fé cresce com prática constante, não com um momento único.",
+    devocional:"Olhando pra trás nesses 7 dias — o que mudou, mesmo que pouco, na forma como você encara seus dias? Fé construída aos poucos costuma durar mais que fé construída num único momento intenso.",
+    oracao:"Senhor, obrigado(a) por esses 7 dias. Que essa semana seja o começo de um hábito, não um momento isolado. Fortalece minha fé a cada vez que eu voltar a ouvir e refletir. Amém.",
+    aplicacao:"Releia a sua primeira reflexão do Dia 1. O que mudou desde então?",
+    pergunta:"O que você quer levar dessa primeira semana pra sua rotina daqui pra frente?" }
+];
+
+const BADGES = [
+  { key:"primeira_semente", nome:"Primeira Semente", desc:"Ganhe seus primeiros pontos", check:function(s){ return s.points>0; } },
+  { key:"sete_dias", nome:"Sete Dias de Constância", desc:"7 dias seguidos de presença no app", check:function(s){ return s.streak>=7; } },
+  { key:"amante_palavra", nome:"Amante da Palavra", desc:"Favorite 10 conselhos", check:function(s){ return Object.keys(s.favorites).length>=10; } },
+  { key:"coracao_grato", nome:"Coração Grato", desc:"Conclua o dia de gratidão da jornada", check:function(s){ return !!(s.journey7.completedDays && s.journey7.completedDays[3]); } },
+  { key:"jornada_completa", nome:"Jornada Completa", desc:"Conclua os 7 dias da Jornada de 7 dias", check:function(s){ return [1,2,3,4,5,6,7].every(function(d){ return s.journey7.completedDays && s.journey7.completedDays[d]; }); } }
+];
+const LEVELS = [
+  { min:0, nome:"Semente" },
+  { min:50, nome:"Broto" },
+  { min:150, nome:"Raiz Firme" },
+  { min:300, nome:"Árvore Frutífera" },
+  { min:600, nome:"Floresta de Sabedoria" }
+];
+function currentLevel(points){
+  var lvl = LEVELS[0];
+  for (var i=0;i<LEVELS.length;i++){ if (points>=LEVELS[i].min) lvl = LEVELS[i]; }
+  return lvl;
+}
+function journeyCompletedCount(){
+  var c = 0;
+  for (var d=1; d<=7; d++){ if (state.journey7.completedDays[d]) c++; }
+  return c;
+}
+function journeyCurrentDay(){
+  for (var d=1; d<=7; d++){ if (!state.journey7.completedDays[d]) return d; }
+  return 7;
+}
+
+function verseBoxHtml(j){
+  return '<div class="verse-box">' +
+    '<div class="txt">“'+j.verseText+'”</div>' +
+    '<div class="ref">'+j.verseRef+'</div>' +
+    '<div class="tr">'+TRADUCAO+'</div>' +
+  '</div>';
+}
+function momentDetailHtml(j){
+  var done = !!state.journey7.completedDays[j.day];
+  var note = state.journey7.notes[j.day] || "";
+  return '<div class="moment-detail">' +
+    '<div class="kicker">Dia '+j.day+' de 7 · '+j.tema+'</div>' +
+    '<h3>'+j.title+'</h3>' +
+    verseBoxHtml(j) +
+    '<div class="moment-block"><div class="lbl">Explicação</div><div class="txt">'+j.explicacao+'</div></div>' +
+    '<div class="moment-block"><div class="lbl">Devocional</div><div class="txt">'+j.devocional+'</div></div>' +
+    '<div class="moment-block prayer"><div class="lbl">Oração guiada</div><div class="txt">'+j.oracao+'</div></div>' +
+    '<div class="moment-block"><div class="lbl">Aplicação prática</div><div class="txt">'+j.aplicacao+'</div></div>' +
+    '<div class="moment-block"><div class="lbl">Pergunta de reflexão</div><div class="txt">'+j.pergunta+'</div>' +
+      '<textarea data-journey-note="'+j.day+'" placeholder="Escreva sua resposta aqui — fica salva automaticamente, só você vê.">'+note.replace(/</g,"&lt;")+'</textarea>' +
+    '</div>' +
+    (done ?
+      '<div class="dash-row" style="justify-content:center; cursor:default;"><span class="t" style="color:var(--gold)">✓ Momento concluído</span></div>' :
+      '<button type="button" class="btn primary" style="width:100%" onclick="completeJourneyDay('+j.day+')">CONCLUIR MEU MOMENTO</button>'
+    ) +
+  '</div>';
+}
+window.toggleJourneyDay = function(day){
+  state.journey7.openDay = (state.journey7.openDay===day) ? null : day;
+  renderJornada();
+};
+window.completeJourneyDay = function(day){
+  if (!state.journey7.completedDays[day]){
+    state.journey7.completedDays[day] = true;
+    state.journey7.completedDates[day] = new Date().toISOString().slice(0,10);
+    state.points += 15;
+  }
+  save(state);
+  renderJornada();
+  renderInicio();
+};
+document.addEventListener("input", function(e){
+  var ta = e.target.closest("textarea[data-journey-note]");
+  if (!ta) return;
+  var day = Number(ta.dataset.journeyNote);
+  clearTimeout(ta._t);
+  ta._t = setTimeout(function(){
+    state.journey7.notes[day] = ta.value;
+    save(state);
+  }, 500);
+});
+function journalListHtml(){
+  var days = Object.keys(state.journey7.completedDates).map(Number).sort(function(a,b){ return state.journey7.completedDates[b].localeCompare(state.journey7.completedDates[a]); });
+  if (!days.length) return '<div class="empty">Suas reflexões da jornada aparecem aqui conforme você concluir cada dia.</div>';
+  return days.map(function(d){
+    var j = JOURNEY7_DATA[d-1];
+    var note = state.journey7.notes[d];
+    return '<div class="journal-entry"><div class="d">'+state.journey7.completedDates[d]+' · Dia '+d+' · '+j.tema+'</div>' +
+      (note ? '<div class="t">'+note.replace(/</g,"&lt;")+'</div>' : '<div class="t" style="color:var(--navy-soft)">(sem anotação escrita)</div>') +
+    '</div>';
+  }).join("");
+}
+function renderJornada(){
+  var el = document.getElementById("page-jornada");
+  var count = journeyCompletedCount();
+  var rows = JOURNEY7_DATA.map(function(j){
+    var done = !!state.journey7.completedDays[j.day];
+    var open = state.journey7.openDay===j.day;
+    return '<div class="journey-day-row'+(done?' done':'')+'" onclick="toggleJourneyDay('+j.day+')">' +
+      '<div class="num">'+(done?'✓':j.day)+'</div>' +
+      '<div class="info"><div class="title">'+j.title+'</div><div class="theme">'+j.tema+'</div></div>' +
+      '<div class="check">'+(open?'−':'+')+'</div>' +
+    '</div>' + (open ? momentDetailHtml(j) : '');
+  }).join('<div style="height:2px"></div>');
+  el.innerHTML =
+    '<div><div class="section-title">Jornada de 7 dias</div><div class="section-sub">'+count+' de 7 dias concluídos · comece por qualquer dia</div></div>' +
+    '<div style="display:flex; flex-direction:column; gap:10px">' + rows + '</div>' +
+    '<div><div class="section-title">Seu diário dessa jornada</div><div class="section-sub">suas reflexões escritas ao concluir cada dia</div></div>' +
+    journalListHtml();
+}
+
+function greetingWord(){
+  var h = new Date().getHours();
+  if (h<12) return "Bom dia";
+  if (h<18) return "Boa tarde";
+  return "Boa noite";
+}
+function renderInicio(){
+  var el = document.getElementById("page-inicio");
+  var nome = state.onb.nome || "";
+  var day = journeyCurrentDay();
+  var j = JOURNEY7_DATA[day-1];
+  var dayDone = !!state.journey7.completedDays[day];
+  var count = journeyCompletedCount();
+  el.innerHTML =
+    '<div>' +
+      '<div class="greeting">'+greetingWord()+(nome?', '+nome:'')+'!</div>' +
+      '<div class="greeting-sub">'+(count>=7 ? 'Você concluiu sua Jornada de 7 dias — que tal revisitar um dia ou favoritar um conselho?' : 'Continue de onde parou na sua jornada.')+'</div>' +
+    '</div>' +
+    '<div class="stat-row">' +
+      '<div class="stat-box"><div class="n">'+Math.min(day,7)+'/7</div><div class="l">Dia da jornada</div></div>' +
+      '<div class="stat-box"><div class="n">'+state.streak+'</div><div class="l">Dias seguidos</div></div>' +
+      '<div class="stat-box"><div class="n">'+Math.round(count/7*100)+'%</div><div class="l">Concluído</div></div>' +
+      '<div class="stat-box"><div class="n">'+state.points+'</div><div class="l">Sementes</div></div>' +
+    '</div>' +
+    '<div class="moment-card">' +
+      '<div class="eyebrow">Seu momento com Deus</div>' +
+      '<div class="theme">'+(count>=7 ? 'Jornada concluída — revisite um dia' : j.title)+'</div>' +
+      '<div class="time">'+(count>=7 ? 'Explore o quanto quiser' : '~3–4 min · '+j.tema)+'</div>' +
+      '<button type="button" onclick="switchPage(\'jornada\')">'+(dayDone&&count<7?'VER PRÓXIMO DIA':'COMEÇAR MEU MOMENTO')+'</button>' +
+    '</div>' +
+    '<div style="display:flex; flex-direction:column; gap:10px">' +
+      '<div class="dash-row" onclick="switchPage(\'jornada\')"><div><div class="t">Continue sua jornada</div><div class="s">Jornada de 7 dias · '+count+'/7 concluídos</div></div><div class="arrow">→</div></div>' +
+      '<div class="dash-row" onclick="switchPage(\'premium\')"><div><div class="t">Seu devocional de hoje</div><div class="s">parte do acesso completo — em produção</div></div><span class="tag">Premium</span></div>' +
+      '<div class="dash-row" onclick="switchPage(\'premium\')"><div><div class="t">Orações para seu momento</div><div class="s">parte do acesso completo — em produção</div></div><span class="tag">Premium</span></div>' +
+      '<div class="dash-row" onclick="switchPage(\'premium\')"><div><div class="t">Planos de 21 e 30 dias</div><div class="s">parte do acesso completo — em produção</div></div><span class="tag">Premium</span></div>' +
+      '<div class="dash-row" onclick="switchPage(\'conselhos\')"><div><div class="t">70 Conselhos de Salomão</div><div class="s">leia, filtre por tema e favorite</div></div><div class="arrow">→</div></div>' +
+      '<div class="dash-row" onclick="switchPage(\'conselhos\'); setTimeout(function(){ switchView(\'favoritos\'); },0)"><div><div class="t">Sua biblioteca</div><div class="s">conselhos favoritados</div></div><div class="arrow">→</div></div>' +
+      '<div class="dash-row" onclick="switchPage(\'conquistas\')"><div><div class="t">Suas conquistas</div><div class="s">pontos, nível e medalhas</div></div><div class="arrow">→</div></div>' +
+    '</div>';
+}
+
+function renderConquistas(){
+  var el = document.getElementById("page-conquistas");
+  var lvl = currentLevel(state.points);
+  var nextLvl = LEVELS[LEVELS.indexOf(lvl)+1];
+  el.innerHTML =
+    '<div class="level-card">' +
+      '<div class="pts">'+state.points+'</div>' +
+      '<div class="pts-l">Sementes de Sabedoria</div>' +
+      '<div class="lvl">'+lvl.nome+'</div>' +
+      (nextLvl ? '<div class="greeting-sub" style="margin-top:8px">faltam '+(nextLvl.min-state.points)+' pontos pra '+nextLvl.nome+'</div>' : '<div class="greeting-sub" style="margin-top:8px">nível máximo alcançado</div>') +
+    '</div>' +
+    '<div><div class="section-title">Medalhas</div><div class="section-sub">desbloqueadas pela sua constância, não por comparação com ninguém</div></div>' +
+    '<div class="badge-grid">' +
+      BADGES.map(function(b){
+        var unlocked = b.check(state);
+        return '<div class="badge-card'+(unlocked?' unlocked':'')+'">' +
+          '<div class="ic">'+(unlocked?'★':'☆')+'</div>' +
+          '<div class="n">'+b.nome+'</div>' +
+          '<div class="d">'+b.desc+'</div>' +
+        '</div>';
+      }).join("") +
+    '</div>';
+}
+
+// ===================== PREMIUM / PAYWALL =====================
+// Checkout ainda não existe (produto não cadastrado na Hotmart). Em vez de
+// um botão decorativo, o CTA fica desabilitado e explica isso — nada aqui
+// finge aceitar pagamento.
+const HOTMART_CHECKOUT_URL = ""; // cole aqui o link assim que o produto existir na Hotmart
+const PREMIUM_PRICE_LABEL = "a definir"; // preço ainda não decidido
+
+function renderPremium(){
+  var el = document.getElementById("page-premium");
+  var hasCheckout = !!HOTMART_CHECKOUT_URL;
+  el.innerHTML =
+    '<button type="button" class="prem-back" onclick="switchPage(\'inicio\')">← voltar</button>' +
+    '<div class="prem-hero">' +
+      '<div class="eyebrow">Acesso completo</div>' +
+      '<h2>Continue sua jornada com uma experiência completa</h2>' +
+      '<p>Tenha acesso a jornadas guiadas, orações, devocionais e ferramentas pra desenvolver sua rotina espiritual.</p>' +
+    '</div>' +
+    '<div class="prem-benefits"><ul>' +
+      '<li>As jornadas de 7, 21 e 30 dias</li>' +
+      '<li>Biblioteca completa de orações, por tema e necessidade</li>' +
+      '<li>Devocionais diários</li>' +
+      '<li>Diário espiritual completo, com busca por data</li>' +
+      '<li>Os 70 Conselhos de Salomão, já incluídos hoje</li>' +
+      '<li>Histórico e conquistas ampliados</li>' +
+    '</ul></div>' +
+    '<div class="prem-price-box">' +
+      '<div class="amount">'+PREMIUM_PRICE_LABEL+'</div>' +
+      '<div class="cond">pagamento único — sem mensalidade, sem cobrança recorrente</div>' +
+      '<button type="button" '+(hasCheckout?'onclick="window.open(\''+HOTMART_CHECKOUT_URL+'\',\'_blank\')"':'disabled') +
+        '>'+(hasCheckout?'COMPRAR ACESSO COMPLETO':'Checkout em configuração')+'</button>' +
+    '</div>' +
+    '<div class="prem-note">'+(hasCheckout ?
+      'Você será levado ao checkout seguro da Hotmart. O acesso é liberado automaticamente assim que o pagamento é confirmado.' :
+      'Essa oferta ainda não está à venda — o produto está sendo cadastrado na Hotmart. Volte em breve.') +
+    '</div>';
+}
+
+// ===================== streak =====================
 (function updateStreak(){
   const today = new Date().toISOString().slice(0,10);
   if(state.lastOpen !== today){
@@ -231,18 +1006,56 @@ function renderFavoritos(){
   `).join("") : `<div class="empty">Você ainda não favoritou nenhum conselho.<br>Toque na estrela ★ pra guardar os que mais tocarem você.</div>`;
 }
 
-document.querySelectorAll("nav.tabs button").forEach(btn=>{
-  btn.addEventListener("click", function(){
-    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
-    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById("view-"+btn.dataset.view).classList.add("active");
-  });
+// ---------- top-level page nav (Início / Jornada / Conselhos / Conquistas) ----------
+function switchPage(name){
+  document.querySelectorAll("#mainTabs button").forEach(function(b){ b.classList.toggle("active", b.dataset.page===name); });
+  document.querySelectorAll("main > .page").forEach(function(v){ v.classList.remove("active"); });
+  var target = document.getElementById("page-"+name);
+  if (target) target.classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
+  if (name==="inicio") renderInicio();
+  if (name==="jornada") renderJornada();
+  if (name==="conquistas") renderConquistas();
+  if (name==="premium") renderPremium();
+  if (name==="conta") renderConta();
+}
+window.switchPage = switchPage;
+document.getElementById("mainTabs").addEventListener("click", function(e){
+  var btn = e.target.closest("button[data-page]");
+  if (!btn) return;
+  switchPage(btn.dataset.page);
 });
 
-renderHoje();
-renderTodos();
-renderFavoritos();
+// ---------- sub nav inside Conselhos (Hoje / Todos / Favoritos) ----------
+function switchView(name){
+  var target = document.getElementById("view-"+name);
+  if (!target) return;
+  document.querySelectorAll("#subTabsConselhos button").forEach(function(b){ b.classList.toggle("active", b.dataset.view===name); });
+  document.querySelectorAll("#page-conselhos .view").forEach(function(v){ v.classList.remove("active"); });
+  target.classList.add("active");
+}
+window.switchView = switchView;
+document.getElementById("subTabsConselhos").addEventListener("click", function(e){
+  var btn = e.target.closest("button[data-view]");
+  if (!btn) return;
+  switchView(btn.dataset.view);
+});
+
+// ===================== boot =====================
+if (state.onb.done){ showMainApp(); } else { showOnboarding(); }
+
+supabaseClient.auth.getSession().then(function(res){
+  authSession = res.data.session;
+  updateAcctBtn();
+  refreshPremiumStatus();
+});
+supabaseClient.auth.onAuthStateChange(function(_event, session){
+  authSession = session;
+  updateAcctBtn();
+  refreshPremiumStatus();
+  var contaPage = document.getElementById("page-conta");
+  if (contaPage && contaPage.classList.contains("active")) renderConta();
+});
 </script>
 </body>
 </html>
