@@ -388,7 +388,10 @@ window.authSubmit = async function(){
   authBusy = true; renderConta();
   try{
     if (authMode === "signup"){
-      const { data, error } = await supabaseClient.auth.signUp({ email: email, password: pass });
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email, password: pass,
+        options: { emailRedirectTo: "https://gfl2026.github.io/oficina-ofertas/salomao/" }
+      });
       if (error) throw error;
       authSession = data.session || null;
       if (!authSession){
