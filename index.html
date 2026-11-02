@@ -389,6 +389,29 @@
   }
   .chart-card .chart-wrap{ position:relative; height:190px }
   .chart-card .chart-empty{ color:var(--fg-muted); font-size:.8rem; text-align:center; padding:40px 0 }
+
+  /* ---------- Oferta — drawer de detalhes (abas Visão Geral / Produto / ... ) ---------- */
+  .drawer-overlay{position:fixed; inset:0; background:rgba(20,16,10,.45); z-index:60; display:none; justify-content:flex-end}
+  .drawer-overlay.open{display:flex}
+  .drawer{width:min(760px,100%); height:100%; background:var(--bg); border-left:1px solid var(--border); overflow-y:auto; padding:18px 20px 60px; display:flex; flex-direction:column; gap:14px}
+  .drawer-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px}
+  .drawer-head h2{margin:0; font-size:1.2rem}
+  .drawer-head .sub{font-size:.78rem; color:var(--fg-muted); margin-top:2px}
+  .drawer-close{background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:6px 11px; font-size:.9rem}
+  .drawer-tabs{display:flex; flex-wrap:wrap; gap:4px; border-bottom:1px solid var(--border); padding-bottom:10px; position:sticky; top:0; background:var(--bg); z-index:2}
+  .drawer-tabs button{font-family:var(--font-display); font-weight:600; font-size:.78rem; padding:7px 12px; background:none; border:none; border-radius:7px; color:var(--fg-muted)}
+  .drawer-tabs button[aria-selected="true"]{background:var(--accent-soft); color:var(--fg)}
+  .drawer-pane{display:none; flex-direction:column; gap:12px}
+  .drawer-pane.active{display:flex}
+  .drawer-row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .drawer-row .full{grid-column:1/-1}
+  .drawer-row label{display:flex; flex-direction:column; gap:4px; font-size:.78rem; color:var(--fg-muted)}
+  .mini-list{display:flex; flex-direction:column; gap:8px}
+  .mini-item{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:4px; position:relative}
+  .mini-item .mini-top{display:flex; justify-content:space-between; gap:8px; align-items:center}
+  .mini-item .mini-meta{font-size:.72rem; color:var(--fg-muted)}
+  .mini-item .mini-del{position:absolute; top:8px; right:8px; background:none; border:none; color:var(--fg-muted); font-size:.75rem}
+  @media (max-width:600px){ .drawer{width:100%} .drawer-row{grid-template-columns:1fr} }
 </style>
 
 <style>
@@ -899,6 +922,29 @@
 
 </main>
 </div><!-- /.shell -->
+
+<!-- ===================== DRAWER DE DETALHES DA OFERTA ===================== -->
+<div class="drawer-overlay" id="offerDrawerOverlay">
+  <div class="drawer" role="dialog" aria-modal="true">
+    <div class="drawer-head">
+      <div>
+        <h2 id="drawerTitle">Oferta</h2>
+        <div class="sub" id="drawerSub"></div>
+      </div>
+      <button class="drawer-close" id="drawerCloseBtn" type="button">✕ Fechar</button>
+    </div>
+    <nav class="drawer-tabs" id="drawerTabs">
+      <button data-tab="geral" aria-selected="true">Visão geral</button>
+      <button data-tab="produto" aria-selected="false">Produto</button>
+      <button data-tab="pagina" aria-selected="false">Página de vendas</button>
+      <button data-tab="criativos" aria-selected="false">Criativos</button>
+      <button data-tab="campanhas" aria-selected="false">Campanhas</button>
+      <button data-tab="financeiro" aria-selected="false">Financeiro</button>
+      <button data-tab="historico" aria-selected="false">Histórico</button>
+    </nav>
+    <div id="drawerBody"><div class="empty">Carregando…</div></div>
+  </div>
+</div>
 <div class="lightbox" id="lightbox">
   <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Fechar">×</button>
   <button type="button" class="lightbox-nav prev" id="lightboxPrev" aria-label="Anterior">‹</button>
@@ -1027,7 +1073,34 @@
   var SUPABASE_KEY = "sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4";
 
   var OFFERS_FIELDS = { country:"country", createdAt:"created_at", creativeCount:"creative_count", daysActive:"days_active", isExample:"is_example", keyword:"keyword", link:"link", siteLink:"site_link", checkoutLink:"checkout_link", niche:"niche", notes:"notes", status:"status", title:"title", previewImages:"preview_images" };
-  var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", campaignStart:"campaign_start", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title" };
+  var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", campaignStart:"campaign_start", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title",
+    country:"country", language:"language", coverImageUrl:"cover_image_url", active:"active", stage:"stage",
+    salePrice:"sale_price", costAmount:"cost_amount", checkoutFeePct:"checkout_fee_pct",
+    positioning:"positioning", promise:"promise", targetAudience:"target_audience", salesMechanism:"sales_mechanism" };
+
+  // ---------- Fase 1: tabelas-filha da oferta (Produto, Página de Vendas,
+  // Criativos, Campanhas, Histórico) — vivem em tabelas próprias ligadas por
+  // offer_id, pra não duplicar dados e dar pra consultar o histórico/criativos
+  // sem carregar tudo junto com my_offers. ----------
+  var STAGE_LABEL = {
+    pesquisa:"Pesquisa", modelagem:"Modelagem", desenvolvimento:"Desenvolvimento",
+    produto_pronto:"Produto pronto", pagina_pronta:"Página pronta", criativos_prontos:"Criativos prontos",
+    teste:"Em teste", validacao:"Em validação", validada:"Validada", escala:"Em escala",
+    pausada:"Pausada", descartada:"Descartada"
+  };
+  async function sbFetchByOffer(table, offerId){
+    return (await sbRequest("GET", table + "?offer_id=eq." + encodeURIComponent(offerId) + "&select=*&order=created_at.desc", null, null)) || [];
+  }
+  async function sbUpsertOne(table, offerId, patch){
+    var row = Object.assign({}, patch, { offer_id: offerId, updated_at: new Date().toISOString() });
+    await sbRequest("POST", table + "?on_conflict=offer_id", row, "resolution=merge-duplicates,return=minimal");
+  }
+  async function sbInsertRow(table, row){
+    await sbRequest("POST", table, row, "return=minimal");
+  }
+  async function sbDeleteRow(table, id){
+    await sbRequest("DELETE", table + "?id=eq." + encodeURIComponent(id), null, "return=minimal");
+  }
   var EVENTS_FIELDS = { createdAt:"created_at", date:"date", notes:"notes", title:"title", type:"type" };
   var REGISTROS_FIELDS = { category:"category", createdAt:"created_at", label:"label", notes:"notes", status:"status", value:"value" };
   var SETTINGS_FIELDS = { goal:"goal" };
@@ -1708,7 +1781,10 @@
         '<div class="title">'+escapeHtml(o.title||"Sem título")+'</div>' +
         '<span class="status '+status+'">'+OFERTA_STATUS_LABEL[status]+'</span>' +
       '</div>' +
-      '<div class="tags">' + (o.niche ? '<span class="tag niche">'+escapeHtml(o.niche)+'</span>' : '') + '</div>' +
+      '<div class="tags">' + (o.niche ? '<span class="tag niche">'+escapeHtml(o.niche)+'</span>' : '') +
+        (o.stage ? '<span class="tag" style="background:var(--surface-2)">'+escapeHtml(STAGE_LABEL[o.stage]||o.stage)+'</span>' : '') +
+        (o.active===false ? '<span class="tag" style="background:var(--warn-soft);color:var(--warn)">inativa</span>' : '') +
+      '</div>' +
       (based ? '<div class="based-on">baseada em: '+escapeHtml(based.title)+'</div>' : '') +
       (next ? '<div class="next-step">próxima ação: '+escapeHtml(next)+'</div>' : '') +
       priceRowHtml(o) +
@@ -1717,7 +1793,9 @@
       (o.copy ? '<div class="copy-box" data-full="1"><button class="copy-toggle" data-act="togglecopy" style="position:absolute;bottom:6px;right:8px;background:var(--surface-2)">ver mais</button>'+escapeHtml(o.copy)+'</div>' : '') +
       (o.notes ? '<div class="notes">'+escapeHtml(o.notes)+'</div>' : '') +
       ((o.creatives&&o.creatives.length) ? '<div class="creatives">'+o.creatives.map(creativeThumbHtml).join("")+'</div>' : '') +
-      '<div class="card-actions">' + ofertaStatusButtonsHtml(o.id, status) + '</div>' +
+      '<div class="card-actions">' + ofertaStatusButtonsHtml(o.id, status) +
+        '<button class="btn btn-accent" data-act="opendetail" data-id="'+o.id+'">Abrir detalhes →</button>' +
+      '</div>' +
     '</article>';
   }
 
@@ -2250,6 +2328,8 @@
         btn.dataset.confirm = "1"; var original = btn.textContent; btn.textContent = "Confirmar?";
         setTimeout(function(){ if(btn.isConnected){ btn.dataset.confirm=""; btn.textContent = original; } }, 3500);
       }
+    } else if (btn.dataset.act === "opendetail"){
+      openDrawer(id);
     }
   }
   ["gridOfertas","attentionGrid"].forEach(function(gridId){
@@ -2257,6 +2337,268 @@
     el.addEventListener("toggle", onOfertaToggle, true);
     el.addEventListener("change", onOfertaChange);
     el.addEventListener("click", onOfertaClick);
+  });
+
+  // ===================== DRAWER DE DETALHES DA OFERTA (Fase 1/2) =====================
+  state.drawer = { offerId:null, tab:"geral", product:null, page:null, creatives:[], campaigns:[], history:[] };
+  var HISTORY_TYPE_LABEL = {alteracao:"Alteração", decisao:"Decisão", teste:"Teste", resultado:"Resultado", observacao:"Observação"};
+
+  function val(id){ var el = document.getElementById(id); return el ? el.value.trim() : ""; }
+  function numOrNull(id){ var v = val(id); return v==="" ? null : Number(v); }
+  function listToLines(arr){ return (arr||[]).join("\n"); }
+  function linesToList(text){ return (text||"").split("\n").map(function(s){return s.trim();}).filter(Boolean); }
+
+  function refreshDrawerHeader(){
+    var o = state.myOffers.find(function(x){ return x.id===state.drawer.offerId; }); if (!o) return;
+    document.getElementById("drawerTitle").textContent = o.title || "Sem título";
+    document.getElementById("drawerSub").textContent = (o.niche||"sem nicho") + (o.stage ? " · " + (STAGE_LABEL[o.stage]||o.stage) : "");
+  }
+
+  async function openDrawer(offerId){
+    var o = state.myOffers.find(function(x){ return x.id===offerId; });
+    if (!o) return;
+    state.drawer.offerId = offerId; state.drawer.tab = "geral";
+    refreshDrawerHeader();
+    document.getElementById("offerDrawerOverlay").classList.add("open");
+    document.getElementById("drawerBody").innerHTML = '<div class="empty">Carregando…</div>';
+    try{
+      var results = await Promise.all([
+        sbRequest("GET", "my_offer_product?offer_id=eq."+encodeURIComponent(offerId)+"&select=*", null, null),
+        sbRequest("GET", "my_offer_sales_page?offer_id=eq."+encodeURIComponent(offerId)+"&select=*", null, null),
+        sbFetchByOffer("my_offer_creatives", offerId),
+        sbFetchByOffer("my_offer_campaigns", offerId),
+        sbFetchByOffer("my_offer_history", offerId)
+      ]);
+      state.drawer.product = (results[0] && results[0][0]) || {};
+      state.drawer.page = (results[1] && results[1][0]) || {};
+      state.drawer.creatives = results[2] || [];
+      state.drawer.campaigns = results[3] || [];
+      state.drawer.history = results[4] || [];
+      renderDrawerBody();
+    }catch(e){
+      console.error("openDrawer failed", e);
+      document.getElementById("drawerBody").innerHTML = '<div class="empty"><strong>Não consegui carregar os detalhes.</strong>Verifique a internet e tente de novo.</div>';
+    }
+  }
+  function closeDrawer(){
+    document.getElementById("offerDrawerOverlay").classList.remove("open");
+    state.drawer.offerId = null;
+  }
+  function switchDrawerTab(tab){
+    state.drawer.tab = tab;
+    document.querySelectorAll("#drawerTabs button").forEach(function(b){ b.setAttribute("aria-selected", b.dataset.tab===tab ? "true":"false"); });
+    document.querySelectorAll(".drawer-pane").forEach(function(p){ p.classList.toggle("active", p.id==="pane-"+tab); });
+  }
+  function renderDrawerBody(){
+    var o = state.myOffers.find(function(x){ return x.id===state.drawer.offerId; }) || {};
+    document.getElementById("drawerBody").innerHTML =
+      paneGeralHtml(o) + paneProdutoHtml(state.drawer.product) + panePaginaHtml(state.drawer.page) +
+      paneCriativosHtml(state.drawer.creatives) + paneCampanhasHtml(state.drawer.campaigns) +
+      paneFinanceiroHtml(o) + paneHistoricoHtml(state.drawer.history);
+    switchDrawerTab(state.drawer.tab);
+  }
+
+  function paneGeralHtml(o){
+    var stageOpts = Object.keys(STAGE_LABEL).map(function(k){
+      return '<option value="'+k+'"'+(o.stage===k?' selected':'')+'>'+STAGE_LABEL[k]+'</option>';
+    }).join("");
+    return '<div class="drawer-pane" id="pane-geral">' +
+      '<div class="drawer-row">' +
+        '<label>Nicho <input id="dgNiche" value="'+escapeHtml(o.niche||"")+'"></label>' +
+        '<label>Estágio <select id="dgStage">'+stageOpts+'</select></label>' +
+        '<label>País <input id="dgCountry" value="'+escapeHtml(o.country||"")+'" placeholder="BR, DE, US..."></label>' +
+        '<label>Idioma <input id="dgLanguage" value="'+escapeHtml(o.language||"")+'" placeholder="pt, de, en..."></label>' +
+        '<label>Status operacional <select id="dgActive"><option value="true"'+(o.active!==false?' selected':'')+'>Ativa</option><option value="false"'+(o.active===false?' selected':'')+'>Inativa</option></select></label>' +
+        '<label class="full">Posicionamento <input id="dgPositioning" value="'+escapeHtml(o.positioning||"")+'"></label>' +
+        '<label class="full">Promessa principal <input id="dgPromise" value="'+escapeHtml(o.promise||"")+'"></label>' +
+        '<label class="full">Público-alvo / persona <input id="dgAudience" value="'+escapeHtml(o.targetAudience||"")+'"></label>' +
+        '<label class="full">Mecanismo de venda <textarea id="dgMechanism">'+escapeHtml(o.salesMechanism||"")+'</textarea></label>' +
+        '<label class="full">Notas <textarea id="dgNotes">'+escapeHtml(o.notes||"")+'</textarea></label>' +
+      '</div>' +
+      '<div><button class="btn btn-accent" data-act="save-geral">Salvar visão geral</button></div>' +
+    '</div>';
+  }
+  function paneProdutoHtml(p){
+    p = p || {};
+    return '<div class="drawer-pane" id="pane-produto">' +
+      '<div class="drawer-row">' +
+        '<label>Nome do mini app <input id="dpName" value="'+escapeHtml(p.miniapp_name||"")+'"></label>' +
+        '<label>URL do mini app <input id="dpUrl" value="'+escapeHtml(p.miniapp_url||"")+'"></label>' +
+        '<label class="full">Links de acesso (um por linha) <textarea id="dpAccess">'+escapeHtml(listToLines(p.access_links))+'</textarea></label>' +
+        '<label class="full">Arquivos / PDFs (um por linha) <textarea id="dpFiles">'+escapeHtml(listToLines(p.files))+'</textarea></label>' +
+        '<label>Bônus (um por linha) <textarea id="dpBonuses">'+escapeHtml(listToLines(p.bonuses))+'</textarea></label>' +
+        '<label>Order bumps (um por linha) <textarea id="dpBumps">'+escapeHtml(listToLines(p.order_bumps))+'</textarea></label>' +
+        '<label>Upsells (um por linha) <textarea id="dpUpsells">'+escapeHtml(listToLines(p.upsells))+'</textarea></label>' +
+        '<label>Versões (um por linha) <textarea id="dpVersions">'+escapeHtml(listToLines(p.versions))+'</textarea></label>' +
+        '<label class="full">Prompt(s) utilizados <textarea id="dpPrompts" style="min-height:90px">'+escapeHtml(p.prompts||"")+'</textarea></label>' +
+      '</div>' +
+      '<div><button class="btn btn-accent" data-act="save-produto">Salvar produto</button></div>' +
+    '</div>';
+  }
+  function panePaginaHtml(pg){
+    pg = pg || {};
+    return '<div class="drawer-pane" id="pane-pagina">' +
+      '<div class="drawer-row">' +
+        '<label>URL publicada <input id="dpgPub" value="'+escapeHtml(pg.published_url||"")+'"></label>' +
+        '<label>Checkout utilizado <input id="dpgCheckout" value="'+escapeHtml(pg.checkout_provider||"")+'" placeholder="Hotmart, Cakto, Hubla..."></label>' +
+        '<label>Versão mobile (link/nota) <input id="dpgMobile" value="'+escapeHtml(pg.mobile_url||"")+'"></label>' +
+        '<label>Versão desktop (link/nota) <input id="dpgDesktop" value="'+escapeHtml(pg.desktop_url||"")+'"></label>' +
+        '<label class="full">Imagens utilizadas (um link por linha) <textarea id="dpgImages">'+escapeHtml(listToLines(pg.images))+'</textarea></label>' +
+      '</div>' +
+      '<div class="hint">Mudou algo relevante na página? Registre uma nota na aba Histórico.</div>' +
+      '<div><button class="btn btn-accent" data-act="save-pagina">Salvar página de vendas</button></div>' +
+    '</div>';
+  }
+  function creativeItemHtml(c){
+    return '<div class="mini-item"><button class="mini-del" data-act="del-criativo" data-id="'+c.id+'">✕</button>' +
+      '<div class="mini-top"><strong>'+escapeHtml(c.type||"imagem")+'</strong></div>' +
+      (c.label ? '<div>'+escapeHtml(c.label)+'</div>' : '') +
+      (c.url ? '<a href="'+escapeHtml(c.url)+'" target="_blank" rel="noopener" style="font-size:.78rem; word-break:break-all">'+escapeHtml(c.url)+'</a>' : '') +
+    '</div>';
+  }
+  function paneCriativosHtml(list){
+    return '<div class="drawer-pane" id="pane-criativos">' +
+      '<div class="mini-list">' + (list.length ? list.map(creativeItemHtml).join("") : '<div class="hint">Nenhum criativo cadastrado ainda.</div>') + '</div>' +
+      '<details class="panel"><summary>+ Adicionar criativo</summary><div class="panel-body drawer-row">' +
+        '<label>Tipo <select id="dcType"><option value="imagem">Imagem</option><option value="video">Vídeo</option><option value="mockup">Mockup</option><option value="anuncio">Anúncio</option><option value="variacao">Variação</option><option value="arquivo">Arquivo editável</option><option value="link">Link externo</option></select></label>' +
+        '<label>Rótulo <input id="dcLabel" placeholder="ex: hook 1, capa v2..."></label>' +
+        '<label class="full">URL <input id="dcUrl" placeholder="link do arquivo/imagem/vídeo"></label>' +
+        '<div class="full"><button class="btn btn-accent" data-act="add-criativo">Adicionar</button></div>' +
+      '</div></details>' +
+    '</div>';
+  }
+  function campaignItemHtml(c){
+    var roas = c.roas != null ? c.roas : (c.investment ? (Number(c.sales||0)/Math.max(Number(c.investment),0.01)).toFixed(2) : "—");
+    return '<div class="mini-item"><button class="mini-del" data-act="del-campanha" data-id="'+c.id+'">✕</button>' +
+      '<div class="mini-top"><strong>'+escapeHtml((c.platform||"").toUpperCase())+' — '+escapeHtml(c.campaign_name||"sem nome")+'</strong></div>' +
+      '<div class="mini-meta">investido '+fmtEUR(c.investment||0)+' · vendas '+fmtEUR(c.sales||0)+' · ROAS '+roas+(c.period_start?' · '+c.period_start+(c.period_end?' → '+c.period_end:''):'')+'</div>' +
+    '</div>';
+  }
+  function paneCampanhasHtml(list){
+    return '<div class="drawer-pane" id="pane-campanhas">' +
+      '<div class="mini-list">' + (list.length ? list.map(campaignItemHtml).join("") : '<div class="hint">Nenhuma campanha registrada ainda — pra números detalhados de Meta/Pinterest por enquanto a gente ainda lança manualmente aqui.</div>') + '</div>' +
+      '<details class="panel"><summary>+ Adicionar campanha</summary><div class="panel-body drawer-row">' +
+        '<label>Plataforma <select id="ccPlatform"><option value="meta">Meta</option><option value="pinterest">Pinterest</option><option value="outro">Outro</option></select></label>' +
+        '<label>Nome da campanha <input id="ccName"></label>' +
+        '<label>Investimento (€) <input id="ccInvest" type="number" step="0.01"></label>' +
+        '<label>Vendas (€) <input id="ccSales" type="number" step="0.01"></label>' +
+        '<label>Período início <input id="ccStart" type="date"></label>' +
+        '<label>Período fim <input id="ccEnd" type="date"></label>' +
+        '<div class="full"><button class="btn btn-accent" data-act="add-campanha">Adicionar</button></div>' +
+      '</div></details>' +
+    '</div>';
+  }
+  function paneFinanceiroHtml(o){
+    var revenue = Number(o.revenue||0), spent = Number(o.spent||0);
+    var margin = (o.salePrice!=null && o.costAmount!=null) ? (Number(o.salePrice)-Number(o.costAmount)-Number(o.salePrice)*(Number(o.checkoutFeePct||0)/100)) : null;
+    return '<div class="drawer-pane" id="pane-financeiro">' +
+      '<div class="drawer-row">' +
+        '<label>Preço de venda (€) <input id="dfPrice" type="number" step="0.01" value="'+(o.salePrice!=null?o.salePrice:"")+'"></label>' +
+        '<label>Custo direto (€) <input id="dfCost" type="number" step="0.01" value="'+(o.costAmount!=null?o.costAmount:"")+'"></label>' +
+        '<label>Taxa do checkout (%) <input id="dfFee" type="number" step="0.01" value="'+(o.checkoutFeePct!=null?o.checkoutFeePct:"")+'"></label>' +
+      '</div>' +
+      '<section class="stats">' +
+        '<div class="stat"><div class="n mono">'+fmtEUR(revenue)+'</div><div class="l">receita (Minhas Ofertas)</div></div>' +
+        '<div class="stat"><div class="n mono">'+fmtEUR(spent)+'</div><div class="l">investido em tráfego</div></div>' +
+        '<div class="stat"><div class="n mono">'+(margin!=null?fmtEUR(margin):"—")+'</div><div class="l">margem por venda (estimada)</div></div>' +
+      '</section>' +
+      '<div><button class="btn btn-accent" data-act="save-financeiro">Salvar financeiro</button></div>' +
+    '</div>';
+  }
+  function historyItemHtml(h){
+    var d = h.created_at ? new Date(h.created_at).toLocaleDateString("pt-BR") : "";
+    return '<div class="mini-item"><button class="mini-del" data-act="del-historico" data-id="'+h.id+'">✕</button>' +
+      '<div class="mini-top"><strong>'+(HISTORY_TYPE_LABEL[h.event_type]||h.event_type)+'</strong><span class="mini-meta">'+d+'</span></div>' +
+      '<div>'+escapeHtml(h.note||"")+'</div>' +
+    '</div>';
+  }
+  function paneHistoricoHtml(list){
+    return '<div class="drawer-pane" id="pane-historico">' +
+      '<div class="mini-list">' + (list.length ? list.map(historyItemHtml).join("") : '<div class="hint">Nenhum registro ainda.</div>') + '</div>' +
+      '<details class="panel"><summary>+ Adicionar ao histórico</summary><div class="panel-body drawer-row">' +
+        '<label>Tipo <select id="dhType"><option value="observacao">Observação</option><option value="alteracao">Alteração</option><option value="decisao">Decisão</option><option value="teste">Teste</option><option value="resultado">Resultado</option></select></label>' +
+        '<label class="full">Nota <textarea id="dhNote"></textarea></label>' +
+        '<div class="full"><button class="btn btn-accent" data-act="add-historico">Adicionar</button></div>' +
+      '</div></details>' +
+    '</div>';
+  }
+
+  document.getElementById("drawerTabs").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-tab]"); if (!btn) return;
+    switchDrawerTab(btn.dataset.tab);
+  });
+  document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);
+  document.getElementById("offerDrawerOverlay").addEventListener("click", function(e){ if (e.target.id==="offerDrawerOverlay") closeDrawer(); });
+
+  document.getElementById("drawerBody").addEventListener("click", async function(e){
+    var btn = e.target.closest("button[data-act]"); if (!btn) return;
+    var offerId = state.drawer.offerId; if (!offerId) return;
+    var act = btn.dataset.act;
+    try{
+      if (act === "save-geral"){
+        btn.disabled = true;
+        await updateMyOffer(offerId, {
+          niche: val("dgNiche"), stage: val("dgStage"), country: val("dgCountry"), language: val("dgLanguage"),
+          active: val("dgActive")==="true", positioning: val("dgPositioning"), promise: val("dgPromise"),
+          targetAudience: val("dgAudience"), salesMechanism: val("dgMechanism"), notes: val("dgNotes")
+        });
+        refreshDrawerHeader();
+        btn.textContent = "Salvo ✓"; setTimeout(function(){ btn.textContent="Salvar visão geral"; btn.disabled=false; }, 1500);
+      } else if (act === "save-produto"){
+        btn.disabled = true;
+        var patchP = { miniapp_name: val("dpName"), miniapp_url: val("dpUrl"), prompts: val("dpPrompts"),
+          access_links: linesToList(val("dpAccess")), files: linesToList(val("dpFiles")),
+          bonuses: linesToList(val("dpBonuses")), order_bumps: linesToList(val("dpBumps")),
+          upsells: linesToList(val("dpUpsells")), versions: linesToList(val("dpVersions")) };
+        await sbUpsertOne("my_offer_product", offerId, patchP);
+        state.drawer.product = patchP;
+        btn.textContent = "Salvo ✓"; setTimeout(function(){ btn.textContent="Salvar produto"; btn.disabled=false; }, 1500);
+      } else if (act === "save-pagina"){
+        btn.disabled = true;
+        var patchPg = { published_url: val("dpgPub"), checkout_provider: val("dpgCheckout"),
+          mobile_url: val("dpgMobile"), desktop_url: val("dpgDesktop"), images: linesToList(val("dpgImages")) };
+        await sbUpsertOne("my_offer_sales_page", offerId, patchPg);
+        state.drawer.page = patchPg;
+        btn.textContent = "Salvo ✓"; setTimeout(function(){ btn.textContent="Salvar página de vendas"; btn.disabled=false; }, 1500);
+      } else if (act === "save-financeiro"){
+        btn.disabled = true;
+        await updateMyOffer(offerId, { salePrice: numOrNull("dfPrice"), costAmount: numOrNull("dfCost"), checkoutFeePct: numOrNull("dfFee") });
+        renderDrawerBody(); switchDrawerTab("financeiro");
+      } else if (act === "add-criativo"){
+        var curl = val("dcUrl"); if (!curl){ alert("Cole o link do criativo."); return; }
+        await sbInsertRow("my_offer_creatives", { offer_id: offerId, type: val("dcType"), label: val("dcLabel"), url: curl });
+        state.drawer.creatives = await sbFetchByOffer("my_offer_creatives", offerId);
+        renderDrawerBody(); switchDrawerTab("criativos");
+      } else if (act === "del-criativo"){
+        await sbDeleteRow("my_offer_creatives", btn.dataset.id);
+        state.drawer.creatives = state.drawer.creatives.filter(function(c){ return c.id!==btn.dataset.id; });
+        renderDrawerBody(); switchDrawerTab("criativos");
+      } else if (act === "add-campanha"){
+        var cname = val("ccName"); if (!cname){ alert("Dê um nome pra campanha."); return; }
+        await sbInsertRow("my_offer_campaigns", { offer_id: offerId, platform: val("ccPlatform"), campaign_name: cname,
+          investment: Number(val("ccInvest"))||0, sales: Number(val("ccSales"))||0,
+          period_start: val("ccStart")||null, period_end: val("ccEnd")||null });
+        state.drawer.campaigns = await sbFetchByOffer("my_offer_campaigns", offerId);
+        renderDrawerBody(); switchDrawerTab("campanhas");
+      } else if (act === "del-campanha"){
+        await sbDeleteRow("my_offer_campaigns", btn.dataset.id);
+        state.drawer.campaigns = state.drawer.campaigns.filter(function(c){ return c.id!==btn.dataset.id; });
+        renderDrawerBody(); switchDrawerTab("campanhas");
+      } else if (act === "add-historico"){
+        var note = val("dhNote"); if (!note){ alert("Escreva uma nota."); return; }
+        await sbInsertRow("my_offer_history", { offer_id: offerId, event_type: val("dhType"), note: note });
+        state.drawer.history = await sbFetchByOffer("my_offer_history", offerId);
+        renderDrawerBody(); switchDrawerTab("historico");
+      } else if (act === "del-historico"){
+        await sbDeleteRow("my_offer_history", btn.dataset.id);
+        state.drawer.history = state.drawer.history.filter(function(h){ return h.id!==btn.dataset.id; });
+        renderDrawerBody(); switchDrawerTab("historico");
+      }
+    }catch(err){
+      console.error("drawer action failed", act, err);
+      alert("Não consegui salvar. Tente de novo.");
+      btn.disabled = false;
+    }
   });
 
   initStore();
