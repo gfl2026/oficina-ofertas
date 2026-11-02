@@ -3016,7 +3016,7 @@
     if (!o) return;
     var statusEl = document.getElementById("modelarStatus");
     var btn = document.getElementById("modelarRunBtn");
-    btn.disabled = true; statusEl.style.color = ""; statusEl.textContent = "Rodando análise com a Claude API… pode levar uns 20-40s.";
+    btn.disabled = true; statusEl.style.color = ""; statusEl.textContent = "Rodando análise com IA (GPT-5.5)… pode levar uns 20-50s.";
     try{
       var resp = await fetch(MODELAR_FUNCTION_URL, {
         method: "POST",
