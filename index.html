@@ -2665,6 +2665,11 @@
           '<option value="1024x1536">Vertical (stories/reels)</option>' +
           '<option value="1536x1024">Horizontal</option>' +
         '</select></label>' +
+        '<label>Qualidade <select id="aiImgQuality">' +
+          '<option value="low">Rascunho (~$0,006/img) — testar ideia</option>' +
+          '<option value="medium" selected>Padrão (~$0,05/img) — recomendado p/ anúncio</option>' +
+          '<option value="high">Alta (~$0,21/img) — arte final/impressão</option>' +
+        '</select></label>' +
         '<label>Rótulo (opcional) <input id="aiImgLabel" placeholder="ex: hook 1, capa v2..."></label>' +
         '<div class="full"><button class="btn btn-accent" data-act="gerar-criativo-ia">Gerar imagem</button> <span id="aiImgStatus" class="hint"></span></div>' +
       '</div></details>' +
@@ -2680,6 +2685,7 @@
   async function runGerarCriativoIA(pane, offerId, onDone){
     var prompt = pane.querySelector("#aiImgPrompt").value.trim();
     var size = pane.querySelector("#aiImgSize").value;
+    var quality = pane.querySelector("#aiImgQuality").value;
     var label = pane.querySelector("#aiImgLabel").value.trim();
     var status = pane.querySelector("#aiImgStatus");
     if (!prompt){ alert("Descreva o que você quer na imagem."); return; }
@@ -2688,7 +2694,7 @@
       var resp = await fetch(IMAGE_FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
-        body: JSON.stringify({ offerId: offerId, prompt: prompt, size: size, label: label || undefined }),
+        body: JSON.stringify({ offerId: offerId, prompt: prompt, size: size, quality: quality, label: label || undefined }),
       });
       var data = await resp.json();
       if (!resp.ok || data.error){ status.textContent = ""; alert("Erro ao gerar imagem: " + (data.error || resp.status)); return; }
