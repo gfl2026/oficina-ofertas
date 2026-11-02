@@ -57,6 +57,7 @@
     color-scheme: dark;
   }
 
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
   *{box-sizing:border-box}
   body{
     background:var(--bg); color:var(--fg); font-family:var(--font-body);
@@ -112,10 +113,21 @@
       padding:8px 6px; gap:4px; margin:0 -16px; width:calc(100% + 32px); padding-left:16px; padding-right:16px;
     }
     nav.tabs .nav-group-label{display:none}
-    nav.tabs button{flex-direction:column; gap:2px; flex:0 0 auto; padding:7px 9px; font-size:.64rem; white-space:nowrap}
+    nav.tabs button{
+      flex-direction:column; gap:2px; flex:0 0 66px; width:66px; padding:6px 4px; font-size:.6rem;
+      white-space:normal; text-align:center; line-height:1.15;
+    }
+    nav.tabs button .ico{font-size:1.05rem; width:auto}
     nav.tabs button .num{display:none}
     nav.tabs button .soon{margin-left:0; font-size:.52rem; padding:1px 4px}
     main{padding:16px 0 40px; max-width:none}
+    header{padding:10px 16px 0; padding-top:calc(10px + env(safe-area-inset-top,0px))}
+    header .df-mark{width:26px; height:26px}
+    header h1{font-size:1rem}
+    header .eyebrow{font-size:.6rem}
+    .header-top{gap:8px; padding-bottom:6px}
+    .store-note{font-size:.64rem}
+    #btnReloadData{font-size:11px !important; padding:4px 8px !important}
   }
   .view{display:none; flex-direction:column; gap:22px; min-width:0}
   .view.active{display:flex}
