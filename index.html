@@ -68,14 +68,46 @@
   header .eyebrow{font-size:.7rem; color:var(--fg-muted); text-transform:uppercase; letter-spacing:.08em}
   .store-note{font-size:.72rem; color:var(--fg-muted)}
 
-  nav.tabs{display:flex; gap:4px}
-  nav.tabs button{
-    font-family:var(--font-display); font-weight:600; font-size:.84rem; padding:9px 14px;
-    background:none; border:none; border-bottom:2px solid transparent; color:var(--fg-muted);
+  .shell{display:flex; align-items:flex-start}
+  nav.tabs{
+    display:flex; flex-direction:column; gap:2px; flex:0 0 214px;
+    position:sticky; top:0; align-self:flex-start;
+    padding:16px 8px 24px; border-right:1px solid var(--border);
+    max-height:100vh; overflow-y:auto;
   }
-  nav.tabs button[aria-selected="true"]{color:var(--fg); border-bottom-color:var(--accent)}
+  nav.tabs .nav-group-label{
+    font-family:var(--font-display); font-weight:600; font-size:.66rem; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--fg-muted); padding:14px 10px 4px;
+  }
+  nav.tabs .nav-group-label:first-child{padding-top:2px}
+  nav.tabs button{
+    display:flex; align-items:center; gap:9px; text-align:left; width:100%;
+    font-family:var(--font-body); font-weight:600; font-size:.83rem; padding:8px 10px;
+    background:none; border:none; border-radius:8px; color:var(--fg-muted);
+  }
+  nav.tabs button .ico{font-size:1rem; width:18px; text-align:center; flex:0 0 auto}
+  nav.tabs button .num{font-family:var(--font-mono); font-size:.66rem; opacity:.65; flex:0 0 auto}
+  nav.tabs button[aria-selected="true"]{background:var(--accent-soft); color:var(--fg)}
+  nav.tabs button .soon{
+    margin-left:auto; font-size:.58rem; font-family:var(--font-mono); white-space:nowrap;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:999px; padding:2px 6px; color:var(--fg-muted);
+  }
 
-  main{max-width:960px; margin:0 auto; padding-block:20px 48px; display:flex; flex-direction:column; gap:22px}
+  main{flex:1 1 auto; min-width:0; max-width:960px; padding:20px 20px 48px; display:flex; flex-direction:column; gap:22px}
+
+  @media (max-width:860px){
+    .shell{flex-direction:column}
+    nav.tabs{
+      flex-direction:row; flex:0 0 auto; position:static; width:100%; max-height:none;
+      overflow-x:auto; overflow-y:hidden; border-right:none; border-bottom:1px solid var(--border);
+      padding:8px 6px; gap:4px; margin:0 -16px; width:calc(100% + 32px); padding-left:16px; padding-right:16px;
+    }
+    nav.tabs .nav-group-label{display:none}
+    nav.tabs button{flex-direction:column; gap:2px; flex:0 0 auto; padding:7px 9px; font-size:.64rem; white-space:nowrap}
+    nav.tabs button .num{display:none}
+    nav.tabs button .soon{margin-left:0; font-size:.52rem; padding:1px 4px}
+    main{padding:16px 0 40px; max-width:none}
+  }
   .view{display:none; flex-direction:column; gap:22px}
   .view.active{display:flex}
 
@@ -447,15 +479,25 @@
       <button type="button" id="btnReloadData" title="Forçar reconexão com os dados salvos" style="font-size:12px; padding:4px 10px; border-radius:6px; cursor:pointer;">🔄 Recarregar dados</button>
     </div>
   </div>
-  <nav class="tabs" id="tabs">
-    <button data-view="painel" aria-selected="true">Painel</button>
-    <button data-view="garimpo" aria-selected="false">Garimpo</button>
-    <button data-view="ofertas" aria-selected="false">Minhas Ofertas</button>
-    <button data-view="calendario" aria-selected="false">Calendário</button>
-    <button data-view="cadastros" aria-selected="false">Cadastros</button>
-    <button data-view="cartoes" aria-selected="false">Cartões</button>
-  </nav>
+
 </header>
+
+<div class="shell">
+  <nav class="tabs" id="tabs">
+    <div class="nav-group-label">Pipeline</div>
+    <button data-view="painel" aria-selected="true"><span class="ico">🏠</span><span class="num">1</span>Dashboard</button>
+    <button data-view="garimpo" aria-selected="false"><span class="ico">⛏️</span><span class="num">2</span>Biblioteca de Ofertas</button>
+    <button data-view="modelar" aria-selected="false"><span class="ico">🧭</span><span class="num">3</span>Modelar Oferta<span class="soon">em obras</span></button>
+    <button data-view="entregaveis" aria-selected="false"><span class="ico">🛠️</span><span class="num">4</span>Entregáveis &amp; Mini App<span class="soon">em obras</span></button>
+    <button data-view="paginavendas" aria-selected="false"><span class="ico">🖥️</span><span class="num">5</span>Página de Vendas<span class="soon">em obras</span></button>
+    <button data-view="criativos" aria-selected="false"><span class="ico">🎬</span><span class="num">6</span>Criativos<span class="soon">em obras</span></button>
+    <button data-view="campanhas" aria-selected="false"><span class="ico">📊</span><span class="num">7</span>Campanhas<span class="soon">em obras</span></button>
+    <button data-view="ofertas" aria-selected="false"><span class="ico">📦</span><span class="num">8</span>Minhas Ofertas</button>
+    <div class="nav-group-label">Utilidades</div>
+    <button data-view="calendario" aria-selected="false"><span class="ico">🗓️</span>Calendário</button>
+    <button data-view="cadastros" aria-selected="false"><span class="ico">⚙️</span>Cadastros</button>
+    <button data-view="cartoes" aria-selected="false"><span class="ico">🗂️</span>Cartões</button>
+  </nav>
 
 <main>
   <!-- ===================== PAINEL ===================== -->
@@ -803,8 +845,60 @@
     </section>
   </section>
 
-</main>
+  <!-- ===================== MODELAR OFERTA (placeholder) ===================== -->
+  <section class="view" id="view-modelar">
+    <h3 class="section-title">Modelar Oferta</h3>
+    <div class="empty">
+      <strong>Ainda não construído — reservando o espaço certo no fluxo.</strong>
+      Aqui vai entrar o botão "escolher pra modelar" na Biblioteca de Ofertas, que joga os dados da oferta garimpada pra cá.
+      O sistema vai ler a oferta (mecanismo, promessa, desejo criado, persona, nicho), desenhar o funil e sugerir mini apps possíveis
+      com base nela — incluindo bônus, order bumps e upsells da oferta completa.
+    </div>
+  </section>
 
+  <!-- ===================== ENTREGÁVEIS & MINI APP (placeholder) ===================== -->
+  <section class="view" id="view-entregaveis">
+    <h3 class="section-title">Entregáveis &amp; Mini App</h3>
+    <div class="empty">
+      <strong>Ainda não construído.</strong>
+      Vai puxar o que foi definido na Modelagem (nicho, promessa, persona) e montar o prompt padronizado pra gerar o mini app —
+      com templates salvos pra reaproveitar. Isso precisa de uma integração de IA dentro do sistema; se você montar o mini app
+      fora (aqui no Claude, por exemplo), também dá pra salvar o link aqui, atrelado à oferta.
+    </div>
+  </section>
+
+  <!-- ===================== PÁGINA DE VENDAS (placeholder) ===================== -->
+  <section class="view" id="view-paginavendas">
+    <h3 class="section-title">Página de Vendas</h3>
+    <div class="empty">
+      <strong>Ainda não construído.</strong>
+      Vai pegar os dados da oferta modelada e gerar um prompt de página de vendas (com checkout, imagens, mobile + desktop)
+      a partir dos templates escalados que você for me mandando, pronto pra subir.
+    </div>
+  </section>
+
+  <!-- ===================== CRIATIVOS (placeholder) ===================== -->
+  <section class="view" id="view-criativos">
+    <h3 class="section-title">Criativos</h3>
+    <div class="empty">
+      <strong>Ainda não construído.</strong>
+      Biblioteca de imagens e vídeos por oferta — mockups, takes, cortes do CapCut etc. Geração de vídeo por IA ainda é uma
+      limitação real; vou te dar uma resposta honesta sobre o que dá e o que não dá pra automatizar aqui antes de prometer.
+    </div>
+  </section>
+
+  <!-- ===================== CAMPANHAS (placeholder) ===================== -->
+  <section class="view" id="view-campanhas">
+    <h3 class="section-title">Campanhas</h3>
+    <div class="empty">
+      <strong>Ainda não construído.</strong>
+      Painel inspirado na Utmify: pixel, funil desenhado, tráfego Meta/Pinterest separado por oferta, valor gasto — e,
+      quando você decidir o gateway (Hotmart/Cakto/Hubla), os links de checkout por oferta.
+    </div>
+  </section>
+
+</main>
+</div><!-- /.shell -->
 <div class="lightbox" id="lightbox">
   <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Fechar">×</button>
   <button type="button" class="lightbox-nav prev" id="lightboxPrev" aria-label="Anterior">‹</button>
