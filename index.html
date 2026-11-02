@@ -105,7 +105,7 @@
   main{flex:1 1 auto; min-width:0; max-width:960px; padding:20px 20px 48px; display:flex; flex-direction:column; gap:22px}
 
   @media (max-width:860px){
-    .shell{flex-direction:column}
+    .shell{flex-direction:column; align-items:stretch}
     nav.tabs{
       flex-direction:row; flex:0 0 auto; position:static; width:100%; max-height:none;
       overflow-x:auto; overflow-y:hidden; border-right:none; border-bottom:1px solid var(--border);
@@ -117,7 +117,7 @@
     nav.tabs button .soon{margin-left:0; font-size:.52rem; padding:1px 4px}
     main{padding:16px 0 40px; max-width:none}
   }
-  .view{display:none; flex-direction:column; gap:22px}
+  .view{display:none; flex-direction:column; gap:22px; min-width:0}
   .view.active{display:flex}
 
   .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px}
@@ -423,7 +423,7 @@
   @media (max-width:600px){ .drawer{width:100%} .drawer-row{grid-template-columns:1fr} }
 
   /* ---------- Portfólio & Estágios — kanban ---------- */
-  .kanban{display:flex; gap:12px; overflow-x:auto; padding-bottom:10px; align-items:flex-start}
+  .kanban{display:flex; gap:12px; overflow-x:auto; padding-bottom:10px; align-items:flex-start; min-width:0; max-width:100%}
   .kanban-col{flex:0 0 240px; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px; min-height:80px}
   .kanban-col.drag-over{outline:2px dashed var(--accent); outline-offset:-2px}
   .kanban-col h4{margin:0 0 8px; font-family:var(--font-display); font-size:.78rem; font-weight:600; display:flex; justify-content:space-between; color:var(--fg-muted)}
@@ -440,7 +440,7 @@
   .kv-item{background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:8px 10px}
   .kv-item .k{font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; color:var(--fg-muted); margin-bottom:3px}
   .kv-item .v{font-size:.82rem; line-height:1.4}
-  .funnel-steps{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px}
+  .funnel-steps{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; min-width:0; max-width:100%}
   .funnel-steps .fs{flex:0 0 170px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:9px 10px; font-size:.78rem}
   .funnel-steps .fs .k{font-family:var(--font-display); font-weight:600; font-size:.72rem; margin-bottom:4px; color:var(--accent)}
   .miniapp-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px}
