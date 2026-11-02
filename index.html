@@ -106,21 +106,20 @@
   main{flex:1 1 auto; min-width:0; max-width:960px; padding:20px 20px 48px; display:flex; flex-direction:column; gap:22px}
 
   @media (max-width:860px){
-    .shell{flex-direction:column; align-items:stretch}
+    /* .shell fica em row (igual desktop) — a barra continua vertical, só mais estreita */
     nav.tabs{
-      flex-direction:row; flex:0 0 auto; position:static; width:100%; max-height:none;
-      overflow-x:auto; overflow-y:hidden; border-right:none; border-bottom:1px solid var(--border);
-      padding:8px 6px; gap:4px; margin:0 -16px; width:calc(100% + 32px); padding-left:16px; padding-right:16px;
+      flex:0 0 58px; width:58px; padding:10px 3px; gap:1px;
+      position:sticky; top:0; max-height:100vh; overflow-y:auto; overflow-x:hidden;
     }
     nav.tabs .nav-group-label{display:none}
     nav.tabs button{
-      flex-direction:column; gap:2px; flex:0 0 66px; width:66px; padding:6px 4px; font-size:.6rem;
-      white-space:normal; text-align:center; line-height:1.15;
+      flex-direction:column; gap:2px; width:100%; padding:7px 2px; font-size:.52rem;
+      white-space:normal; text-align:center; line-height:1.1; border-radius:8px;
     }
-    nav.tabs button .ico{font-size:1.05rem; width:auto}
+    nav.tabs button .ico{font-size:1.15rem; width:auto}
     nav.tabs button .num{display:none}
-    nav.tabs button .soon{margin-left:0; font-size:.52rem; padding:1px 4px}
-    main{padding:16px 0 40px; max-width:none}
+    nav.tabs button .soon{display:none}
+    main{padding:14px 12px 40px; max-width:none; min-width:0}
     header{padding:10px 16px 0; padding-top:calc(10px + env(safe-area-inset-top,0px))}
     header .df-mark{width:26px; height:26px}
     header h1{font-size:1rem}
@@ -128,6 +127,12 @@
     .header-top{gap:8px; padding-bottom:6px}
     .store-note{font-size:.64rem}
     #btnReloadData{font-size:11px !important; padding:4px 8px !important}
+  }
+  @media (max-width:420px){
+    nav.tabs{flex:0 0 52px; width:52px}
+    nav.tabs button{font-size:.48rem; padding:6px 1px}
+    nav.tabs button .ico{font-size:1.05rem}
+    main{padding-left:8px; padding-right:8px}
   }
   .view{display:none; flex-direction:column; gap:22px; min-width:0}
   .view.active{display:flex}
@@ -403,8 +408,9 @@
   @media (max-width:640px){ .charts-row{ grid-template-columns:1fr } }
   .chart-card{
     background:var(--surface); border:1px solid var(--border); border-radius:12px;
-    padding:14px 14px 10px;
+    padding:14px 14px 10px; min-width:0;
   }
+  .chart-wrap canvas{max-width:100%}
   .chart-card h4{
     margin:0 0 10px; font-family:var(--font-display); font-weight:600; font-size:.88rem; color:var(--fg);
   }
@@ -459,6 +465,24 @@
   .miniapp-card{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px; display:flex; flex-direction:column; gap:4px}
   .miniapp-card h5{margin:0; font-family:var(--font-display); font-size:.86rem}
   .miniapp-card .meta{font-size:.68rem; color:var(--fg-muted); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap}
+
+  /* ---------- Ajustes finos de mobile — ficam no fim de propósito, pra vencer
+     qualquer regra sem media query definida depois no arquivo (empate de
+     especificidade = quem vem por último na folha de estilo vence). ---------- */
+  @media (max-width:860px){
+    form.add-form{grid-template-columns:1fr}
+    .charts-row{grid-template-columns:1fr}
+    .kv-grid, .miniapp-cards{grid-template-columns:1fr}
+  }
+  @media (max-width:520px){
+    .grid{grid-template-columns:1fr}
+  }
+  @media (max-width:420px){
+    .empty{padding:24px 12px}
+  }
+  @media (max-width:360px){
+    body{overflow-x:hidden}
+  }
 </style>
 
 <style>
