@@ -1031,11 +1031,17 @@
   <section class="view" id="view-campanhas">
     <h3 class="section-title">Campanhas</h3>
     <div class="section-sub">visão geral de tráfego pago em todas as ofertas — Meta e Pinterest separados, funil e UTMs</div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0">
+      <button class="btn btn-accent" id="syncNowBtn">🔄 Sincronizar agora (Meta + Pinterest)</button>
+      <span class="hint" id="syncStatus"></span>
+    </div>
+    <div class="mini-list" id="syncLogList" style="margin-bottom:6px"></div>
     <section class="stats" id="statsCampanhas"></section>
     <section style="margin-top:16px">
       <h4 class="section-title" style="font-size:.9rem">Por oferta e plataforma</h4>
       <div class="mini-list" id="campanhasList"></div>
     </section>
+    <section style="margin-top:16px" id="unmatchedSection"></section>
     <section style="margin-top:20px">
       <h4 class="section-title" style="font-size:.9rem">Gerador de UTM</h4>
       <div class="drawer-row">
@@ -3241,18 +3247,62 @@
         '<div class="stat"><div class="n mono">'+totalSales+'</div><div class="l">vendas atribuídas</div></div>' +
         '<div class="stat"><div class="n mono">'+fmtEUR(meta)+'</div><div class="l">investido Meta</div></div>' +
         '<div class="stat"><div class="n mono">'+fmtEUR(pin)+'</div><div class="l">investido Pinterest</div></div>';
-      if (!rows.length){ listEl.innerHTML = '<div class="empty">Nenhuma campanha registrada ainda — adicione em Minhas Ofertas → abrir detalhes → aba Campanhas.</div>'; return; }
+      if (!rows.length){ listEl.innerHTML = '<div class="empty">Nenhuma campanha registrada ainda — adicione em Minhas Ofertas → abrir detalhes → aba Campanhas, ou clique em "Sincronizar agora" depois de configurar as integrações.</div>'; document.getElementById("unmatchedSection").innerHTML=""; return; }
+      var matchedRows = rows.filter(function(r){ return r.offer_id; });
+      var unmatchedRows = rows.filter(function(r){ return !r.offer_id; });
       var byOffer = {};
-      rows.forEach(function(r){ (byOffer[r.offer_id] = byOffer[r.offer_id]||[]).push(r); });
-      listEl.innerHTML = Object.keys(byOffer).map(function(oid){
+      matchedRows.forEach(function(r){ (byOffer[r.offer_id] = byOffer[r.offer_id]||[]).push(r); });
+      listEl.innerHTML = Object.keys(byOffer).length ? Object.keys(byOffer).map(function(oid){
         var offer = state.myOffers.find(function(x){ return x.id===oid; });
         var title = offer ? offer.title : oid;
         return '<div class="mini-item"><div class="mini-top"><strong>'+escapeHtml(title)+'</strong></div>' +
           byOffer[oid].map(campaignItemHtml).join("") +
         '</div>';
-      }).join("");
+      }).join("") : '<div class="empty">Nenhuma campanha vinculada a uma oferta ainda.</div>';
+
+      var unmatchedEl = document.getElementById("unmatchedSection");
+      if (unmatchedRows.length){
+        unmatchedEl.innerHTML = '<h4 class="section-title" style="font-size:.9rem">Sincronizadas, mas sem oferta correspondente ('+unmatchedRows.length+')</h4>' +
+          '<div class="hint" style="margin-bottom:8px">O nome da campanha não bateu com o título de nenhuma oferta em Minhas Ofertas — renomeie a campanha na plataforma de anúncios pra incluir o título da oferta, ou ajuste o título da oferta, e sincronize de novo.</div>' +
+          '<div class="mini-list">' + unmatchedRows.map(campaignItemHtml).join("") + '</div>';
+      } else {
+        unmatchedEl.innerHTML = "";
+      }
     }catch(e){ console.error("renderCampanhasDashboard failed", e); listEl.innerHTML = '<div class="empty">Não consegui carregar as campanhas.</div>'; }
+    renderSyncLog();
   }
+  async function renderSyncLog(){
+    var el = document.getElementById("syncLogList");
+    if (!el) return;
+    try{
+      var logs = await sbRequest("GET", "integration_sync_log?select=*&order=created_at.desc&limit=4", null, null) || [];
+      if (!logs.length){ el.innerHTML = '<div class="hint">Ainda não sincronizou nenhuma vez — clique em "Sincronizar agora" (precisa das secrets configuradas antes).</div>'; return; }
+      el.innerHTML = logs.map(function(l){
+        var d = new Date(l.created_at).toLocaleString("pt-BR");
+        var color = l.status==="success" ? "var(--good)" : "var(--warn)";
+        return '<div class="mini-item"><div class="mini-top"><strong style="color:'+color+'">'+(l.integration==="meta_ads"?"Meta":"Pinterest")+' — '+l.status+'</strong><span class="mini-meta">'+d+'</span></div>' +
+          '<div style="font-size:.78rem">'+escapeHtml(l.summary||"")+'</div></div>';
+      }).join("");
+    }catch(e){ console.error(e); el.innerHTML = ""; }
+  }
+  document.getElementById("syncNowBtn").addEventListener("click", async function(){
+    var btn = this, statusEl = document.getElementById("syncStatus");
+    btn.disabled = true; statusEl.textContent = "Sincronizando…"; statusEl.style.color = "";
+    try{
+      var results = await Promise.all([
+        fetch(SUPABASE_URL + "/functions/v1/sync-meta-campaigns", { method:"POST", headers:{ "apikey":SUPABASE_KEY, "Content-Type":"application/json" } }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); }),
+        fetch(SUPABASE_URL + "/functions/v1/sync-pinterest-campaigns", { method:"POST", headers:{ "apikey":SUPABASE_KEY, "Content-Type":"application/json" } }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      ]);
+      var errs = results.filter(function(r){ return !r.ok; }).map(function(r){ return r.j.error; });
+      if (errs.length){ statusEl.style.color = "var(--warn)"; statusEl.textContent = errs.join(" · "); }
+      else { statusEl.style.color = "var(--good)"; statusEl.textContent = "Sincronizado ✓"; }
+    }catch(e){
+      console.error("sync now failed", e);
+      statusEl.style.color = "var(--warn)"; statusEl.textContent = "Não consegui falar com as funções de sincronização.";
+    }
+    btn.disabled = false;
+    renderCampanhasDashboard();
+  });
   document.getElementById("utmGenerateBtn").addEventListener("click", function(){
     var base = document.getElementById("utmUrl").value.trim();
     if (!base){ alert("Cole a URL base."); return; }
