@@ -537,12 +537,12 @@
     <button data-view="painel" aria-selected="true"><span class="ico">🏠</span><span class="num">1</span>Dashboard</button>
     <button data-view="ofertas" aria-selected="false"><span class="ico">📦</span><span class="num">2</span>Minhas Ofertas</button>
     <button data-view="garimpo" aria-selected="false"><span class="ico">⛏️</span><span class="num">3</span>Biblioteca de Ofertas</button>
-    <button data-view="modelar" aria-selected="false"><span class="ico">🧭</span><span class="num">4</span>Modelar Oferta<span class="soon">em obras</span></button>
-    <button data-view="entregaveis" aria-selected="false"><span class="ico">🛠️</span><span class="num">5</span>Entregáveis &amp; Mini App<span class="soon">em obras</span></button>
+    <button data-view="modelar" aria-selected="false"><span class="ico">🧭</span><span class="num">4</span>Modelar Oferta</button>
+    <button data-view="entregaveis" aria-selected="false"><span class="ico">🛠️</span><span class="num">5</span>Entregáveis &amp; Mini App</button>
     <button data-view="portfolio" aria-selected="false"><span class="ico">🗂️</span><span class="num">6</span>Portfólio &amp; Estágios</button>
-    <button data-view="paginavendas" aria-selected="false"><span class="ico">🖥️</span><span class="num">7</span>Página de Vendas<span class="soon">em obras</span></button>
-    <button data-view="criativos" aria-selected="false"><span class="ico">🎬</span><span class="num">8</span>Criativos<span class="soon">em obras</span></button>
-    <button data-view="campanhas" aria-selected="false"><span class="ico">📊</span><span class="num">9</span>Campanhas<span class="soon">em obras</span></button>
+    <button data-view="paginavendas" aria-selected="false"><span class="ico">🖥️</span><span class="num">7</span>Página de Vendas</button>
+    <button data-view="criativos" aria-selected="false"><span class="ico">🎬</span><span class="num">8</span>Criativos</button>
+    <button data-view="campanhas" aria-selected="false"><span class="ico">📊</span><span class="num">9</span>Campanhas</button>
     <div class="nav-group-label">Utilidades</div>
     <button data-view="calendario" aria-selected="false"><span class="ico">🗓️</span>Calendário</button>
     <button data-view="cadastros" aria-selected="false"><span class="ico">⚙️</span>Cadastros</button>
@@ -930,45 +930,82 @@
     <div id="modelarHistory"></div>
   </section>
 
-  <!-- ===================== ENTREGÁVEIS & MINI APP (placeholder) ===================== -->
+  <!-- ===================== ENTREGÁVEIS & MINI APP ===================== -->
   <section class="view" id="view-entregaveis">
     <h3 class="section-title">Entregáveis &amp; Mini App</h3>
-    <div class="empty">
-      <strong>Ainda não construído.</strong>
-      Vai puxar o que foi definido na Modelagem (nicho, promessa, persona) e montar o prompt padronizado pra gerar o mini app —
-      com templates salvos pra reaproveitar. Isso precisa de uma integração de IA dentro do sistema; se você montar o mini app
-      fora (aqui no Claude, por exemplo), também dá pra salvar o link aqui, atrelado à oferta.
+    <div class="section-sub">gera um prompt padronizado pra criar o mini app, já preenchido com os dados da oferta modelada — sem integração de IA direta aqui ainda, o prompt sai pronto pra colar no Claude/Lovable/etc.</div>
+    <div class="drawer-row" style="margin:12px 0">
+      <label>Oferta <select id="entOfferSelect"><option value="">— escolha uma oferta —</option></select></label>
+      <label>Tipo de mini app <select id="entTemplateSelect">
+        <option value="calculadora">Calculadora</option><option value="quiz">Quiz</option><option value="gerador">Gerador</option>
+        <option value="planejador">Planejador</option><option value="treinador">Treinador</option><option value="simulador">Simulador</option>
+        <option value="educacional">App educacional</option><option value="produtividade">Ferramenta de produtividade</option>
+      </select></label>
     </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+      <button class="btn btn-accent" id="entGenerateBtn" disabled>Gerar prompt</button>
+      <button class="btn" id="entCopyBtn" disabled>Copiar</button>
+      <button class="btn" id="entSaveBtn" disabled>Salvar no Produto da oferta</button>
+      <span class="hint" id="entStatus"></span>
+    </div>
+    <textarea id="entPromptOutput" style="min-height:360px; font-family:var(--font-mono); font-size:.78rem"></textarea>
   </section>
 
-  <!-- ===================== PÁGINA DE VENDAS (placeholder) ===================== -->
+  <!-- ===================== PÁGINA DE VENDAS ===================== -->
   <section class="view" id="view-paginavendas">
     <h3 class="section-title">Página de Vendas</h3>
-    <div class="empty">
-      <strong>Ainda não construído.</strong>
-      Vai pegar os dados da oferta modelada e gerar um prompt de página de vendas (com checkout, imagens, mobile + desktop)
-      a partir dos templates escalados que você for me mandando, pronto pra subir.
+    <div class="section-sub">gera o briefing/prompt completo da página (headline → CTA) com os dados da oferta e do produto — cole no Claude/Lovable/v0 pra sair com a página pronta</div>
+    <div class="drawer-row" style="margin:12px 0">
+      <label>Oferta <select id="pgOfferSelect"><option value="">— escolha uma oferta —</option></select></label>
+      <label>Categoria da página <select id="pgCategorySelect">
+        <option value="mini_app">Página de mini app</option><option value="produto_digital">Página de produto digital</option>
+        <option value="quiz">Página de quiz</option><option value="ferramenta">Página de ferramenta</option>
+        <option value="oferta_direta">Página de oferta direta</option><option value="vsl">Página com VSL</option>
+      </select></label>
     </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+      <button class="btn btn-accent" id="pgGenerateBtn" disabled>Gerar prompt</button>
+      <button class="btn" id="pgCopyBtn" disabled>Copiar</button>
+      <button class="btn" id="pgSaveBtn" disabled>Salvar na Página de Vendas da oferta</button>
+      <span class="hint" id="pgStatus"></span>
+    </div>
+    <textarea id="pgPromptOutput" style="min-height:360px; font-family:var(--font-mono); font-size:.78rem"></textarea>
   </section>
 
-  <!-- ===================== CRIATIVOS (placeholder) ===================== -->
+  <!-- ===================== CRIATIVOS (biblioteca cross-offer) ===================== -->
   <section class="view" id="view-criativos">
     <h3 class="section-title">Criativos</h3>
-    <div class="empty">
-      <strong>Ainda não construído.</strong>
-      Biblioteca de imagens e vídeos por oferta — mockups, takes, cortes do CapCut etc. Geração de vídeo por IA ainda é uma
-      limitação real; vou te dar uma resposta honesta sobre o que dá e o que não dá pra automatizar aqui antes de prometer.
+    <div class="section-sub">biblioteca de imagens e vídeos por oferta — geração de vídeo por IA ainda não é uma integração real aqui; isso continua passando pelo CapCut/edição externa, com upload do link/arquivo final</div>
+    <div class="drawer-row" style="margin:12px 0">
+      <label class="full">Oferta <select id="crOfferSelect"><option value="">— escolha uma oferta —</option></select></label>
     </div>
+    <div id="crBody"></div>
   </section>
 
-  <!-- ===================== CAMPANHAS (placeholder) ===================== -->
+  <!-- ===================== CAMPANHAS (dashboard cross-offer) ===================== -->
   <section class="view" id="view-campanhas">
     <h3 class="section-title">Campanhas</h3>
-    <div class="empty">
-      <strong>Ainda não construído.</strong>
-      Painel inspirado na Utmify: pixel, funil desenhado, tráfego Meta/Pinterest separado por oferta, valor gasto — e,
-      quando você decidir o gateway (Hotmart/Cakto/Hubla), os links de checkout por oferta.
-    </div>
+    <div class="section-sub">visão geral de tráfego pago em todas as ofertas — Meta e Pinterest separados, funil e UTMs</div>
+    <section class="stats" id="statsCampanhas"></section>
+    <section style="margin-top:16px">
+      <h4 class="section-title" style="font-size:.9rem">Por oferta e plataforma</h4>
+      <div class="mini-list" id="campanhasList"></div>
+    </section>
+    <section style="margin-top:20px">
+      <h4 class="section-title" style="font-size:.9rem">Gerador de UTM</h4>
+      <div class="drawer-row">
+        <label>URL base <input id="utmUrl" placeholder="https://seusite.com"></label>
+        <label>utm_source <input id="utmSource" placeholder="meta, pinterest..."></label>
+        <label>utm_medium <input id="utmMedium" placeholder="cpc, paid..."></label>
+        <label>utm_campaign <input id="utmCampaign" placeholder="nome-da-campanha"></label>
+        <label>utm_content <input id="utmContent" placeholder="criativo-1 (opcional)"></label>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; margin-top:8px">
+        <button class="btn btn-accent" id="utmGenerateBtn">Gerar link</button>
+        <button class="btn" id="utmCopyBtn" disabled>Copiar</button>
+      </div>
+      <input id="utmOutput" readonly style="margin-top:8px; font-family:var(--font-mono); font-size:.78rem" placeholder="o link com UTM aparece aqui">
+    </section>
   </section>
 
 </main>
@@ -1096,6 +1133,10 @@
     target.classList.add("active");
     if (name === "portfolio" && typeof renderKanban === "function") renderKanban();
     if (name === "modelar" && typeof renderModelarSelect === "function") renderModelarSelect();
+    if (name === "entregaveis" && typeof populateOfferSelect === "function") populateOfferSelect("entOfferSelect", "— escolha uma oferta —");
+    if (name === "paginavendas" && typeof populateOfferSelect === "function") populateOfferSelect("pgOfferSelect", "— escolha uma oferta —");
+    if (name === "criativos" && typeof populateOfferSelect === "function") populateOfferSelect("crOfferSelect", "— escolha uma oferta —");
+    if (name === "campanhas" && typeof renderCampanhasDashboard === "function") renderCampanhasDashboard();
     window.scrollTo({top:0, behavior:"smooth"});
   }
   document.getElementById("tabs").addEventListener("click", function(e){
@@ -2970,6 +3011,223 @@
       renderModelarResultUI({ strategic_analysis:r.strategic_analysis, funnel:r.funnel, modeling_suggestion:r.modeling_suggestion, miniapp_ideas:r.miniapp_ideas }, r.id);
       document.getElementById("modelarResult").scrollIntoView({behavior:"smooth"});
     }catch(err){ console.error(err); }
+  });
+
+  // ===================== FASE 4 — Entregáveis, Página de Vendas, Criativos =====================
+  function populateOfferSelect(selId, placeholder){
+    var sel = document.getElementById(selId); if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">'+placeholder+'</option>' +
+      state.myOffers.map(function(o){ return '<option value="'+o.id+'">'+escapeHtml(o.title||"Sem título")+'</option>'; }).join("");
+    if (cur) sel.value = cur;
+  }
+
+  // ---------- Entregáveis & Mini App ----------
+  var ENTREGAVEL_TEMPLATES = {
+    calculadora:"Calculadora interativa que recebe inputs do usuário e devolve um resultado calculado na hora, com explicação do resultado.",
+    quiz:"Quiz com perguntas de múltipla escolha, pontuação final e resultado personalizado por faixa de pontuação.",
+    gerador:"Gerador que monta um conteúdo personalizado (texto, plano, lista) a partir de poucas respostas do usuário.",
+    planejador:"Planejador com etapas/dias organizados, onde o usuário marca progresso e vê um resumo visual do avanço.",
+    treinador:"Treinador com exercícios recorrentes, repetição espaçada e acompanhamento de evolução ao longo do tempo.",
+    simulador:"Simulador que recria um cenário prático pro usuário praticar antes de enfrentar a situação real.",
+    educacional:"App educacional com conteúdo em módulos/lições, progresso salvo e gamificação leve (pontos, níveis, badges).",
+    produtividade:"Ferramenta de produtividade focada numa tarefa específica do dia a dia do usuário, rápida de usar, sem fricção."
+  };
+  var entState = { offer:null, product:null };
+  async function onEntOfferChange(){
+    var id = document.getElementById("entOfferSelect").value;
+    var enabled = !!id;
+    document.getElementById("entGenerateBtn").disabled = !enabled;
+    entState.offer = state.myOffers.find(function(x){ return x.id===id; }) || null;
+    entState.product = null;
+    if (id){
+      try{ var rows = await sbRequest("GET","my_offer_product?offer_id=eq."+encodeURIComponent(id)+"&select=*", null, null); entState.product = (rows&&rows[0])||{}; }catch(e){}
+    }
+  }
+  function buildEntregavelPrompt(offer, product, templateKey){
+    var tmpl = ENTREGAVEL_TEMPLATES[templateKey] || "";
+    var p = product || {};
+    return [
+      "CONTEXTO DO PROJETO",
+      "Produto digital low-ticket, modelado a partir de uma oferta validada no mercado. Formato: " + tmpl,
+      "", "OBJETIVO DO APLICATIVO", offer.promise || "(defina a promessa na aba Visão Geral da oferta)",
+      "", "PÚBLICO-ALVO", offer.targetAudience || "(defina a persona na aba Visão Geral da oferta)",
+      "", "PROBLEMA RESOLVIDO", offer.positioning || "(defina o posicionamento na aba Visão Geral da oferta)",
+      "", "MECANISMO / DIFERENCIAL", offer.salesMechanism || "(defina o mecanismo de venda na aba Visão Geral da oferta)",
+      "", "FUNCIONALIDADES / ENTREGÁVEL PRINCIPAL", (p.files&&p.files.length ? p.files.join("\n") : "(liste em Minhas Ofertas → aba Produto)"),
+      "", "BÔNUS", (p.bonuses&&p.bonuses.length ? p.bonuses.join("\n") : "nenhum bônus definido ainda"),
+      "", "FLUXO DE UTILIZAÇÃO", "1. Onboarding rápido (quem é o usuário, o que ele busca)\n2. Tela principal com a função central do app\n3. Resultado/feedback imediato\n4. Tela de progresso/histórico (se aplicável)",
+      "", "ESTRUTURA DAS TELAS", "- Onboarding\n- Tela principal\n- Resultado\n- Progresso/Histórico\n- Configurações/Conta (se precisar de login)",
+      "", "IDENTIDADE VISUAL", "Nicho: " + (offer.niche||"não definido") + ". Paleta e tom visual coerentes com o nicho e a persona.",
+      "", "EXPERIÊNCIA MOBILE", "Mobile-first, responsivo, poucos cliques até o valor central.",
+      "", "REQUISITOS TÉCNICOS", "App web single-page, sem instalação. PWA se o uso for recorrente.",
+      "", "REGRAS DE FUNCIONAMENTO", "Sem dado fabricado. Sem botão decorativo — toda ação precisa funcionar de verdade.",
+      "", "BANCO DE DADOS", "Definir se precisa persistir progresso entre sessões (local storage costuma bastar em low-ticket).",
+      "", "SEGURANÇA", "Se houver conteúdo pago, validar o desbloqueio no servidor — nunca só no frontend.",
+      "", "REQUISITOS DE PUBLICAÇÃO", "Publicar como página web com link único, pronta pra divulgar no anúncio e na página de vendas."
+    ].join("\n");
+  }
+  document.getElementById("entOfferSelect").addEventListener("change", onEntOfferChange);
+  document.getElementById("entGenerateBtn").addEventListener("click", function(){
+    if (!entState.offer) return;
+    var tpl = document.getElementById("entTemplateSelect").value;
+    var text = buildEntregavelPrompt(entState.offer, entState.product, tpl);
+    document.getElementById("entPromptOutput").value = text;
+    document.getElementById("entCopyBtn").disabled = false;
+    document.getElementById("entSaveBtn").disabled = false;
+  });
+  document.getElementById("entCopyBtn").addEventListener("click", function(){
+    var ta = document.getElementById("entPromptOutput"); ta.select();
+    navigator.clipboard && navigator.clipboard.writeText(ta.value).catch(function(){ document.execCommand("copy"); });
+    var s = document.getElementById("entStatus"); s.textContent = "Copiado ✓"; setTimeout(function(){ s.textContent=""; }, 1500);
+  });
+  document.getElementById("entSaveBtn").addEventListener("click", async function(){
+    if (!entState.offer) return;
+    try{
+      await sbUpsertOne("my_offer_product", entState.offer.id, { prompts: document.getElementById("entPromptOutput").value });
+      var s = document.getElementById("entStatus"); s.textContent = "Salvo no Produto da oferta ✓"; setTimeout(function(){ s.textContent=""; }, 2000);
+    }catch(e){ console.error(e); alert("Não consegui salvar."); }
+  });
+
+  // ---------- Página de Vendas ----------
+  var PAGECAT_LABEL = { mini_app:"mini app", produto_digital:"produto digital", quiz:"quiz", ferramenta:"ferramenta", oferta_direta:"oferta direta", vsl:"com VSL" };
+  var pgState = { offer:null, product:null };
+  async function onPgOfferChange(){
+    var id = document.getElementById("pgOfferSelect").value;
+    document.getElementById("pgGenerateBtn").disabled = !id;
+    pgState.offer = state.myOffers.find(function(x){ return x.id===id; }) || null;
+    pgState.product = null;
+    if (id){
+      try{ var rows = await sbRequest("GET","my_offer_product?offer_id=eq."+encodeURIComponent(id)+"&select=*", null, null); pgState.product = (rows&&rows[0])||{}; }catch(e){}
+    }
+  }
+  function buildPaginaPrompt(offer, product, cat){
+    var p = product || {};
+    return [
+      "Gere uma página de vendas ("+(PAGECAT_LABEL[cat]||cat)+"), mobile-first e depois adaptada pra desktop, com esta estrutura de copy, nessa ordem:",
+      "1. Headline — foco na promessa: " + (offer.promise||"(defina a promessa)"),
+      "2. Subheadline — reforça pra quem é: " + (offer.targetAudience||"(defina a persona)"),
+      "3. Apresentação do problema — " + (offer.positioning||"(defina o posicionamento/dor)"),
+      "4. Identificação com a persona",
+      "5. Apresentação da solução — mecanismo: " + (offer.salesMechanism||"(defina o mecanismo)"),
+      "6. Demonstração do produto/mini app",
+      "7. Benefícios",
+      "8. Funcionalidades — " + (p.files&&p.files.length ? p.files.join(", ") : "(ver aba Produto da oferta)"),
+      "9. Entregáveis",
+      "10. Bônus — " + (p.bonuses&&p.bonuses.length ? p.bonuses.join(", ") : "nenhum definido ainda"),
+      "11. Oferta (preço: " + (offer.salePrice!=null ? offer.salePrice : "a definir") + ")",
+      "12. Order bump — " + (p.order_bumps&&p.order_bumps.length ? p.order_bumps.join(", ") : "nenhum definido ainda"),
+      "13. Garantia",
+      "14. Perguntas frequentes",
+      "15. CTA final, repetindo o link de checkout em todos os botões",
+      "",
+      "Nicho: " + (offer.niche||"não definido") + ". Linguagem coerente com a persona acima.",
+      offer.notes ? ("Observações da oferta: " + offer.notes) : ""
+    ].join("\n");
+  }
+  document.getElementById("pgOfferSelect").addEventListener("change", onPgOfferChange);
+  document.getElementById("pgGenerateBtn").addEventListener("click", function(){
+    if (!pgState.offer) return;
+    var cat = document.getElementById("pgCategorySelect").value;
+    document.getElementById("pgPromptOutput").value = buildPaginaPrompt(pgState.offer, pgState.product, cat);
+    document.getElementById("pgCopyBtn").disabled = false;
+    document.getElementById("pgSaveBtn").disabled = false;
+  });
+  document.getElementById("pgCopyBtn").addEventListener("click", function(){
+    var ta = document.getElementById("pgPromptOutput"); ta.select();
+    navigator.clipboard && navigator.clipboard.writeText(ta.value).catch(function(){ document.execCommand("copy"); });
+    var s = document.getElementById("pgStatus"); s.textContent = "Copiado ✓"; setTimeout(function(){ s.textContent=""; }, 1500);
+  });
+  document.getElementById("pgSaveBtn").addEventListener("click", async function(){
+    if (!pgState.offer) return;
+    try{
+      await sbUpsertOne("my_offer_sales_page", pgState.offer.id, { page_prompt: document.getElementById("pgPromptOutput").value });
+      var s = document.getElementById("pgStatus"); s.textContent = "Salvo na Página de Vendas da oferta ✓"; setTimeout(function(){ s.textContent=""; }, 2000);
+    }catch(e){ console.error(e); alert("Não consegui salvar."); }
+  });
+
+  // ---------- Criativos (biblioteca cross-offer) ----------
+  async function onCrOfferChange(){
+    var id = document.getElementById("crOfferSelect").value;
+    var body = document.getElementById("crBody");
+    if (!id){ body.innerHTML = ""; return; }
+    body.innerHTML = '<div class="hint">Carregando…</div>';
+    try{
+      var list = await sbFetchByOffer("my_offer_creatives", id);
+      body.innerHTML = paneCriativosHtml(list)
+        .replace('class="drawer-pane" id="pane-criativos"','id="crPane" data-offer-id="'+id+'"');
+    }catch(e){ console.error(e); body.innerHTML = '<div class="empty">Não consegui carregar.</div>'; }
+  }
+  document.getElementById("crOfferSelect").addEventListener("change", onCrOfferChange);
+  document.getElementById("crBody").addEventListener("click", async function(e){
+    var btn = e.target.closest("button[data-act]"); if (!btn) return;
+    var offerId = document.getElementById("crOfferSelect").value; if (!offerId) return;
+    if (btn.dataset.act === "add-criativo"){
+      var pane = document.getElementById("crPane");
+      var url = pane.querySelector("#dcUrl").value.trim(); if (!url){ alert("Cole o link do criativo."); return; }
+      try{
+        await sbInsertRow("my_offer_creatives", { offer_id: offerId, type: pane.querySelector("#dcType").value, label: pane.querySelector("#dcLabel").value.trim(), url: url });
+        onCrOfferChange();
+      }catch(err){ console.error(err); alert("Não consegui salvar."); }
+    } else if (btn.dataset.act === "del-criativo"){
+      try{ await sbDeleteRow("my_offer_creatives", btn.dataset.id); onCrOfferChange(); }catch(err){ console.error(err); }
+    }
+  });
+
+  // ---------- Campanhas (dashboard cross-offer) + UTM ----------
+  async function renderCampanhasDashboard(){
+    var statsEl = document.getElementById("statsCampanhas"), listEl = document.getElementById("campanhasList");
+    if (!statsEl) return;
+    statsEl.innerHTML = ''; listEl.innerHTML = '<div class="hint">Carregando campanhas…</div>';
+    try{
+      var rows = await sbRequest("GET", "my_offer_campaigns?select=*&order=period_start.desc", null, null) || [];
+      var totalInvest = rows.reduce(function(s,r){ return s+(Number(r.investment)||0); }, 0);
+      var totalImpr = rows.reduce(function(s,r){ return s+(Number(r.impressions)||0); }, 0);
+      var totalClicks = rows.reduce(function(s,r){ return s+(Number(r.clicks)||0); }, 0);
+      var totalSales = rows.reduce(function(s,r){ return s+(Number(r.sales)||0); }, 0);
+      var avgCtr = totalImpr>0 ? (totalClicks/totalImpr*100) : null;
+      var meta = rows.filter(function(r){ return r.platform==="meta"; }).reduce(function(s,r){ return s+(Number(r.investment)||0); },0);
+      var pin = rows.filter(function(r){ return r.platform==="pinterest"; }).reduce(function(s,r){ return s+(Number(r.investment)||0); },0);
+      statsEl.innerHTML =
+        '<div class="stat"><div class="n mono">'+fmtEUR(totalInvest)+'</div><div class="l">investido (todas campanhas)</div></div>' +
+        '<div class="stat"><div class="n mono">'+totalImpr+'</div><div class="l">impressões</div></div>' +
+        '<div class="stat"><div class="n mono">'+totalClicks+'</div><div class="l">cliques</div></div>' +
+        '<div class="stat"><div class="n mono">'+(avgCtr!=null?avgCtr.toFixed(2)+"%":"—")+'</div><div class="l">CTR médio</div></div>' +
+        '<div class="stat"><div class="n mono">'+totalSales+'</div><div class="l">vendas atribuídas</div></div>' +
+        '<div class="stat"><div class="n mono">'+fmtEUR(meta)+'</div><div class="l">investido Meta</div></div>' +
+        '<div class="stat"><div class="n mono">'+fmtEUR(pin)+'</div><div class="l">investido Pinterest</div></div>';
+      if (!rows.length){ listEl.innerHTML = '<div class="empty">Nenhuma campanha registrada ainda — adicione em Minhas Ofertas → abrir detalhes → aba Campanhas.</div>'; return; }
+      var byOffer = {};
+      rows.forEach(function(r){ (byOffer[r.offer_id] = byOffer[r.offer_id]||[]).push(r); });
+      listEl.innerHTML = Object.keys(byOffer).map(function(oid){
+        var offer = state.myOffers.find(function(x){ return x.id===oid; });
+        var title = offer ? offer.title : oid;
+        return '<div class="mini-item"><div class="mini-top"><strong>'+escapeHtml(title)+'</strong></div>' +
+          byOffer[oid].map(campaignItemHtml).join("") +
+        '</div>';
+      }).join("");
+    }catch(e){ console.error("renderCampanhasDashboard failed", e); listEl.innerHTML = '<div class="empty">Não consegui carregar as campanhas.</div>'; }
+  }
+  document.getElementById("utmGenerateBtn").addEventListener("click", function(){
+    var base = document.getElementById("utmUrl").value.trim();
+    if (!base){ alert("Cole a URL base."); return; }
+    try{
+      var u = new URL(base);
+      var src = document.getElementById("utmSource").value.trim();
+      var med = document.getElementById("utmMedium").value.trim();
+      var camp = document.getElementById("utmCampaign").value.trim();
+      var cont = document.getElementById("utmContent").value.trim();
+      if (src) u.searchParams.set("utm_source", src);
+      if (med) u.searchParams.set("utm_medium", med);
+      if (camp) u.searchParams.set("utm_campaign", camp);
+      if (cont) u.searchParams.set("utm_content", cont);
+      document.getElementById("utmOutput").value = u.toString();
+      document.getElementById("utmCopyBtn").disabled = false;
+    }catch(e){ alert("URL base inválida — inclua https://"); }
+  });
+  document.getElementById("utmCopyBtn").addEventListener("click", function(){
+    var inp = document.getElementById("utmOutput"); inp.select();
+    navigator.clipboard && navigator.clipboard.writeText(inp.value).catch(function(){ document.execCommand("copy"); });
   });
 
   initStore();
