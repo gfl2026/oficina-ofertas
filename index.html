@@ -425,6 +425,19 @@
   .kanban-card .kc-title{font-weight:600; margin-bottom:3px}
   .kanban-card .kc-meta{font-size:.7rem; color:var(--fg-muted); display:flex; gap:6px; flex-wrap:wrap}
   .kanban-card .kc-inactive{color:var(--warn)}
+
+  /* ---------- Modelar Oferta ---------- */
+  .kv-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px}
+  .kv-item{background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:8px 10px}
+  .kv-item .k{font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; color:var(--fg-muted); margin-bottom:3px}
+  .kv-item .v{font-size:.82rem; line-height:1.4}
+  .funnel-steps{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px}
+  .funnel-steps .fs{flex:0 0 170px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:9px 10px; font-size:.78rem}
+  .funnel-steps .fs .k{font-family:var(--font-display); font-weight:600; font-size:.72rem; margin-bottom:4px; color:var(--accent)}
+  .miniapp-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px}
+  .miniapp-card{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px; display:flex; flex-direction:column; gap:4px}
+  .miniapp-card h5{margin:0; font-family:var(--font-display); font-size:.86rem}
+  .miniapp-card .meta{font-size:.68rem; color:var(--fg-muted); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap}
 </style>
 
 <style>
@@ -901,15 +914,20 @@
     <div class="kanban" id="kanbanBoard"></div>
   </section>
 
-  <!-- ===================== MODELAR OFERTA (placeholder) ===================== -->
+  <!-- ===================== MODELAR OFERTA ===================== -->
   <section class="view" id="view-modelar">
     <h3 class="section-title">Modelar Oferta</h3>
-    <div class="empty">
-      <strong>Ainda não construído — reservando o espaço certo no fluxo.</strong>
-      Aqui vai entrar o botão "escolher pra modelar" na Biblioteca de Ofertas, que joga os dados da oferta garimpada pra cá.
-      O sistema vai ler a oferta (mecanismo, promessa, desejo criado, persona, nicho), desenhar o funil e sugerir mini apps possíveis
-      com base nela — incluindo bônus, order bumps e upsells da oferta completa.
+    <div class="section-sub">escolha uma oferta garimpada (ou clique "Modelar com IA" num card da Biblioteca de Ofertas) pra IA fazer a leitura estratégica e sugerir uma modelagem própria</div>
+    <div class="drawer-row" style="margin:12px 0 4px">
+      <label class="full">Oferta garimpada <select id="modelarSourceSelect"><option value="">— escolha uma oferta —</option></select></label>
     </div>
+    <div id="modelarSourceCard"></div>
+    <div style="display:flex; gap:10px; align-items:center; margin:12px 0">
+      <button class="btn btn-accent" id="modelarRunBtn" disabled>🧭 Rodar análise com IA</button>
+      <span class="hint" id="modelarStatus"></span>
+    </div>
+    <div id="modelarResult"></div>
+    <div id="modelarHistory"></div>
   </section>
 
   <!-- ===================== ENTREGÁVEIS & MINI APP (placeholder) ===================== -->
@@ -1077,6 +1095,7 @@
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
     target.classList.add("active");
     if (name === "portfolio" && typeof renderKanban === "function") renderKanban();
+    if (name === "modelar" && typeof renderModelarSelect === "function") renderModelarSelect();
     window.scrollTo({top:0, behavior:"smooth"});
   }
   document.getElementById("tabs").addEventListener("click", function(e){
@@ -1415,6 +1434,7 @@
     if (status !== "discarded") btns += '<button class="btn" data-act="status" data-id="'+id+'" data-value="discarded">Descartar</button>';
     else btns += '<button class="btn" data-act="status" data-id="'+id+'" data-value="unclassified">Reabrir</button>';
     if (status === "copiable") btns += '<button class="btn btn-info" data-act="promote" data-id="'+id+'">Virar oferta →</button>';
+    btns += '<button class="btn btn-accent" data-act="modelar" data-id="'+id+'">🧭 Modelar com IA →</button>';
     btns += '<button class="btn btn-danger" data-act="delete" data-id="'+id+'">Excluir</button>';
     return btns;
   }
@@ -2329,6 +2349,9 @@
       populateBasedOnSelect();
       if (o) document.getElementById("basedOnSelect").value = o.id;
       form.title.scrollIntoView({behavior:"smooth", block:"start"});
+    } else if (btn.dataset.act === "modelar"){
+      switchView("modelar");
+      if (typeof openModelar === "function") openModelar(id);
     }
   });
 
@@ -2759,6 +2782,195 @@
       renderKanban();
     });
   }
+
+  // ===================== MODELAR OFERTA (Fase 3 — IA) =====================
+  var MODELAR_FUNCTION_URL = SUPABASE_URL + "/functions/v1/modelar-oferta";
+  state.modelar = { sourceId: null, lastResult: null, lastRowId: null };
+
+  function renderModelarSelect(){
+    var sel = document.getElementById("modelarSourceSelect");
+    if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">— escolha uma oferta —</option>' +
+      state.offers.map(function(o){ return '<option value="'+o.id+'">'+escapeHtml(o.title||"Sem título")+(o.niche?" — "+escapeHtml(o.niche):"")+'</option>'; }).join("");
+    if (cur) sel.value = cur;
+  }
+  function openModelar(sourceOfferId){
+    renderModelarSelect();
+    var sel = document.getElementById("modelarSourceSelect");
+    if (sel) sel.value = sourceOfferId;
+    onModelarSourceChange();
+  }
+  function onModelarSourceChange(){
+    var sel = document.getElementById("modelarSourceSelect");
+    var id = sel ? sel.value : "";
+    state.modelar.sourceId = id || null;
+    var card = document.getElementById("modelarSourceCard");
+    var runBtn = document.getElementById("modelarRunBtn");
+    document.getElementById("modelarResult").innerHTML = "";
+    document.getElementById("modelarStatus").textContent = "";
+    if (!id){ card.innerHTML = ""; runBtn.disabled = true; document.getElementById("modelarHistory").innerHTML = ""; return; }
+    var o = state.offers.find(function(x){ return x.id===id; });
+    runBtn.disabled = !o;
+    card.innerHTML = o ? cardHtml(o).replace('<div class="card-actions">'+statusButtonsHtml(o.id, o.status||"unclassified")+'</div>', '') : '';
+    renderModelarHistory(id);
+  }
+  async function renderModelarHistory(sourceId){
+    var el = document.getElementById("modelarHistory");
+    el.innerHTML = '<div class="hint">Carregando histórico de modelagens…</div>';
+    try{
+      var rows = await sbRequest("GET", "offer_modeling?source_offer_id=eq."+encodeURIComponent(sourceId)+"&select=*&order=created_at.desc", null, null);
+      if (!rows || !rows.length){ el.innerHTML = ""; return; }
+      el.innerHTML = '<h4 class="section-title" style="font-size:.86rem">Modelagens anteriores dessa oferta</h4>' +
+        '<div class="mini-list">' + rows.map(function(r){
+          var d = r.created_at ? new Date(r.created_at).toLocaleString("pt-BR") : "";
+          return '<div class="mini-item"><div class="mini-top"><strong>'+d+'</strong><span class="tag">'+(r.status||"rascunho")+'</span></div>' +
+            '<button class="btn" data-act="modelar-ver" data-id="'+r.id+'">Ver essa análise</button></div>';
+        }).join("") + '</div>';
+    }catch(e){ console.error("renderModelarHistory failed", e); el.innerHTML = ""; }
+  }
+  function kvGridHtml(obj, labels){
+    return '<div class="kv-grid">' + Object.keys(labels).map(function(k){
+      var v = obj && obj[k];
+      if (v == null || v === "") return "";
+      var text = Array.isArray(v) ? v.join(" · ") : String(v);
+      return '<div class="kv-item"><div class="k">'+escapeHtml(labels[k])+'</div><div class="v">'+escapeHtml(text)+'</div></div>';
+    }).join("") + '</div>';
+  }
+  var ANALYSIS_LABELS = { nicho:"Nicho", subnicho:"Subnicho", persona:"Persona", problema_principal:"Problema principal",
+    dor_consciente:"Dor consciente", desejo_principal:"Desejo principal", desejos_secundarios:"Desejos secundários",
+    transformacao_prometida:"Transformação prometida", promessa_central:"Promessa central", mecanismo_unico:"Mecanismo único",
+    mecanismo_de_venda:"Mecanismo de venda", gatilhos_psicologicos:"Gatilhos psicológicos", objecoes:"Objeções",
+    diferenciais:"Diferenciais", posicionamento:"Posicionamento", linguagem_utilizada:"Linguagem utilizada",
+    argumentos_de_venda:"Argumentos de venda", estrutura_da_oferta:"Estrutura da oferta",
+    estrategia_de_precificacao:"Estratégia de precificação", oportunidades_de_melhoria:"Oportunidades de melhoria" };
+  var SUGGESTION_LABELS = { nome_sugerido:"Nome sugerido", nova_promessa:"Nova promessa", persona:"Persona",
+    problema_que_resolveremos:"Problema que resolveremos", mecanismo_proprio:"Mecanismo próprio",
+    diferencial_competitivo:"Diferencial competitivo", estrutura_do_produto:"Estrutura do produto",
+    bonus_sugeridos:"Bônus sugeridos", order_bumps_sugeridos:"Order bumps sugeridos", upsells_sugeridos:"Upsells sugeridos",
+    sugestao_de_preco:"Sugestão de preço", estrategia_de_posicionamento:"Estratégia de posicionamento" };
+  var FUNNEL_LABELS = { anuncio:"Anúncio", pagina_de_vendas:"Página de vendas", checkout:"Checkout",
+    produto_principal:"Produto principal", order_bump:"Order bump", upsell:"Upsell", pos_venda:"Pós-venda" };
+
+  function renderModelarResultUI(parsed, rowId){
+    var sa = parsed.strategic_analysis || {}, fn = parsed.funnel || {}, ms = parsed.modeling_suggestion || {};
+    var ideas = Array.isArray(parsed.miniapp_ideas) ? parsed.miniapp_ideas : [];
+    var html =
+      '<h4 class="section-title" style="font-size:.9rem">Análise estratégica</h4>' + kvGridHtml(sa, ANALYSIS_LABELS) +
+      '<h4 class="section-title" style="font-size:.9rem; margin-top:16px">Engenharia reversa do funil</h4>' +
+      '<div class="funnel-steps">' + Object.keys(FUNNEL_LABELS).map(function(k){
+        return '<div class="fs"><div class="k">'+FUNNEL_LABELS[k]+'</div>'+escapeHtml(fn[k]||"não identificado")+'</div>';
+      }).join("") + '</div>' +
+      '<h4 class="section-title" style="font-size:.9rem; margin-top:16px">Sugestão de modelagem própria</h4>' + kvGridHtml(ms, SUGGESTION_LABELS) +
+      '<h4 class="section-title" style="font-size:.9rem; margin-top:16px">Ideias de mini app</h4>' +
+      '<div class="miniapp-cards">' + ideas.map(function(idea){
+        return '<div class="miniapp-card"><h5>'+escapeHtml(idea.nome||"Sem nome")+'</h5>' +
+          '<div>'+escapeHtml(idea.proposta||"")+'</div>' +
+          '<div class="meta"><span>público: '+escapeHtml(idea.publico||"—")+'</span>' +
+          '<span>dificuldade: '+escapeHtml(idea.dificuldade||"—")+'</span>' +
+          '<span>potencial: '+escapeHtml(idea.potencial_comercial||"—")+'</span></div>' +
+          (idea.funcionalidades ? '<div class="meta">'+escapeHtml(idea.funcionalidades)+'</div>' : '') +
+        '</div>';
+      }).join("") + '</div>' +
+      '<div style="margin-top:16px"><button class="btn btn-accent" id="modelarApproveBtn">✅ Aprovar modelagem e criar produto</button></div>';
+    document.getElementById("modelarResult").innerHTML = html;
+    state.modelar.lastResult = parsed;
+    state.modelar.lastRowId = rowId;
+    var approveBtn = document.getElementById("modelarApproveBtn");
+    if (approveBtn) approveBtn.addEventListener("click", approveModelagem);
+  }
+
+  async function runModelagem(){
+    var sourceId = state.modelar.sourceId;
+    var o = state.offers.find(function(x){ return x.id===sourceId; });
+    if (!o) return;
+    var statusEl = document.getElementById("modelarStatus");
+    var btn = document.getElementById("modelarRunBtn");
+    btn.disabled = true; statusEl.style.color = ""; statusEl.textContent = "Rodando análise com a Claude API… pode levar uns 20-40s.";
+    try{
+      var resp = await fetch(MODELAR_FUNCTION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_KEY, "apikey": SUPABASE_KEY },
+        body: JSON.stringify({ sourceOffer: o })
+      });
+      var json = await resp.json();
+      if (!resp.ok || json.error){
+        statusEl.style.color = "var(--warn)";
+        statusEl.textContent = json.error || ("Erro " + resp.status + " ao chamar a função.");
+        btn.disabled = false;
+        return;
+      }
+      statusEl.style.color = "var(--good)"; statusEl.textContent = "Análise pronta.";
+      var rowId = null;
+      try{
+        var ins = await sbRequest("POST", "offer_modeling", {
+          source_offer_id: o.id, strategic_analysis: json.result.strategic_analysis||{}, funnel: json.result.funnel||{},
+          modeling_suggestion: json.result.modeling_suggestion||{}, miniapp_ideas: json.result.miniapp_ideas||[],
+          raw_model_output: json.raw||"", model_used: json.model||""
+        }, "return=representation");
+        rowId = ins && ins[0] && ins[0].id;
+      }catch(saveErr){ console.error("save offer_modeling failed", saveErr); }
+      renderModelarResultUI(json.result, rowId);
+      renderModelarHistory(sourceId);
+    }catch(e){
+      console.error("runModelagem failed", e);
+      statusEl.style.color = "var(--warn)";
+      statusEl.textContent = "Não consegui falar com a função. Verifique a internet e tente de novo.";
+    }
+    btn.disabled = false;
+  }
+
+  async function approveModelagem(){
+    var ms = (state.modelar.lastResult && state.modelar.lastResult.modeling_suggestion) || {};
+    var sourceId = state.modelar.sourceId;
+    var o = state.offers.find(function(x){ return x.id===sourceId; });
+    var payload = {
+      title: ms.nome_sugerido || (o ? o.title : "Nova oferta"),
+      niche: o ? o.niche : "",
+      basedOnId: sourceId,
+      status: "rascunho",
+      stage: "modelagem",
+      positioning: ms.estrategia_de_posicionamento || "",
+      promise: ms.nova_promessa || "",
+      targetAudience: ms.persona || "",
+      salesMechanism: ms.mecanismo_proprio || "",
+      notes: "Modelada por IA a partir de \"" + (o ? o.title : "") + "\". Diferencial: " + (ms.diferencial_competitivo||"") +
+        (ms.sugestao_de_preco ? ". Preço sugerido: " + ms.sugestao_de_preco : ""),
+      createdAt: Date.now()
+    };
+    try{
+      var ref = await store.col2.add(payload);
+      state.myOffers = state.myOffers.concat([Object.assign({ id: ref.id }, payload)]);
+      renderOfertas();
+      if (state.modelar.lastRowId){
+        try{ await sbRequest("PATCH", "offer_modeling?id=eq."+state.modelar.lastRowId, { status: "aprovada", my_offer_id: ref.id }, "return=minimal"); }
+        catch(e){ console.error("update offer_modeling failed", e); }
+      }
+      // registra no histórico da nova oferta
+      try{ await sbInsertRow("my_offer_history", { offer_id: ref.id, event_type: "decisao",
+        note: 'Criada a partir da modelagem por IA de "'+(o?o.title:"")+'".' }); }catch(e){}
+      alert("Oferta criada em Minhas Ofertas: " + payload.title);
+      switchView("ofertas");
+    }catch(e){
+      console.error("approveModelagem failed", e);
+      alert("Não consegui criar a oferta. Tente de novo.");
+    }
+  }
+
+  var modelarSel = document.getElementById("modelarSourceSelect");
+  if (modelarSel) modelarSel.addEventListener("change", onModelarSourceChange);
+  var modelarRunBtn = document.getElementById("modelarRunBtn");
+  if (modelarRunBtn) modelarRunBtn.addEventListener("click", runModelagem);
+  var modelarHistoryEl = document.getElementById("modelarHistory");
+  if (modelarHistoryEl) modelarHistoryEl.addEventListener("click", async function(e){
+    var btn = e.target.closest('button[data-act="modelar-ver"]'); if (!btn) return;
+    try{
+      var rows = await sbRequest("GET", "offer_modeling?id=eq."+encodeURIComponent(btn.dataset.id)+"&select=*", null, null);
+      var r = rows && rows[0]; if (!r) return;
+      renderModelarResultUI({ strategic_analysis:r.strategic_analysis, funnel:r.funnel, modeling_suggestion:r.modeling_suggestion, miniapp_ideas:r.miniapp_ideas }, r.id);
+      document.getElementById("modelarResult").scrollIntoView({behavior:"smooth"});
+    }catch(err){ console.error(err); }
+  });
 
   initStore();
 })();
