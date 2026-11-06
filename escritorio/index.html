@@ -675,11 +675,18 @@ async function sendAsk(){
   const out = document.getElementById('askOut');
   const btn = document.getElementById('askSend');
   btn.disabled = true; btn.textContent = 'trabalhando…';
-  out.classList.add('show'); out.textContent = 'O agente está trabalhando no seu pedido…';
+  out.classList.add('show');
+  const inicio = Date.now();
+  const tick = setInterval(() => {
+    out.textContent = `O agente está trabalhando no seu pedido… ${Math.round((Date.now()-inicio)/1000)}s`;
+  }, 1000);
+  out.textContent = 'O agente está trabalhando no seu pedido… 0s';
   chars[askAgent.id].userData.busy = true;
+  const controller = new AbortController();
+  const limite = setTimeout(() => controller.abort(), 120000);
   try{
     const res = await fetch(`${SUPABASE_URL}/functions/v1/agente-chat`, {
-      method:'POST',
+      method:'POST', signal: controller.signal,
       headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' },
       body: JSON.stringify({ agente: askAgent.key, pedido })
     });
@@ -706,8 +713,12 @@ async function sendAsk(){
     saveUltimo({ agente: askAgent.name, hora: new Date().toISOString(), resumo: lastResposta.slice(0,140) });
     telao.draw();
   }catch(err){
-    out.textContent = 'Não consegui: ' + err.message;
+    const demorou = err.name === 'AbortError';
+    out.textContent = demorou
+      ? 'O agente demorou mais de 2 minutos e eu parei a espera. Tente um pedido mais curto ou envie de novo.'
+      : 'Não consegui: ' + err.message;
   }finally{
+    clearTimeout(limite); clearInterval(tick);
     chars[askAgent.id].userData.busy = false;
     btn.disabled = false; btn.textContent = 'Enviar ao agente';
   }
