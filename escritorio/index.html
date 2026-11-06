@@ -18,6 +18,7 @@
   .tbtn.done{ background:#dfe9df; color:#557; text-decoration:line-through; }
   .tbtn.ask{ background:#10a37f; color:#fff; border-color:#0b6e55; }
   .tbtn:hover{ filter:brightness(1.05); }
+  .tbtn[data-key], .tlivre{ display:none; }
   .tlivre{ font-size:10px; color:#fff; background:rgba(0,0,0,.55); padding:2px 6px; border-radius:3px; }
   #hud{ position:absolute; top:10px; left:10px; font-family:'Press Start 2P', monospace; font-size:9px; background:rgba(10,10,25,0.75); padding:8px 10px; border-radius:4px; pointer-events:none; }
   #hud b{ color:#7fe0a0; }
@@ -136,18 +137,18 @@ container.insertBefore(renderer.domElement, document.getElementById('overlay'));
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xcfeaf7);
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
-camera.position.set(0, 30, 42);
+camera.position.set(0, 40, 62);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0, 4);
+controls.target.set(0, 0, 13);
 controls.enableDamping = true;
 controls.maxPolarAngle = Math.PI / 2.1;
-controls.minDistance = 14; controls.maxDistance = 80;
+controls.minDistance = 14; controls.maxDistance = 130;
 
 scene.add(new THREE.HemisphereLight(0xffffff, 0x8a9a88, 1.55));
 const sun = new THREE.DirectionalLight(0xffffff, 1.1);
 sun.position.set(10, 30, 18); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left:-36, right:36, top:36, bottom:-36 });
+Object.assign(sun.shadow.camera, { left:-50, right:50, top:50, bottom:-50 });
 scene.add(sun);
 
 const mat = (c, extra={}) => new THREE.MeshStandardMaterial({ color:c, ...extra });
@@ -157,8 +158,10 @@ const ground = new THREE.Mesh(new THREE.BoxGeometry(140, 0.2, 140), mat(0x6fb868
 ground.position.y = -0.5; ground.receiveShadow = true; scene.add(ground);
 const floorIn = new THREE.Mesh(new THREE.BoxGeometry(34, 0.4, 24), mat(0xe8d3b0));
 floorIn.position.set(0, -0.2, 0); floorIn.receiveShadow = true; scene.add(floorIn);
-const patio = new THREE.Mesh(new THREE.BoxGeometry(34, 0.3, 14), mat(0x7cc476));
-patio.position.set(0, -0.25, 19); patio.receiveShadow = true; scene.add(patio);
+const patio = new THREE.Mesh(new THREE.BoxGeometry(72, 0.3, 30), mat(0x7cc476));
+patio.position.set(0, -0.25, 26); patio.receiveShadow = true; scene.add(patio);
+const walkway = new THREE.Mesh(new THREE.BoxGeometry(4, 0.08, 9), mat(0xd9cbb0));
+walkway.position.set(0, 0, 16.5); walkway.receiveShadow = true; scene.add(walkway);
 
 // paredes externas brancas
 const wallMat = mat(0xffffff);
@@ -443,6 +446,46 @@ const ppNet = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.4, 3), mat(0xffffff, 
 });
 const PP_SPOTS = [new THREE.Vector3(PP_X-3.6, 0, PP_Z), new THREE.Vector3(PP_X+3.6, 0, PP_Z)];
 
+// ----- jardim externo: árvores, canteiros, fonte e bancos -----
+function tree(x, z, s=1){
+  const g = new THREE.Group();
+  const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.25*s, 0.35*s, 2*s, 8), mat(0x7a4a22)); tr.position.y = 1*s; tr.castShadow = true; g.add(tr);
+  const cn = new THREE.Mesh(new THREE.IcosahedronGeometry(1.8*s, 1), mat(0x2f8f4e)); cn.position.y = 3.2*s; cn.castShadow = true; g.add(cn);
+  g.position.set(x, 0, z); scene.add(g);
+}
+function bench(x, z, rot=0){
+  const g = new THREE.Group();
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.2, 0.7), mat(0xa9733f)); seat.position.y = 0.6; g.add(seat);
+  const back = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.7, 0.15), mat(0xa9733f)); back.position.set(0, 0.95, -0.3); g.add(back);
+  g.position.set(x, 0, z); g.rotation.y = rot; scene.add(g);
+}
+function bed(x, z, w, d){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.2, d), mat(0x5c3d22)); m.position.set(x, 0.05, z); scene.add(m);
+  const cols = [0xff6b9a, 0xffd166, 0xef476f, 0xffffff, 0xa06cd5];
+  for (let i = 0; i < Math.floor(w*d*1.2); i++){
+    const f = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), mat(cols[i % cols.length]));
+    f.position.set(x + (i*0.37 % (w-0.6)) - (w-0.6)/2, 0.35, z + (i*0.61 % (d-0.6)) - (d-0.6)/2);
+    scene.add(f);
+  }
+}
+function hedge(x, z, w, d){
+  const h = new THREE.Mesh(new THREE.BoxGeometry(w, 1.0, d), mat(0x3d8b4f)); h.position.set(x, 0.5, z); h.castShadow = true; scene.add(h);
+}
+function fountain(x, z){
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, 0.8, 24), mat(0xd9d4c7)); base.position.set(x, 0.4, z); base.castShadow = true; scene.add(base);
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.1, 24), mat(0x5ab8e6, { roughness:0.2, metalness:0.1 })); water.position.set(x, 0.85, z); scene.add(water);
+  const spout = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.6, 12), mat(0xd9d4c7)); spout.position.set(x, 1.6, z); scene.add(spout);
+}
+function decorateGarden(){
+  [[-30,14],[-30,30],[30,14],[30,30],[-22,40],[-6,41],[10,41],[24,40],[-34,22],[34,22],[-40,6],[40,6]]
+    .forEach(([x,z], i) => tree(x, z, 0.9 + (i%3)*0.2));
+  bed(-24, 20, 6, 2.4); bed(24, 20, 6, 2.4); bed(-26, 36, 8, 2); bed(26, 36, 8, 2);
+  hedge(-35, 26, 1, 14); hedge(35, 26, 1, 14); hedge(0, 41, 28, 1);
+  fountain(-18, 28);
+  bench(-20, 33, 0); bench(20, 33, 0); bench(-30, 10, Math.PI/2); bench(30, 10, -Math.PI/2);
+}
+decorateGarden();
+
 // ----- personagem 3D procedural -----
 function makeCharacter(a){
   const g = new THREE.Group();
@@ -503,8 +546,6 @@ agents.forEach((a, i) => {
   const ch = makeCharacter(a);
   const start = wanderPoint({ cx:R.cx, cz:R.cz, front:R.front });
   ch.position.copy(start);
-  const sp = label(a.name.length > 18 ? a.name.slice(0,18)+'…' : a.name);
-  sp.position.y = 3.4; ch.add(sp);
   Object.assign(ch.userData, {
     id:a.id, row:R.row, cx:R.cx, cz:R.cz, front:R.front,
     chair:R.chair.clone(), deskPos:new THREE.Vector3(R.cx, 4.3, R.deskZ),
@@ -570,7 +611,7 @@ function renderOverlay(){
       const key = taskKey(a.id, o.title);
       return `<button class="tbtn ${doneSet.has(key) ? 'done' : ''}" data-key="${esc(key)}">${doneSet.has(key) ? '✓ ' : ''}${esc(o.title)}</button>`;
     }).join('') + (list.length > 3 ? `<span class="tlivre">+${list.length-3}</span>` : '') : '<span class="tlivre">livre</span>';
-    d.innerHTML = tasksHtml + `<button class="tbtn ask" data-ask="${a.id}">💬 pedir ao agente</button>`;
+    d.innerHTML = tasksHtml + `<button class="tbtn ask" data-ask="${a.id}">💬 pedir</button>`;
     d.querySelectorAll('.tbtn[data-key]').forEach(b => b.addEventListener('click', () => {
       const t = allTasks().find(x => x.key === b.dataset.key); if (t) openPanel(t);
     }));
