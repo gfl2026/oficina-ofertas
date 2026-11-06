@@ -405,7 +405,7 @@ Object.keys(ROOMS).forEach(buildRoom);
 const telao = makeCanvasTex(1152, 576, drawTelao);
 telao.draw();
 const telaoMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), new THREE.MeshBasicMaterial({ map: telao.tex }));
-telaoMesh.position.set(0, 4.9, -15.65); scene.add(telaoMesh);
+telaoMesh.position.set(0, 4.9, -15.6); scene.add(telaoMesh);
 const telaoFrame = new THREE.Mesh(new THREE.BoxGeometry(8.4, 4.4, 0.2), mat(0x111118));
 telaoFrame.position.set(0, 4.9, -15.75); scene.add(telaoFrame);
 
