@@ -104,18 +104,19 @@ const agents = [
 const agentById = Object.fromEntries(agents.map(a => [a.id, a]));
 
 // Salas: linha A (fundo do prédio) e linha B (frente), cada uma com sua porta/abertura
-const ROOM_W = 8;
+const ROOM_W = 10;
+const EDGE_L = -15, EDGE_R = 15; // paredes externas das salas de borda
 const ROOMS = {
-  modelada:   { cx:-12, cz:-7.5, d:9,   row:'A', title:'Estrategista de Oferta',   role:'Oferta · modelagem e validação' },
-  entregavel: { cx:-4,  cz:-7.5, d:9,   row:'A', title:'Produtor(a)',              role:'Produção · entregáveis' },
-  checkout:   { cx:4,   cz:-7.5, d:9,   row:'A', title:'Financeiro',               role:'Secretaria · checkout e pagamentos' },
-  copy:       { cx:12,  cz:-7.5, d:9,   row:'A', title:'Copywriter',               role:'Copy · persuasão e vendas' },
-  pagina:     { cx:-8,  cz:3.5,  d:8.5, row:'B', title:'Designer de Página',       role:'Página de vendas' },
-  criativos:  { cx:0,   cz:3.5,  d:8.5, row:'B', title:'Designer de Criativos',    role:'Criativos · imagem e vídeo' },
-  pixel:      { cx:8,   cz:3.5,  d:8.5, row:'B', title:'Estrategista de Anúncios', role:'Tráfego · Meta e Pinterest' },
+  modelada:   { cx:-15, cz:-8.5, d:11, row:'A', title:'Estrategista de Oferta',   role:'Oferta · modelagem e validação' },
+  entregavel: { cx:-5,  cz:-8.5, d:11, row:'A', title:'Produtor(a)',              role:'Produção · entregáveis' },
+  checkout:   { cx:5,   cz:-8.5, d:11, row:'A', title:'Financeiro',               role:'Secretaria · checkout e pagamentos' },
+  copy:       { cx:15,  cz:-8.5, d:11, row:'A', title:'Copywriter',               role:'Copy · persuasão e vendas' },
+  pagina:     { cx:-10, cz:5,    d:10, row:'B', title:'Designer de Página',       role:'Página de vendas' },
+  criativos:  { cx:0,   cz:5,    d:10, row:'B', title:'Designer de Criativos',    role:'Criativos · imagem e vídeo' },
+  pixel:      { cx:10,  cz:5,    d:10, row:'B', title:'Estrategista de Anúncios', role:'Tráfego · Meta e Pinterest' },
 };
 const PP_X = 8, PP_Z = 19;
-const CORRIDOR_Z = -1.9, EAST_X = 14, PATIO_ENTRY_Z = 11;
+const CORRIDOR_Z = -1.5, EAST_X = 17.5, PATIO_ENTRY_Z = 12.5;
 
 // ===== persistência local =====
 function loadDone(){ try { return new Set(JSON.parse(localStorage.getItem('escritorio_done') || '[]')); } catch { return new Set(); } }
@@ -137,9 +138,9 @@ container.insertBefore(renderer.domElement, document.getElementById('overlay'));
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xcfeaf7);
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
-camera.position.set(0, 40, 62);
+camera.position.set(0, 46, 66);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0, 13);
+controls.target.set(0, 0, 8);
 controls.enableDamping = true;
 controls.maxPolarAngle = Math.PI / 2.1;
 controls.minDistance = 14; controls.maxDistance = 130;
@@ -156,8 +157,8 @@ const mat = (c, extra={}) => new THREE.MeshStandardMaterial({ color:c, ...extra 
 // chão geral (gramado) e piso interno
 const ground = new THREE.Mesh(new THREE.BoxGeometry(140, 0.2, 140), mat(0x6fb868));
 ground.position.y = -0.5; ground.receiveShadow = true; scene.add(ground);
-const floorIn = new THREE.Mesh(new THREE.BoxGeometry(34, 0.4, 24), mat(0xe8d3b0));
-floorIn.position.set(0, -0.2, 0); floorIn.receiveShadow = true; scene.add(floorIn);
+const floorIn = new THREE.Mesh(new THREE.BoxGeometry(42, 0.4, 26), mat(0xe8d3b0));
+floorIn.position.set(0, -0.2, -1); floorIn.receiveShadow = true; scene.add(floorIn);
 const patio = new THREE.Mesh(new THREE.BoxGeometry(72, 0.3, 30), mat(0x7cc476));
 patio.position.set(0, -0.25, 26); patio.receiveShadow = true; scene.add(patio);
 const walkway = new THREE.Mesh(new THREE.BoxGeometry(4, 0.08, 9), mat(0xd9cbb0));
@@ -165,10 +166,10 @@ walkway.position.set(0, 0, 16.5); walkway.receiveShadow = true; scene.add(walkwa
 
 // paredes externas brancas
 const wallMat = mat(0xffffff);
-const back = new THREE.Mesh(new THREE.BoxGeometry(34, 7, 0.4), wallMat); back.position.set(0, 3.5, -12); back.castShadow = true; scene.add(back);
-const leftW = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7, 24), wallMat); leftW.position.set(-17, 3.5, 0); leftW.castShadow = true; scene.add(leftW);
-const rightW = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7, 24), wallMat); rightW.position.set(17, 3.5, 0); rightW.castShadow = true; scene.add(rightW);
-[[0,0.15,-11.8,34,0.3,0.1],[-16.8,0.15,0,0.1,0.3,24],[16.8,0.15,0,0.1,0.3,24]].forEach(([x,y,z,w,h,d]) => {
+const back = new THREE.Mesh(new THREE.BoxGeometry(42, 7, 0.4), wallMat); back.position.set(0, 3.5, -14); back.castShadow = true; scene.add(back);
+const leftW = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7, 26), wallMat); leftW.position.set(-21, 3.5, -1); leftW.castShadow = true; scene.add(leftW);
+const rightW = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7, 26), wallMat); rightW.position.set(21, 3.5, -1); rightW.castShadow = true; scene.add(rightW);
+[[0,0.15,-13.8,42,0.3,0.1],[-20.8,0.15,-1,0.1,0.3,26],[20.8,0.15,-1,0.1,0.3,26]].forEach(([x,y,z,w,h,d]) => {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(0xa9733f)); m.position.set(x,y,z); scene.add(m);
 });
 
@@ -265,8 +266,8 @@ function buildRoom(id){
     cap.position.set(x, H + 0.07, z); scene.add(cap);
   };
   // paredes divisórias (paredes externas do prédio já são o fundo/lateral nas salas de borda)
-  if (R.cx !== -12) addWall(R.cx - W/2, R.cz, 0.3, d);
-  if (R.cx !== 12)  addWall(R.cx + W/2, R.cz, 0.3, d);
+  if (R.cx !== EDGE_L) addWall(R.cx - W/2, R.cz, 0.3, d);
+  if (R.cx !== EDGE_R) addWall(R.cx + W/2, R.cz, 0.3, d);
   if (R.row === 'B') addWall(R.cx, back, W, 0.3);
 
   // placa com título e área de cada sala (sobre a abertura da frente)
@@ -401,32 +402,32 @@ Object.keys(ROOMS).forEach(buildRoom);
 const telao = makeCanvasTex(1152, 576, drawTelao);
 telao.draw();
 const telaoMesh = new THREE.Mesh(new THREE.PlaneGeometry(9, 4.5), new THREE.MeshStandardMaterial({ map: telao.tex, emissive:0x222233 }));
-telaoMesh.position.set(0, 5.2, -11.65); scene.add(telaoMesh);
+telaoMesh.position.set(0, 5.2, -13.65); scene.add(telaoMesh);
 const telaoFrame = new THREE.Mesh(new THREE.BoxGeometry(9.4, 4.9, 0.2), mat(0x111118));
-telaoFrame.position.set(0, 5.2, -11.75); scene.add(telaoFrame);
+telaoFrame.position.set(0, 5.2, -13.75); scene.add(telaoFrame);
 
 // quadro de metas na parede esquerda (área livre da linha B)
 const metaTex = makeCanvasTex(512, 512, drawMeta);
 metaTex.draw();
 const metaMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 4.2), new THREE.MeshStandardMaterial({ map: metaTex.tex }));
-metaMesh.position.set(-16.7, 3.6, 3.5); metaMesh.rotation.y = Math.PI/2; scene.add(metaMesh);
+metaMesh.position.set(-20.7, 3.6, 3.5); metaMesh.rotation.y = Math.PI/2; scene.add(metaMesh);
 
 // quadros motivacionais e artísticos
-quoteFrame(QUOTES[0], -11, 4.1, -11.78, 0);
-quoteFrame(QUOTES[1], 11, 4.1, -11.78, 0);
-quoteFrame(QUOTES[2], 16.78, 3.2, -4, -Math.PI/2);
-quoteFrame(QUOTES[3], 16.78, 3.2, 6, -Math.PI/2);
-artPiece('circles', 7, -6.8, 3.4, -11.78, 0);
-artPiece('grid', 21, 6.8, 3.4, -11.78, 0);
-artPiece('waves', 42, -16.78, 3.4, -7, Math.PI/2);
-artPiece('dots', 99, 16.78, 3.4, -10.5, -Math.PI/2);
-artPiece('circles', 58, -16.78, 3.4, 9.5, Math.PI/2, 2.2, 1.7);
+quoteFrame(QUOTES[0], -15, 4.1, -13.78, 0);
+quoteFrame(QUOTES[1], 15, 4.1, -13.78, 0);
+quoteFrame(QUOTES[2], 20.78, 3.2, -6, -Math.PI/2);
+quoteFrame(QUOTES[3], 20.78, 3.2, 6, -Math.PI/2);
+artPiece('circles', 7, -7.5, 3.4, -13.78, 0);
+artPiece('grid', 21, 7.5, 3.4, -13.78, 0);
+artPiece('waves', 42, -20.78, 3.4, -8.5, Math.PI/2);
+artPiece('dots', 99, 20.78, 3.4, -11, -Math.PI/2);
+artPiece('circles', 58, -20.78, 3.4, 9.5, Math.PI/2, 2.2, 1.7);
 
 // prosperidade e decoração do corredor
-moneyTree(14.2, 3.5);
-bamboo(-14.2, -0.5);
+moneyTree(18.5, 2);
+bamboo(-18.5, 7.5);
 coinStack(-6, CORRIDOR_Z); coinStack(6, CORRIDOR_Z);
-flowers(-14.2, 7.2);
+flowers(-18.5, 11);
 
 // ----- área externa: sofá, bebidas, mesa de ping-pong -----
 const sofa = new THREE.Group();
