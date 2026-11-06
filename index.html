@@ -570,7 +570,7 @@
     </div>
     <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
       <div class="store-note" id="storeNote">conectando…</div>
-      <a id="btnEscritorioTop" href="https://claude.ai/artifact/8xP83FA2LvpoQp8KJwhC42" target="_blank" rel="noopener" title="Abrir o escritório de agentes (lê as mesmas ofertas desta Oficina)" style="font-size:12px; padding:4px 10px; border-radius:6px; cursor:pointer; text-decoration:none; color:inherit; border:1px solid currentColor;">🏢 Ir para o escritório</a>
+      <a id="btnEscritorioTop" href="escritorio/" target="_blank" rel="noopener" title="Abrir o escritório de agentes (lê as mesmas ofertas desta Oficina)" style="font-size:12px; padding:4px 10px; border-radius:6px; cursor:pointer; text-decoration:none; color:inherit; border:1px solid currentColor;">🏢 Ir para o escritório</a>
       <button type="button" id="btnReloadData" title="Forçar reconexão com os dados salvos" style="font-size:12px; padding:4px 10px; border-radius:6px; cursor:pointer;">🔄 Recarregar dados</button>
     </div>
   </div>
@@ -1406,7 +1406,7 @@
   if (btnReloadDataEl) btnReloadDataEl.addEventListener("click", reloadData);
   var btnEscritorioTabEl = document.getElementById("btnEscritorioTab");
   if (btnEscritorioTabEl) btnEscritorioTabEl.addEventListener("click", function(){
-    window.open("https://claude.ai/artifact/8xP83FA2LvpoQp8KJwhC42", "_blank", "noopener");
+    window.open("escritorio/", "_blank", "noopener");
   });
 
   function updateUploadHint(){
