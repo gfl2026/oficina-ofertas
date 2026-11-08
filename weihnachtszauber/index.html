@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Weihnachtszauber – Geschenk Tracker</title><link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Geschenkplanner</title><link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 :root{--bg:#faf5ea;--cd:#fff;--tx:#2a1f1a;--mu:#7a6d63;--rd:#b3262e;--gn:#1f4a36;--gd:#c9a043;--ln:#eadfca;--sh:0 6px 20px #4a2e1214;--hd:'Fraunces',Georgia,serif;--bd:'Inter',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -14,7 +14,9 @@ nav button.on{background:var(--rd);border-color:var(--rd);color:#fff}
 .sy{margin-left:auto;font-size:12px;color:var(--gn);white-space:nowrap}
 main{max-width:1100px;margin:0 auto;padding:18px}
 .hero{border-radius:20px;background:linear-gradient(135deg,var(--cd),var(--bg));border:1px solid var(--ln);box-shadow:var(--sh);padding:0 22px 20px;overflow:hidden;margin-bottom:16px}
-.gar{white-space:nowrap;overflow:hidden;font-size:22px;letter-spacing:3px;padding:8px 0;color:var(--gn)}
+.gar{display:flex;align-items:center;justify-content:center;gap:14px;padding:10px 0;color:var(--gd)}
+.gar i{flex:1;max-width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--gd),transparent)}
+.gar svg{flex:0 0 auto;width:16px;height:16px;opacity:.85}
 .hero small{font:italic 15px var(--hd);color:var(--rd)}.hero h1{font-size:clamp(26px,5vw,38px);margin:0}
 .cdn{font:italic 600 19px var(--hd);color:var(--rd);margin-top:6px}
 .g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
@@ -69,6 +71,7 @@ let U=JSON.parse(ST.get('wz_u')||'{}'),sid=ST.get('wz_s'),d=null,tab='dash',F={q
 const CATS=['Familie','Freunde','Kinder','Kollegen','Partner','Sonstige'],CUR=['EUR','CHF','GBP','USD'],DL=['Persönlich','Post / Paket','Abholung'];
 const NAV=[['dash','📊','Dashboard'],['gifts','🎁','Geschenke'],['recips','🧦','Empfänger'],['ideas','💡','Ideenbank'],['shop','🛍️','Einkaufsliste'],['set','⚙️','Einstellungen']];
 const uid=()=>Math.random().toString(36).slice(2,9),slug=s=>s.trim().toLowerCase().replace(/\s+/g,'-');
+const STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.1 8 7.9 2.1-7.9 2.1-2.1 7.8-2.1-7.8L2 10.1 9.9 8z"/></svg>',DIV=`<div class="gar"><i></i>${STAR}<i></i></div>`;
 const sha=async t=>{try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(x){return btoa(unescape(encodeURIComponent(t)))}};
 const save=()=>{if(sid)ST.set('wz_d_'+sid,JSON.stringify(d))},saveU=()=>ST.set('wz_u',JSON.stringify(U));
 const fm=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:d?d.cur:'EUR'}).format(+n||0);
@@ -83,9 +86,9 @@ const fdat=()=>Object.fromEntries(new FormData($('#mf')));
 function dl(name,txt,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click();toast('Datei wurde exportiert.')}catch(x){toast('Der Export ist hier nicht möglich.',1)}}
 function csv(rows){return '\ufeff'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\n')}
 function render(){document.documentElement.dataset.theme=d&&d.dark?'dark':'light';if(!d)return auth();
-$('#app').innerHTML=`<header><div class="lg">🎄 Weihnachtszauber</div><nav>${NAV.map(n=>`<button data-a="tab" data-i="${n[0]}" class="${tab===n[0]?'on':''}" title="${n[2]}"><span>${n[1]}</span>${n[2]}</button>`).join('')}</nav><span class="sy" id="sy">${navigator.onLine?'● Online':'● Offline'}</span></header><main>${({dash,gifts:giftsV,recips:recV,ideas:ideaV,shop:shopV,set:setV})[tab]()}</main>`;if(tab==='gifts')gt()}
+$('#app').innerHTML=`<header><div class="lg">Geschenkplanner</div><nav>${NAV.map(n=>`<button data-a="tab" data-i="${n[0]}" class="${tab===n[0]?'on':''}" title="${n[2]}"><span>${n[1]}</span>${n[2]}</button>`).join('')}</nav><span class="sy" id="sy">${navigator.onLine?'● Online':'● Offline'}</span></header><main>${({dash,gifts:giftsV,recips:recV,ideas:ideaV,shop:shopV,set:setV})[tab]()}</main>`;if(tab==='gifts')gt()}
 function auth(){const s=as.st;let h='';
-if(s===0)h=`<div class="gar">🎄✨🎁🔔❄️🎄✨🎁</div><h1>Willkommen bei Weihnachtszauber!</h1><p class="mu">Plane deine Weihnachtsgeschenke ganz entspannt.</p><label style="text-align:left">Wie heißt du?<input id="nm" placeholder="Dein Vorname" autocomplete="given-name"></label><button class="bt pr" data-a="w1">Weiter</button>`;
+if(s===0)h=`${DIV}<h1>Willkommen beim Geschenkplanner!</h1><p class="mu">Plane deine Weihnachtsgeschenke ganz entspannt.</p><label style="text-align:left">Wie heißt du?<input id="nm" placeholder="Dein Vorname" autocomplete="given-name"></label><button class="bt pr" data-a="w1">Weiter</button>`;
 else if(s===1)h=`<h1>Hallo, ${E(as.name)}!</h1><p class="mu">Wie möchtest du starten?</p><button class="bt pr" data-a="mo" data-i="new">Neues Konto erstellen</button><button class="bt" data-a="mo" data-i="in">Mit bestehendem Konto anmelden</button><button class="bt" data-a="mo" data-i="loc">Ohne Konto lokal verwenden</button><button class="sm" style="margin-top:14px" data-a="bk">Zurück</button>`;
 else h=`<h1>${as.mode==='new'?'Neues Konto':'Anmelden'}</h1><form onsubmit="return false" style="text-align:left"><label>Dein Name<input id="ln" value="${E(as.name)}"></label><label>Passwort<input id="pw" type="password" autocomplete="${as.mode==='new'?'new-password':'current-password'}"></label>${as.mode==='new'?'<label>Passwort wiederholen<input id="p2" type="password"></label><p class="mu" style="font-size:12px">Mindestens 6 Zeichen. Deine Daten bleiben privat auf diesem Gerät.</p>':''}</form><button class="bt pr" data-a="go">${as.mode==='new'?'Konto erstellen':'Anmelden'}</button><button class="sm" style="margin-top:14px" data-a="bk">Zurück</button>`;
 $('#app').innerHTML=`<div class="card auth">${h}</div>`}
@@ -100,7 +103,7 @@ function dash(){const g=G(),n=g.length,tb=d.recips.reduce((s,r)=>s+(+r.bu||0),0)
 days=Math.ceil((new Date(d.date+'T00:00:00')-new Date().setHours(0,0,0,0))/864e5),rs=d.recips.map(r=>({r,sp:spent(r.id)})),mx=Math.max(1,...rs.map(x=>Math.max(x.sp,+x.r.bu||0))),over=rs.filter(x=>x.sp>x.r.bu),
 todo=g.filter(x=>!x.b),rec=[...g].sort((a,b)=>(b.up||0)-(a.up||0)).slice(0,5),pr=n?Math.round((dn('b')+dn('w')+dn('s'))/(3*n)*100):0;
 const cd=days>0?`Noch ${days} ${days===1?'Tag':'Tage'} bis Weihnachten!`:days===0?'Heute ist Weihnachten! 🎅':'Die Weihnachtszeit ist vorbei.';
-return`<div class="hero"><div class="gar">🌲🔴✨🌲🟡🔔🌲🔴✨🌲🟡🔔🌲🔴✨🌲🟡🔔🌲🔴✨🌲🟡</div><small>Deine Weihnachtszeit</small><h1>Weihnachten ${new Date(d.date).getFullYear()} 🎅</h1><div class="cdn">${cd}</div><small>${fd(d.date)} · Hallo, ${E(d.name)}</small></div>
+return`<div class="hero">${DIV}<small>Deine Weihnachtszeit</small><h1>Weihnachten ${new Date(d.date).getFullYear()}</h1><div class="cdn">${cd}</div><small>${fd(d.date)} · Hallo, ${E(d.name)}</small></div>
 <div class="kp"><div><span>Gesamtbudget</span><b>${fm(tb)}</b></div><div><span>Bisher ausgegeben</span><b>${fm(ts)}</b></div><div><span>Noch verfügbar</span><b>${fm(tb-ts)}</b></div><div><span>Geschenke gesamt</span><b>${n}</b></div></div>
 <div class="g3">${ring('Gekauft','🎁',dn('b'),n,'var(--rd)')}${ring('Verpackt','🎀',dn('w'),n,'var(--gd)')}${ring('Verschickt / Übergeben','🛷',dn('s'),n,'var(--gn)')}</div>
 <div class="card sec"><h3>Budget vs. tatsächliche Ausgaben</h3>${rs.length?`<div class="chart">${rs.map(x=>`<div class="bg"><div class="bp"><i class="gd" style="height:${x.r.bu/mx*100}%"></i><i class="${x.sp>x.r.bu?'rd':'gn'}" style="height:${x.sp/mx*100}%"></i></div><small>${E(x.r.name)}</small></div>`).join('')}</div><div class="lgd"><i class="gd"></i>Geplantes Budget<i class="gn"></i>Innerhalb des Budgets<i class="rd"></i>Überschritten</div>`:'<p class="mu">Lege Empfänger an, um den Vergleich zu sehen.</p>'}</div>
