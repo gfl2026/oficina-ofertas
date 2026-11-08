@@ -2799,6 +2799,11 @@
         '<label>Rótulo (opcional) <input id="aiImgLabel" placeholder="ex: hook 1, capa v2..."></label>' +
         '<div class="full"><button class="btn btn-accent" data-act="gerar-criativo-ia">Gerar imagem</button> <span id="aiImgStatus" class="hint"></span></div>' +
       '</div></details>' +
+      '<details class="panel" open><summary>📤 Subir fotos reais do computador</summary><div class="panel-body drawer-row">' +
+        '<label class="full">Escolha uma ou mais fotos <input type="file" id="dcFiles" accept="image/*" multiple></label>' +
+        '<div class="full"><button class="btn btn-accent" data-act="upload-criativos">Subir fotos</button> <span id="dcUploadStatus" class="hint"></span></div>' +
+        '<div class="full hint">Essas vão direto pro armazenamento — sem passar pela IA, sem gastar créditos.</div>' +
+      '</div></details>' +
       '<details class="panel"><summary>+ Adicionar criativo manualmente (link)</summary><div class="panel-body drawer-row">' +
         '<label>Tipo <select id="dcType"><option value="imagem">Imagem</option><option value="video">Vídeo</option><option value="mockup">Mockup</option><option value="anuncio">Anúncio</option><option value="variacao">Variação</option><option value="arquivo">Arquivo editável</option><option value="link">Link externo</option></select></label>' +
         '<label>Rótulo <input id="dcLabel" placeholder="ex: hook 1, capa v2..."></label>' +
@@ -2806,6 +2811,40 @@
         '<div class="full"><button class="btn btn-accent" data-act="add-criativo">Adicionar</button></div>' +
       '</div></details>' +
     '</div>';
+  }
+  function slugifyPath(s){
+    return String(s||"foto").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+      .replace(/[^a-z0-9.]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"").slice(0,80) || "foto";
+  }
+  async function uploadCriativosFiles(pane, offerId, onDone){
+    var input = pane.querySelector("#dcFiles");
+    var files = input && input.files ? Array.from(input.files) : [];
+    var status = pane.querySelector("#dcUploadStatus");
+    if (!files.length){ alert("Escolha pelo menos uma foto."); return; }
+    status.textContent = "Subindo " + files.length + " foto(s)…";
+    var ok = 0, fail = 0;
+    for (var i=0;i<files.length;i++){
+      var file = files[i];
+      try{
+        var path = "real/" + offerId + "/" + Date.now() + "-" + i + "-" + slugifyPath(file.name);
+        var up = await fetch(SUPABASE_URL + "/storage/v1/object/ai-creatives/" + path, {
+          method: "POST",
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": file.type || "image/jpeg" },
+          body: file
+        });
+        if (!up.ok){ fail++; continue; }
+        var publicUrl = SUPABASE_URL + "/storage/v1/object/public/ai-creatives/" + path;
+        await sbInsertRow("my_offer_creatives", {
+          offer_id: offerId, type: "imagem", label: file.name, url: publicUrl,
+          tags: ["real","foto-original"], is_active: true, source: "upload-manual"
+        });
+        ok++;
+      }catch(err){ console.error("upload foto falhou", err); fail++; }
+      status.textContent = "Subindo… " + (i+1) + "/" + files.length;
+    }
+    status.textContent = ok + " foto(s) enviada(s)" + (fail ? ", " + fail + " falharam" : "") + ".";
+    setTimeout(function(){ status.textContent = ""; }, 4000);
+    if (onDone) onDone();
   }
   var IMAGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/gerar-criativo";
   async function runGerarCriativoIA(pane, offerId, onDone){
@@ -2928,6 +2967,11 @@
         renderDrawerBody(); switchDrawerTab("financeiro");
       } else if (act === "gerar-criativo-ia"){
         await runGerarCriativoIA(e.target.closest(".drawer-pane"), offerId, async function(){
+          state.drawer.creatives = await sbFetchByOffer("my_offer_creatives", offerId);
+          renderDrawerBody(); switchDrawerTab("criativos");
+        });
+      } else if (act === "upload-criativos"){
+        await uploadCriativosFiles(e.target.closest(".drawer-pane"), offerId, async function(){
           state.drawer.creatives = await sbFetchByOffer("my_offer_creatives", offerId);
           renderDrawerBody(); switchDrawerTab("criativos");
         });
@@ -3386,6 +3430,11 @@
     if (btn.dataset.act === "gerar-criativo-ia"){
       var iaPane = document.getElementById("crPane");
       await runGerarCriativoIA(iaPane, offerId, onCrOfferChange);
+      return;
+    }
+    if (btn.dataset.act === "upload-criativos"){
+      var upPane = document.getElementById("crPane");
+      await uploadCriativosFiles(upPane, offerId, onCrOfferChange);
       return;
     }
     if (btn.dataset.act === "add-criativo"){
