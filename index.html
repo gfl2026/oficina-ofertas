@@ -2973,6 +2973,29 @@
       if (onDone) onDone();
     }catch(err){ console.error(err); status.textContent = ""; alert("Não consegui gerar a imagem."); }
   }
+  function base64ToBlob(b64, mime){
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: mime || "image/png" });
+  }
+  function resizeBlobToSquare(blob, size){
+    return new Promise(function(resolve, reject){
+      var img = new Image();
+      img.onload = function(){
+        var canvas = document.createElement("canvas");
+        canvas.width = size; canvas.height = size;
+        var ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, size, size);
+        URL.revokeObjectURL(img.src);
+        canvas.toBlob(function(outBlob){ outBlob ? resolve(outBlob) : reject(new Error("toBlob falhou")); }, "image/png");
+      };
+      img.onerror = function(){ reject(new Error("Falha ao carregar imagem gerada.")); };
+      img.src = URL.createObjectURL(blob);
+    });
+  }
   async function runGerarSetFotos(pane, offerId, offerTitle, onDone){
     var titleLine = pane.querySelector("#setTitleLine").value.trim();
     var promiseLine = pane.querySelector("#setPromiseLine").value.trim();
@@ -2980,23 +3003,44 @@
     var contentsScene = pane.querySelector("#setContentsScene").value.trim();
     var stepsScene = pane.querySelector("#setStepsScene").value.trim();
     var status = pane.querySelector("#setFotosStatus");
+    var size = 2000;
     if (!titleLine || !promiseLine || !coverScene || !contentsScene || !stepsScene){
       alert("Preenche título, promessa e as 3 cenas (capa, conteúdo, passo a passo)."); return;
     }
-    status.textContent = "Gerando as 3 fotos em 2000x2000… (pode levar 1-2 minutos)";
+    status.textContent = "Gerando as 3 fotos… (pode levar 1-2 minutos)";
     try{
       var resp = await fetch(PRODUCT_PHOTOS_FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
         body: JSON.stringify({
-          offerId: offerId, offerTitle: offerTitle || titleLine,
           titleLine: titleLine, promiseLine: promiseLine,
           coverScene: coverScene, contentsScene: contentsScene, stepsScene: stepsScene
         }),
       });
       var data = await resp.json();
       if (!resp.ok || data.error){ status.textContent = ""; alert("Erro ao gerar fotos: " + (data.error || resp.status)); return; }
-      status.textContent = "3 fotos geradas em " + data.size + " ✓";
+
+      status.textContent = "Redimensionando e salvando em " + size + "x" + size + "…";
+      for (var i=0;i<data.images.length;i++){
+        var img = data.images[i];
+        var rawBlob = base64ToBlob(img.base64, "image/png");
+        var finalBlob = await resizeBlobToSquare(rawBlob, size);
+        var path = "produto/" + offerId + "/" + img.kind + "-" + Date.now() + "-" + i + ".png";
+        var up = await fetch(SUPABASE_URL + "/storage/v1/object/ai-creatives/" + path, {
+          method: "POST",
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "image/png" },
+          body: finalBlob
+        });
+        if (!up.ok){ console.error("upload falhou", img.kind, await up.text()); continue; }
+        var publicUrl = SUPABASE_URL + "/storage/v1/object/public/ai-creatives/" + path;
+        await sbInsertRow("my_offer_creatives", {
+          offer_id: offerId, type: "imagem", url: publicUrl,
+          label: (img.label||img.kind) + " — " + (offerTitle||titleLine),
+          tags: ["ia", "gpt-image-2", "etsy-listing", size+"x"+size],
+          is_active: true, source: "ia-produto-v2"
+        });
+      }
+      status.textContent = "3 fotos geradas em " + size + "x" + size + " ✓";
       setTimeout(function(){ status.textContent = ""; }, 3000);
       if (onDone) onDone();
     }catch(err){ console.error(err); status.textContent = ""; alert("Não consegui gerar o set de fotos."); }
