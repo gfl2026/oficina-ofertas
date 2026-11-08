@@ -82,7 +82,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 let assignments = {}, offersCache = [];
 const SUPABASE_URL = 'https://gnqsgfnsqretbppogvqm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Ivu40x63bk6LHFdVW9LpxA_TJXGJtw4';
-const OFICINA_URL = 'https://gfl2026.github.io/oficina-ofertas/';
+const OFICINA_URL = 'https://gfl2026.github.io/oficina-ofertas/?view=etsyshop';
+const ESCRITORIO_NICHE = 'etsy-natal-alemao';
 const STEP_ORDER = ['modelada','entregavel','checkout','copy','pagina','pixel','criativos','lancada'];
 const META_TARGET = 10;
 const QUOTES = [
@@ -732,7 +733,7 @@ setInterval(() => { telao.draw(); metaTex.draw(); }, 2000);
 // ===== carregamento =====
 async function load(){
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/my_offers?select=title,niche,status,progress,sales,spent,created_at&order=created_at.desc`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/my_offers?select=title,niche,status,progress,sales,spent,created_at&niche=eq.${encodeURIComponent(ESCRITORIO_NICHE)}&order=created_at.desc`, {
       headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}` }
     });
     if (!res.ok) throw new Error('HTTP '+res.status);

@@ -579,6 +579,8 @@
 
 <div class="shell">
   <nav class="tabs" id="tabs">
+    <div class="nav-group-label">Foco de hoje</div>
+    <button data-view="etsyshop" aria-selected="false"><span class="ico">🧡</span>Loja Etsy GLFDIGITAL</button>
     <div class="nav-group-label">Pipeline</div>
     <button data-view="painel" aria-selected="true"><span class="ico">🏠</span><span class="num">1</span>Dashboard</button>
     <button data-view="ofertas" aria-selected="false"><span class="ico">📦</span><span class="num">2</span>Minhas Ofertas</button>
@@ -672,6 +674,34 @@
     <section>
       <h3 class="section-title">Próximos no calendário</h3>
       <div class="cal-list" id="upcomingList" style="margin-top:10px"></div>
+    </section>
+  </section>
+
+  <!-- ===================== LOJA ETSY GLFDIGITAL ===================== -->
+  <section class="view" id="view-etsyshop">
+    <section class="hero" style="align-items:center">
+      <div class="hero-body">
+        <h2 class="disp">🧡 Loja Etsy · GLFDIGITAL</h2>
+        <div class="sub">só os produtos do nicho <code>etsy-natal-alemao</code> — pra focar no que precisa publicar hoje, sem o resto do catálogo misturado.</div>
+        <div class="goal-form">
+          <a class="btn btn-accent" href="https://www.etsy.com/shop/GLFDIGITAL" target="_blank" rel="noopener">Abrir loja no Etsy ↗</a>
+          <button class="btn" id="btnReloadEtsy" type="button">🔄 Recarregar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" id="statsEtsy"></section>
+
+    <section>
+      <h3 class="section-title">🎯 Hoje — o que falta publicar</h3>
+      <div class="section-sub">produtos do nicho Etsy que ainda não estão com status "ativa"</div>
+      <div class="grid" id="etsyTodoGrid" style="margin-top:10px"></div>
+    </section>
+
+    <section>
+      <h3 class="section-title">✅ Publicadas na loja</h3>
+      <div class="section-sub">status "ativa" — cole o link real do Etsy se ainda não tiver um salvo</div>
+      <div class="grid" id="etsyLiveGrid" style="margin-top:10px"></div>
     </section>
   </section>
 
@@ -1223,7 +1253,8 @@
   var MYOFFERS_FIELDS = { allocatedBudget:"allocated_budget", basedOnId:"based_on_id", campaignStart:"campaign_start", checkoutStarted:"checkout_started", clicks:"clicks", copy:"copy", createdAt:"created_at", creatives:"creatives", impressions:"impressions", niche:"niche", notes:"notes", priceBump:"price_bump", priceTripwire:"price_tripwire", progress:"progress", revenue:"revenue", sales:"sales", spent:"spent", status:"status", title:"title",
     country:"country", language:"language", coverImageUrl:"cover_image_url", active:"active", stage:"stage",
     salePrice:"sale_price", costAmount:"cost_amount", checkoutFeePct:"checkout_fee_pct",
-    positioning:"positioning", promise:"promise", targetAudience:"target_audience", salesMechanism:"sales_mechanism" };
+    positioning:"positioning", promise:"promise", targetAudience:"target_audience", salesMechanism:"sales_mechanism",
+    etsyUrl:"etsy_url" };
 
   // ---------- Fase 1: tabelas-filha da oferta (Produto, Página de Vendas,
   // Criativos, Campanhas, Histórico) — vivem em tabelas próprias ligadas por
@@ -1338,6 +1369,7 @@
       setStoreNote("biblioteca salva na nuvem (Supabase)");
       assetsNS = null; updateUploadHint();
       applyQuickAdd();
+      applyViewParam();
     }catch(e){
       console.error("initStore (supabase)", e);
       setStoreNote("não foi possível conectar ao banco de dados — verifique sua internet e clique em Recarregar dados");
@@ -1955,6 +1987,7 @@
     renderStatsOfertas();
     populateNicheOptionsOfertas();
     if (typeof renderPainel === "function") renderPainel();
+    if (typeof renderEtsyShop === "function") renderEtsyShop();
     var list = filteredOfertas();
     var grid = document.getElementById("gridOfertas");
     if (!list.length){
@@ -2154,6 +2187,93 @@
     renderChartStatus();
     renderChartBudget();
     renderChartStage();
+  }
+
+  // ===================== LOJA ETSY GLFDIGITAL =====================
+  var ETSY_NICHE = "etsy-natal-alemao";
+  function etsyOffers(){
+    return state.myOffers.filter(function(o){ return o.niche === ETSY_NICHE; });
+  }
+  function etsyTodoCardHtml(o){
+    var status = o.status || "rascunho";
+    var next = nextStepLabel(o);
+    return '<article class="card">' +
+      '<div class="top">' +
+        '<div class="title">'+escapeHtml(o.title||"Sem título")+'</div>' +
+        '<span class="status '+status+'">'+OFERTA_STATUS_LABEL[status]+'</span>' +
+      '</div>' +
+      (next ? '<div class="next-step">próxima ação: '+escapeHtml(next)+'</div>' : '') +
+      '<div class="card-actions">' + ofertaStatusButtonsHtml(o.id, status) +
+        '<button class="btn btn-accent" data-act="opendetail" data-id="'+o.id+'">Abrir detalhes →</button>' +
+      '</div>' +
+    '</article>';
+  }
+  function etsyLiveCardHtml(o){
+    var sales = Number(o.sales)||0;
+    return '<article class="card">' +
+      '<div class="top">' +
+        '<div class="title">'+escapeHtml(o.title||"Sem título")+'</div>' +
+        '<span class="status ativa">Ativa</span>' +
+      '</div>' +
+      '<div class="tags"><span class="tag">vendas: '+sales+'</span></div>' +
+      (o.etsyUrl ?
+        '<div class="card-actions"><a class="btn btn-accent" href="'+escapeHtml(o.etsyUrl)+'" target="_blank" rel="noopener">Ver no Etsy ↗</a></div>' :
+        '<div class="card-actions" style="flex-wrap:wrap">' +
+          '<input type="url" placeholder="colar link do Etsy aqui" data-etsyinput="'+o.id+'" style="flex:1;min-width:200px;padding:6px 8px;border:1px solid var(--border, #ccc);border-radius:6px">' +
+          '<button class="btn btn-accent" data-act="saveetsyurl" data-id="'+o.id+'">Salvar link</button>' +
+        '</div>') +
+      '<div class="card-actions"><button class="btn" data-act="opendetail" data-id="'+o.id+'">Abrir detalhes →</button></div>' +
+    '</article>';
+  }
+  function renderEtsyShop(){
+    var statsEl = document.getElementById("statsEtsy");
+    if (!statsEl) return; // module not present in this build
+    var offers = etsyOffers();
+    var ativas = offers.filter(function(o){ return o.status==="ativa"; });
+    var prontas = offers.filter(function(o){ return o.status==="pronta"; });
+    var pendentes = offers.filter(function(o){ return o.status==="rascunho" || o.status==="ideia"; });
+    var semLink = ativas.filter(function(o){ return !o.etsyUrl; }).length;
+    var totalSales = ativas.reduce(function(s,o){ return s + (Number(o.sales)||0); }, 0);
+    statsEl.innerHTML =
+      '<div class="stat"><div class="n mono">'+ativas.length+'</div><div class="l">publicadas no Etsy</div></div>' +
+      '<div class="stat"><div class="n mono">'+prontas.length+'</div><div class="l">prontas, falta publicar</div></div>' +
+      '<div class="stat"><div class="n mono">'+pendentes.length+'</div><div class="l">em produção</div></div>' +
+      '<div class="stat"><div class="n mono">'+totalSales+'</div><div class="l">vendas (publicadas)</div></div>' +
+      (semLink ? '<div class="stat"><div class="n mono" style="color:var(--warn)">'+semLink+'</div><div class="l">ativas sem link salvo</div></div>' : "");
+
+    var todo = prontas.concat(pendentes);
+    var todoEl = document.getElementById("etsyTodoGrid");
+    todoEl.innerHTML = todo.length ? todo.map(etsyTodoCardHtml).join("") :
+      '<div class="empty" style="grid-column:1/-1">Nada pendente — tudo que é Etsy já está publicado.</div>';
+
+    var liveEl = document.getElementById("etsyLiveGrid");
+    liveEl.innerHTML = ativas.length ? ativas.map(etsyLiveCardHtml).join("") :
+      '<div class="empty" style="grid-column:1/-1">Nenhum produto Etsy ativo ainda.</div>';
+  }
+  var btnReloadEtsy = document.getElementById("btnReloadEtsy");
+  if (btnReloadEtsy) btnReloadEtsy.addEventListener("click", reloadData);
+  function onEtsyClick(e){
+    var btn = e.target.closest("button[data-act]"); if (!btn) return;
+    if (btn.dataset.act === "saveetsyurl"){
+      var input = document.querySelector('[data-etsyinput="'+btn.dataset.id+'"]');
+      var val = input ? input.value.trim() : "";
+      if (!val){ input && input.focus(); return; }
+      updateMyOffer(btn.dataset.id, { etsyUrl: val });
+      return;
+    }
+    onOfertaClick(e);
+  }
+  ["etsyTodoGrid","etsyLiveGrid"].forEach(function(gridId){
+    var el = document.getElementById(gridId);
+    if (!el) return;
+    el.addEventListener("click", onEtsyClick);
+  });
+
+  // ---------- deep-link: ?view=NAME opens straight into that tab ----------
+  function applyViewParam(){
+    var params = new URLSearchParams(window.location.search);
+    var v = params.get("view");
+    if (v && document.getElementById("view-"+v)) switchView(v);
   }
 
   document.getElementById("goalSaveBtn").addEventListener("click", function(){
