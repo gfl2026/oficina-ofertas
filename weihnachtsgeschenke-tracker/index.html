@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Weihnachtsplaner — Geschenke, Budget & Einkaufsliste</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎄</text></svg>">
+<style>
+  :root{
+    --kraft:#f3ead9; --kraft-dark:#e7d9bd; --ink:#2c2a26;
+    --pine:#1f4536; --pine-dark:#153527; --pine-light:#2f664e;
+    --red:#a3312a; --red-dark:#852621; --gold:#c9a227;
+    --card:#ffffff; --muted:#6b6459; --line:#e3d9c4;
+    --radius:16px; --shadow:0 4px 18px rgba(31,69,54,.10);
+    font-family:'Segoe UI', -apple-system, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:
+      radial-gradient(ellipse at top, #fffaf0 0%, var(--kraft) 55%, var(--kraft-dark) 100%);
+    color:var(--ink); min-height:100vh; padding-bottom:40px;
+  }
+  header{
+    background:linear-gradient(135deg, var(--pine) 0%, var(--pine-dark) 100%);
+    color:#fff; padding:22px 16px 60px; text-align:center; position:relative; overflow:hidden;
+  }
+  header::before{
+    content:"🎄"; position:absolute; font-size:120px; opacity:.08; right:-10px; top:-20px;
+  }
+  header h1{ margin:0 0 4px; font-size:1.6rem; font-weight:800; letter-spacing:.3px; }
+  header p{ margin:0; opacity:.85; font-size:.92rem; }
+  .countdown{
+    display:inline-flex; gap:6px; align-items:baseline; margin-top:14px; background:rgba(255,255,255,.12);
+    padding:8px 16px; border-radius:999px; font-weight:700;
+  }
+  .countdown b{ font-size:1.3rem; color:var(--gold); }
+  .wrap{ max-width:880px; margin:-38px auto 0; padding:0 14px; }
+  nav{
+    display:flex; gap:6px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:6px; overflow-x:auto; margin-bottom:18px;
+  }
+  nav button{
+    flex:1; white-space:nowrap; border:none; background:transparent; padding:10px 12px; border-radius:11px;
+    font-size:.86rem; font-weight:700; color:var(--muted); cursor:pointer; transition:.15s;
+  }
+  nav button.active{ background:var(--pine); color:#fff; }
+  section{ display:none; }
+  section.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+  .card{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; margin-bottom:16px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; }
+  .stat{ text-align:center; padding:14px 8px; border-radius:12px; background:var(--kraft); }
+  .stat .n{ font-size:1.5rem; font-weight:800; color:var(--pine); }
+  .stat .l{ font-size:.74rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
+  .stat.red .n{ color:var(--red); }
+  h2{ font-size:1.05rem; margin:0 0 12px; color:var(--pine-dark); }
+  .progress-row{ margin-bottom:10px; }
+  .progress-row .pl{ display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:4px; color:var(--muted); font-weight:600; }
+  .bar{ height:9px; background:var(--line); border-radius:6px; overflow:hidden; }
+  .bar i{ display:block; height:100%; background:linear-gradient(90deg, var(--pine-light), var(--pine)); border-radius:6px; }
+  table{ width:100%; border-collapse:collapse; font-size:.88rem; }
+  th{ text-align:left; color:var(--muted); font-size:.74rem; text-transform:uppercase; letter-spacing:.4px; padding:6px 8px; border-bottom:2px solid var(--line); }
+  td{ padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  input, select{
+    width:100%; padding:9px 10px; border:1.5px solid var(--line); border-radius:9px; font-size:.9rem;
+    background:#fffefb; color:var(--ink); font-family:inherit;
+  }
+  input:focus, select:focus{ outline:none; border-color:var(--pine-light); }
+  .form-row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:10px; margin-bottom:10px; }
+  .btn{
+    border:none; padding:10px 16px; border-radius:10px; font-weight:700; cursor:pointer; font-size:.88rem;
+    background:var(--pine); color:#fff; transition:.15s;
+  }
+  .btn:hover{ background:var(--pine-dark); }
+  .btn.red{ background:var(--red); } .btn.red:hover{ background:var(--red-dark); }
+  .btn.ghost{ background:transparent; color:var(--pine); border:1.5px solid var(--pine); }
+  .btn.sm{ padding:5px 10px; font-size:.76rem; border-radius:8px; }
+  .btn.icon{ background:transparent; color:var(--red); padding:4px 8px; font-size:1rem; }
+  .status-pill{
+    display:inline-block; padding:4px 10px; border-radius:999px; font-size:.72rem; font-weight:800; text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .status-idee{ background:#eee; color:#777; }
+  .status-gekauft{ background:#fde8c7; color:#8a5a00; }
+  .status-eingepackt{ background:#d9ecff; color:#1f5fa8; }
+  .status-verschickt{ background:#dcf3e2; color:#1f7a3d; }
+  .empty{ text-align:center; color:var(--muted); padding:28px 10px; font-size:.9rem; }
+  .list-row{ display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line); gap:10px; }
+  .list-row:last-child{ border-bottom:none; }
+  .shop-check{ display:flex; align-items:center; gap:10px; }
+  .shop-check input[type=checkbox]{ width:20px; height:20px; accent-color:var(--pine); }
+  .tag{ font-size:.72rem; background:var(--kraft); color:var(--pine-dark); padding:3px 8px; border-radius:7px; font-weight:700; }
+  footer{ text-align:center; color:var(--muted); font-size:.76rem; padding:30px 16px 10px; }
+  .mini{ font-size:.78rem; color:var(--muted); }
+  .section-title-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .danger-zone{ border:1.5px dashed var(--red); border-radius:12px; padding:14px; margin-top:16px; }
+  @media (max-width:480px){
+    header h1{ font-size:1.3rem; }
+    th:nth-child(4), td:nth-child(4){ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎄 Weihnachtsplaner</h1>
+  <p>Geschenke, Budget & Einkaufsliste an einem Ort — alles in deinem Browser gespeichert.</p>
+  <div class="countdown">🎁 noch <b id="cdDays">–</b> Tage bis Weihnachten</div>
+</header>
+
+<div class="wrap">
+  <nav>
+    <button class="tab-btn active" data-tab="dashboard">📊 Übersicht</button>
+    <button class="tab-btn" data-tab="gifts">🎁 Geschenke</button>
+    <button class="tab-btn" data-tab="recipients">👪 Empfänger</button>
+    <button class="tab-btn" data-tab="shopping">🛒 Einkaufsliste</button>
+    <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
+  </nav>
+
+  <section id="tab-dashboard" class="active">
+    <div class="card">
+      <div class="grid">
+        <div class="stat"><div class="n" id="stBudget">–</div><div class="l">Gesamtbudget</div></div>
+        <div class="stat red"><div class="n" id="stSpent">–</div><div class="l">Ausgegeben</div></div>
+        <div class="stat"><div class="n" id="stLeft">–</div><div class="l">Verbleibend</div></div>
+        <div class="stat"><div class="n" id="stCount">–</div><div class="l">Geschenke geplant</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Fortschritt</h2>
+      <div class="progress-row"><div class="pl"><span>🛍️ Gekauft</span><span id="pctGekauft">0%</span></div><div class="bar"><i id="barGekauft" style="width:0%"></i></div></div>
+      <div class="progress-row"><div class="pl"><span>🎀 Eingepackt</span><span id="pctEingepackt">0%</span></div><div class="bar"><i id="barEingepackt" style="width:0%"></i></div></div>
+      <div class="progress-row"><div class="pl"><span>📦 Verschickt / Fertig</span><span id="pctVerschickt">0%</span></div><div class="bar"><i id="barVerschickt" style="width:0%"></i></div></div>
+    </div>
+    <div class="card">
+      <h2>Ausgaben pro Empfänger</h2>
+      <div id="perRecipient"><div class="empty">Füge Empfänger hinzu, um hier die Übersicht zu sehen.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-gifts">
+    <div class="card">
+      <div class="section-title-row"><h2 style="margin:0">Geschenk hinzufügen</h2></div>
+      <div class="form-row">
+        <select id="giftRecipient"></select>
+        <input id="giftName" placeholder="Geschenk (z. B. Kochbuch)">
+        <input id="giftPrice" type="number" step="0.01" min="0" placeholder="Preis (€)">
+        <select id="giftStatus">
+          <option value="idee">Idee</option>
+          <option value="gekauft">Gekauft</option>
+          <option value="eingepackt">Eingepackt</option>
+          <option value="verschickt">Verschickt</option>
+        </select>
+      </div>
+      <input id="giftNote" placeholder="Notiz / Link (optional)" style="margin-bottom:10px">
+      <button class="btn" id="btnAddGift">+ Geschenk hinzufügen</button>
+    </div>
+    <div class="card">
+      <h2>Alle Geschenke</h2>
+      <div id="giftsTableWrap"><div class="empty">Noch keine Geschenke — füge oben das erste hinzu 🎁</div></div>
+    </div>
+  </section>
+
+  <section id="tab-recipients">
+    <div class="card">
+      <h2>Empfänger hinzufügen</h2>
+      <div class="form-row">
+        <input id="recName" placeholder="Name (z. B. Mama)">
+        <input id="recBudget" type="number" step="0.01" min="0" placeholder="Budget für diese Person (€, optional)">
+      </div>
+      <button class="btn" id="btnAddRecipient">+ Empfänger hinzufügen</button>
+    </div>
+    <div class="card">
+      <h2>Alle Empfänger</h2>
+      <div id="recipientsList"><div class="empty">Noch niemand eingetragen.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-shopping">
+    <div class="card">
+      <h2>🛒 Noch zu kaufen</h2>
+      <div id="shopToBuy"><div class="empty">Alles gekauft — gut gemacht! 🎉</div></div>
+    </div>
+    <div class="card">
+      <h2>🎀 Noch einzupacken</h2>
+      <div id="shopToWrap"><div class="empty">Nichts offen.</div></div>
+    </div>
+    <div class="card">
+      <h2>📦 Noch zu verschicken / zu übergeben</h2>
+      <div id="shopToSend"><div class="empty">Nichts offen.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-settings">
+    <div class="card">
+      <h2>Gesamtbudget</h2>
+      <div class="form-row">
+        <input id="setBudget" type="number" step="0.01" min="0" placeholder="z. B. 300">
+        <select id="setCurrency">
+          <option value="€">€ Euro</option>
+          <option value="CHF">CHF</option>
+          <option value="$">$ Dollar</option>
+        </select>
+      </div>
+      <button class="btn" id="btnSaveSettings">Speichern</button>
+    </div>
+    <div class="card">
+      <h2>Daten exportieren / importieren</h2>
+      <p class="mini">Sichere deine Liste als Datei (z. B. um sie auf einem anderen Gerät weiter zu benutzen) oder lade eine gesicherte Datei wieder ein.</p>
+      <div class="form-row">
+        <button class="btn ghost" id="btnExport">⬇️ Als Datei sichern</button>
+        <label class="btn ghost" style="text-align:center; cursor:pointer;">⬆️ Datei laden<input type="file" id="importFile" accept="application/json" style="display:none"></label>
+      </div>
+      <div class="danger-zone">
+        <p class="mini" style="margin:0 0 10px"><b>Alles zurücksetzen.</b> Löscht alle Geschenke, Empfänger und Einstellungen unwiderruflich.</p>
+        <button class="btn red sm" id="btnReset">🗑️ Alles löschen</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    🔒 Alle Daten werden ausschließlich lokal in deinem Browser gespeichert (localStorage) — nichts wird an einen Server gesendet.<br>
+    Funktioniert auf Smartphone, Tablet und Computer. Am besten als Lesezeichen speichern.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = "wgt_data_v1";
+
+  function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+  function fmtMoney(n){
+    var c = state.currency || "€";
+    var v = (Math.round((Number(n)||0)*100)/100).toFixed(2).replace(".", ",");
+    return c === "€" ? v + " €" : c + " " + v;
+  }
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    }catch(e){ console.error("Konnte gespeicherte Daten nicht lesen", e); }
+    return { budget: 0, currency: "€", recipients: [], gifts: [] };
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ alert("Konnte nicht speichern — eventuell ist der Speicher deines Browsers voll."); }
+  }
+
+  var state = loadState();
+
+  // ---------- Navigation ----------
+  var tabBtns = Array.prototype.slice.call(document.querySelectorAll(".tab-btn"));
+  tabBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabBtns.forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      Array.prototype.slice.call(document.querySelectorAll("section")).forEach(function(s){ s.classList.remove("active"); });
+      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------- Countdown ----------
+  function updateCountdown(){
+    var now = new Date();
+    var year = now.getFullYear();
+    var xmas = new Date(year, 11, 25);
+    if (now > xmas) xmas = new Date(year + 1, 11, 25);
+    var diffDays = Math.ceil((xmas - now) / (1000*60*60*24));
+    document.getElementById("cdDays").textContent = diffDays;
+  }
+
+  // ---------- Derived helpers ----------
+  function totalSpent(){
+    return state.gifts.reduce(function(sum,g){ return sum + (Number(g.price)||0); }, 0);
+  }
+  function spentFor(recipientId){
+    return state.gifts.filter(function(g){ return g.recipientId === recipientId; })
+      .reduce(function(sum,g){ return sum + (Number(g.price)||0); }, 0);
+  }
+  function statusOrder(st){ return {idee:0, gekauft:1, eingepackt:2, verschickt:3}[st] || 0; }
+  function recipientName(id){
+    var r = state.recipients.find(function(x){ return x.id === id; });
+    return r ? r.name : "—";
+  }
+
+  // ---------- Render: Dashboard ----------
+  function renderDashboard(){
+    var spent = totalSpent();
+    document.getElementById("stBudget").textContent = fmtMoney(state.budget);
+    document.getElementById("stSpent").textContent = fmtMoney(spent);
+    document.getElementById("stLeft").textContent = fmtMoney((Number(state.budget)||0) - spent);
+    document.getElementById("stCount").textContent = state.gifts.length;
+
+    var total = state.gifts.length || 1;
+    var nGekauft = state.gifts.filter(function(g){ return statusOrder(g.status) >= statusOrder("gekauft"); }).length;
+    var nEingepackt = state.gifts.filter(function(g){ return statusOrder(g.status) >= statusOrder("eingepackt"); }).length;
+    var nVerschickt = state.gifts.filter(function(g){ return statusOrder(g.status) >= statusOrder("verschickt"); }).length;
+    function pct(n){ return Math.round((n/total)*100); }
+    document.getElementById("pctGekauft").textContent = pct(nGekauft) + "%";
+    document.getElementById("barGekauft").style.width = pct(nGekauft) + "%";
+    document.getElementById("pctEingepackt").textContent = pct(nEingepackt) + "%";
+    document.getElementById("barEingepackt").style.width = pct(nEingepackt) + "%";
+    document.getElementById("pctVerschickt").textContent = pct(nVerschickt) + "%";
+    document.getElementById("barVerschickt").style.width = pct(nVerschickt) + "%";
+
+    var wrap = document.getElementById("perRecipient");
+    if (!state.recipients.length){
+      wrap.innerHTML = '<div class="empty">Füge Empfänger hinzu, um hier die Übersicht zu sehen.</div>';
+    } else {
+      wrap.innerHTML = state.recipients.map(function(r){
+        var s = spentFor(r.id);
+        var budget = Number(r.budget)||0;
+        var pct = budget > 0 ? Math.min(100, Math.round((s/budget)*100)) : (s>0 ? 100 : 0);
+        return '<div class="progress-row"><div class="pl"><span>' + escapeHtml(r.name) + '</span>' +
+          '<span>' + fmtMoney(s) + (budget ? ' / ' + fmtMoney(budget) : '') + '</span></div>' +
+          '<div class="bar"><i style="width:' + pct + '%; background:' + (budget && s > budget ? 'var(--red)' : 'linear-gradient(90deg, var(--pine-light), var(--pine))') + '"></i></div></div>';
+      }).join("");
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- Render: Gifts ----------
+  function renderGiftRecipientSelect(){
+    var sel = document.getElementById("giftRecipient");
+    sel.innerHTML = state.recipients.length
+      ? state.recipients.map(function(r){ return '<option value="'+r.id+'">'+escapeHtml(r.name)+'</option>'; }).join("")
+      : '<option value="">(zuerst Empfänger anlegen)</option>';
+  }
+
+  function statusLabel(st){
+    return {idee:"Idee", gekauft:"Gekauft", eingepackt:"Eingepackt", verschickt:"Verschickt"}[st] || st;
+  }
+
+  function renderGifts(){
+    var wrap = document.getElementById("giftsTableWrap");
+    if (!state.gifts.length){
+      wrap.innerHTML = '<div class="empty">Noch keine Geschenke — füge oben das erste hinzu 🎁</div>';
+      return;
+    }
+    var rows = state.gifts.map(function(g){
+      return '<tr>' +
+        '<td>'+escapeHtml(recipientName(g.recipientId))+'</td>' +
+        '<td>'+escapeHtml(g.name)+(g.note ? '<br><span class="mini">'+escapeHtml(g.note)+'</span>' : '')+'</td>' +
+        '<td>'+fmtMoney(g.price)+'</td>' +
+        '<td><select data-act="status" data-id="'+g.id+'" class="status-select">' +
+          ["idee","gekauft","eingepackt","verschickt"].map(function(s){
+            return '<option value="'+s+'"'+(g.status===s?' selected':'')+'>'+statusLabel(s)+'</option>';
+          }).join("") +
+        '</select></td>' +
+        '<td><button class="btn icon" data-act="del-gift" data-id="'+g.id+'">✕</button></td>' +
+      '</tr>';
+    }).join("");
+    wrap.innerHTML = '<table><thead><tr><th>Für</th><th>Geschenk</th><th>Preis</th><th>Status</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  // ---------- Render: Recipients ----------
+  function renderRecipients(){
+    var wrap = document.getElementById("recipientsList");
+    if (!state.recipients.length){
+      wrap.innerHTML = '<div class="empty">Noch niemand eingetragen.</div>';
+      return;
+    }
+    wrap.innerHTML = state.recipients.map(function(r){
+      var s = spentFor(r.id);
+      return '<div class="list-row"><div><b>'+escapeHtml(r.name)+'</b><br><span class="mini">'+fmtMoney(s)+(r.budget?(' von '+fmtMoney(r.budget)):'')+'</span></div>' +
+        '<button class="btn icon" data-act="del-recipient" data-id="'+r.id+'">✕</button></div>';
+    }).join("");
+  }
+
+  // ---------- Render: Shopping list ----------
+  function renderShopping(){
+    function section(elId, filterFn, markLabel, nextStatus){
+      var items = state.gifts.filter(filterFn);
+      var el = document.getElementById(elId);
+      if (!items.length){ el.innerHTML = '<div class="empty">Nichts offen. 🎉</div>'; return; }
+      el.innerHTML = items.map(function(g){
+        return '<div class="list-row"><div class="shop-check">' +
+          '<input type="checkbox" data-act="advance" data-id="'+g.id+'" data-next="'+nextStatus+'">' +
+          '<span>'+escapeHtml(g.name)+' <span class="tag">'+escapeHtml(recipientName(g.recipientId))+'</span></span></div>' +
+          '<span class="mini">'+fmtMoney(g.price)+'</span></div>';
+      }).join("");
+    }
+    section("shopToBuy", function(g){ return g.status === "idee"; }, "kaufen", "gekauft");
+    section("shopToWrap", function(g){ return g.status === "gekauft"; }, "einpacken", "eingepackt");
+    section("shopToSend", function(g){ return g.status === "eingepackt"; }, "verschicken", "verschickt");
+  }
+
+  function renderAll(){
+    renderDashboard();
+    renderGiftRecipientSelect();
+    renderGifts();
+    renderRecipients();
+    renderShopping();
+  }
+
+  // ---------- Events: Gifts ----------
+  document.getElementById("btnAddGift").addEventListener("click", function(){
+    var recipientId = document.getElementById("giftRecipient").value;
+    var name = document.getElementById("giftName").value.trim();
+    var price = document.getElementById("giftPrice").value;
+    var status = document.getElementById("giftStatus").value;
+    var note = document.getElementById("giftNote").value.trim();
+    if (!recipientId){ alert("Lege zuerst einen Empfänger an (Tab \"Empfänger\")."); return; }
+    if (!name){ alert("Gib einen Namen für das Geschenk ein."); return; }
+    state.gifts.push({ id: uid(), recipientId: recipientId, name: name, price: price || 0, status: status, note: note });
+    saveState();
+    document.getElementById("giftName").value = "";
+    document.getElementById("giftPrice").value = "";
+    document.getElementById("giftNote").value = "";
+    renderAll();
+  });
+
+  document.getElementById("giftsTableWrap").addEventListener("change", function(e){
+    var t = e.target;
+    if (t.dataset.act === "status"){
+      var g = state.gifts.find(function(x){ return x.id === t.dataset.id; });
+      if (g){ g.status = t.value; saveState(); renderDashboard(); renderShopping(); }
+    }
+  });
+  document.getElementById("giftsTableWrap").addEventListener("click", function(e){
+    var t = e.target.closest("[data-act='del-gift']");
+    if (t){
+      state.gifts = state.gifts.filter(function(g){ return g.id !== t.dataset.id; });
+      saveState(); renderAll();
+    }
+  });
+
+  // ---------- Events: Recipients ----------
+  document.getElementById("btnAddRecipient").addEventListener("click", function(){
+    var name = document.getElementById("recName").value.trim();
+    var budget = document.getElementById("recBudget").value;
+    if (!name){ alert("Gib einen Namen ein."); return; }
+    state.recipients.push({ id: uid(), name: name, budget: budget || 0 });
+    saveState();
+    document.getElementById("recName").value = "";
+    document.getElementById("recBudget").value = "";
+    renderAll();
+  });
+  document.getElementById("recipientsList").addEventListener("click", function(e){
+    var t = e.target.closest("[data-act='del-recipient']");
+    if (t){
+      if (state.gifts.some(function(g){ return g.recipientId === t.dataset.id; })){
+        if (!confirm("Diese Person hat schon Geschenke zugeordnet. Diese Geschenke bleiben, aber ohne Empfänger. Trotzdem löschen?")) return;
+      }
+      state.recipients = state.recipients.filter(function(r){ return r.id !== t.dataset.id; });
+      saveState(); renderAll();
+    }
+  });
+
+  // ---------- Events: Shopping checkboxes ----------
+  ["shopToBuy","shopToWrap","shopToSend"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(e){
+      var t = e.target;
+      if (t.dataset.act === "advance" && t.checked){
+        var g = state.gifts.find(function(x){ return x.id === t.dataset.id; });
+        if (g){ g.status = t.dataset.next; saveState(); renderAll(); }
+      }
+    });
+  });
+
+  // ---------- Settings ----------
+  document.getElementById("setBudget").value = state.budget || "";
+  document.getElementById("setCurrency").value = state.currency || "€";
+  document.getElementById("btnSaveSettings").addEventListener("click", function(){
+    state.budget = document.getElementById("setBudget").value || 0;
+    state.currency = document.getElementById("setCurrency").value;
+    saveState(); renderAll();
+    var b = document.getElementById("btnSaveSettings");
+    var old = b.textContent; b.textContent = "Gespeichert ✓";
+    setTimeout(function(){ b.textContent = old; }, 1500);
+  });
+
+  document.getElementById("btnExport").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "weihnachtsplaner-" + new Date().toISOString().slice(0,10) + ".json";
+    a.click();
+  });
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var data = JSON.parse(String(reader.result));
+        if (!data || !Array.isArray(data.gifts) || !Array.isArray(data.recipients)) throw new Error("Ungültiges Format");
+        state = data;
+        saveState(); renderAll();
+        document.getElementById("setBudget").value = state.budget || "";
+        document.getElementById("setCurrency").value = state.currency || "€";
+        alert("Daten erfolgreich geladen ✓");
+      }catch(err){ alert("Konnte die Datei nicht lesen — ist es die richtige Sicherungsdatei?"); }
+    };
+    reader.readAsText(file);
+  });
+  document.getElementById("btnReset").addEventListener("click", function(){
+    if (confirm("Wirklich ALLES löschen? Das kann nicht rückgängig gemacht werden.")){
+      state = { budget: 0, currency: "€", recipients: [], gifts: [] };
+      saveState(); renderAll();
+      document.getElementById("setBudget").value = "";
+    }
+  });
+
+  updateCountdown();
+  renderAll();
+})();
+</script>
+</body>
+</html>
