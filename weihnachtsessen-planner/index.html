@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Weihnachtszauber – Mein perfektes Weihnachtsessen</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Weihnachtsessen">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Weihnachtsessen Planner">
+<meta name="theme-color" content="#5c1a26">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="Gäste, Menü, Einkaufsliste, Budget, Zeitplan und Tischplanung für dein perfektes Weihnachtsessen – alles in deinem Browser gespeichert.">
+<style>
+:root{
+  --ivory:#faf6ec; --ivory-d:#f0e6d2; --burgundy:#5c1a26; --burgundy-d:#45121c;
+  --forest:#1f3d2b; --gold:#c9a86a; --gold-d:#ad8a4e; --ink:#2a211c; --muted:#796a5e;
+  --line:#e9ddc6; --white:#fff; --ok:#1f3d2b; --warn:#9c5a1d; --bg:var(--ivory); --card:#fff;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:1180px;margin:0 auto;padding:0 18px 90px}
+.topbar{background:var(--burgundy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.lg{font-family:Georgia,serif;font-weight:700;font-size:20px;letter-spacing:.3px}
+.lg small{display:block;font-family:-apple-system,sans-serif;font-weight:400;font-size:11px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-top:-2px}
+.status{font-size:12px;color:#e8c98e;display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#7fbf7f;display:inline-block}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:58px;z-index:40;padding:6px 10px;scrollbar-width:thin}
+nav.tabs button{background:none;border:none;padding:10px 14px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+nav.tabs button.on{background:var(--burgundy);color:#fff}
+.view{padding-top:22px;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(60,40,20,.05)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.kpi .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.kpi .val{font-size:26px;font-weight:700;margin-top:4px;font-family:Georgia,serif;color:var(--burgundy)}
+.hero{background:linear-gradient(135deg,var(--forest),#163022);color:#f3ead8;border-radius:18px;padding:28px;margin-bottom:18px;position:relative;overflow:hidden}
+.hero .gar{display:flex;align-items:center;gap:12px;color:var(--gold);margin-bottom:6px}
+.hero .gar i{flex:0 0 40px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.hero h1{margin:4px 0;font-size:30px}
+.hero .cd{font-size:15px;color:#e3c98f}
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13.5px}
+.btn-primary{background:var(--burgundy);color:#fff}
+.btn-gold{background:var(--gold);color:var(--burgundy-d)}
+.btn-ghost{background:var(--ivory-d);color:var(--ink)}
+.btn-danger{background:#fff;color:#a6333f;border:1px solid #e3b7bc}
+.btn:disabled{opacity:.5;cursor:default}
+input,select,textarea{font-family:inherit;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:14px;background:#fff;color:var(--ink);width:100%}
+label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.field{margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:2px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:700}
+.pill-burgundy{background:#f3dde1;color:var(--burgundy)}
+.pill-gold{background:#f3e7cc;color:var(--gold-d)}
+.pill-forest{background:#dbe8dd;color:var(--forest)}
+.pill-warn{background:#f6e2cc;color:var(--warn)}
+.sectitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sectitle h2{margin:0;font-size:19px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.modal-bg{position:fixed;inset:0;background:rgba(30,20,15,.5);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:40px 14px;overflow-y:auto}
+.modal{background:#fff;border-radius:16px;padding:22px;max-width:520px;width:100%;max-height:none}
+.modal h3{margin-top:0}
+.rowend{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.chk{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.chk:last-child{border-bottom:none}
+.chk input{width:auto}
+.badge-cat{display:inline-block;background:var(--ivory-d);color:var(--forest);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:6px;margin-bottom:6px}
+.recipe-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:6px}
+.recipe-card h4{margin:0;font-size:15.5px}
+.recipe-meta{display:flex;gap:10px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+.toast-wrap{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--forest);color:#fff;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:toastIn .2s ease}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ring{position:relative;width:84px;height:84px}
+.ring svg{transform:rotate(-90deg)}
+.ring .n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;font-family:Georgia,serif}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:13.5px}
+.printonly{display:none}
+@media print{
+  body *{visibility:hidden}
+  .printonly,.printonly *{visibility:visible}
+  .printonly{display:block;position:absolute;left:0;top:0;width:100%}
+  .print-page{page-break-after:always;padding:20px}
+}
+.toggle3{display:flex;gap:6px}
+.toggle3 button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px;font-size:12px;font-weight:700;color:var(--muted)}
+.toggle3 button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+.ing-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.ing-row:last-child{border-bottom:none}
+.catgroup{margin-bottom:10px}
+.catgroup h5{margin:0 0 4px;font-size:12px;text-transform:uppercase;color:var(--gold-d);letter-spacing:.5px}
+footer.appfoot{text-align:center;color:var(--muted);font-size:11.5px;padding:30px 0 10px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast-wrap" id="toasts"></div>
+<div id="printarea" class="printonly"></div>
+
+<script>
+/* ================= DATA / STATE ================= */
+const LS_KEY = "wep_data_v1";
+const uid = () => Math.random().toString(36).slice(2,9);
+
+const CATS = [
+  {id:"aperitif", label:"Aperitif"},
+  {id:"vorspeisen", label:"Vorspeisen"},
+  {id:"hauptgericht", label:"Hauptgericht"},
+  {id:"beilagen", label:"Beilagen"},
+  {id:"desserts", label:"Desserts"},
+  {id:"getraenke", label:"Getränke"},
+];
+
+const RECIPES = [
+  {id:"r1",name:"Klassischer Kartoffelsalat",cat:"beilagen",servings:6,prep:25,cook:20,diff:"Einfach",cost:8,storage:"Bis zu 2 Tage im Kühlschrank, abgedeckt.",
+    ing:[["Kartoffeln, festkochend","1.2","kg"],["Gemüsebrühe","400","ml"],["Essiggurken","3","Stk"],["Zwiebel","1","Stk"],["Senf","1","EL"],["Weißweinessig","3","EL"],["Sonnenblumenöl","6","EL"],["Salz & Pfeffer","1","Prise"]],
+    steps:["Kartoffeln waschen und in der Schale ca. 20 Minuten garkochen.","Kartoffeln pellen, noch warm in Scheiben schneiden.","Zwiebel und Essiggurken fein würfeln.","Brühe, Essig, Senf, Öl verrühren und über die warmen Kartoffeln geben.","Zwiebeln und Gurken untermischen, mit Salz und Pfeffer abschmecken.","Mindestens 1 Stunde ziehen lassen, vor dem Servieren nochmals abschmecken."]},
+  {id:"r2",name:"Festliche Weihnachtsgans",cat:"hauptgericht",servings:8,prep:30,cook:180,diff:"Anspruchsvoll",cost:55,storage:"Reste bis 2 Tage gekühlt, gut durcherhitzen.",
+    ing:[["Gans, bratfertig","1","Stk (ca. 4.5kg)"],["Äpfel","3","Stk"],["Zwiebeln","2","Stk"],["Beifuß","2","EL"],["Salz & Pfeffer","2","EL"],["Gemüsebrühe","500","ml"]],
+    steps:["Gans innen und außen trocken tupfen, mit Salz, Pfeffer und Beifuß einreiben.","Äpfel und Zwiebeln vierteln und die Gans damit füllen.","Bei 160°C ca. 3 Stunden braten, regelmäßig mit Bratensaft übergießen.","Letzte 20 Minuten Hitze erhöhen, damit die Haut knusprig wird.","Vor dem Tranchieren 15 Minuten ruhen lassen.","Bratensaft mit Brühe ablöschen für die Sauce."]},
+  {id:"r3",name:"Rotkohl mit Apfel",cat:"beilagen",servings:6,prep:15,cook:60,diff:"Einfach",cost:6,storage:"Schmeckt aufgewärmt sogar besser, 3 Tage haltbar.",
+    ing:[["Rotkohl","1.2","kg"],["Äpfel","2","Stk"],["Zwiebel","1","Stk"],["Rotwein","150","ml"],["Johannisbeergelee","2","EL"],["Nelken & Lorbeer","2","Stk"],["Butterschmalz","2","EL"]],
+    steps:["Rotkohl fein hobeln, Äpfel und Zwiebel würfeln.","Butterschmalz erhitzen, Zwiebel glasig dünsten.","Rotkohl und Äpfel zugeben, mit Rotwein ablöschen.","Gewürze zugeben, zugedeckt 50 Minuten köcheln lassen.","Mit Johannisbeergelee abschmecken und binden."]},
+  {id:"r4",name:"Semmelknödel",cat:"beilagen",servings:6,prep:20,cook:20,diff:"Mittel",cost:5,storage:"Rohe Masse nicht lange lagern, gekocht 1 Tag kühlen.",
+    ing:[["Brötchen vom Vortag","8","Stk"],["Milch","300","ml"],["Zwiebel","1","Stk"],["Eier","2","Stk"],["Petersilie","2","EL"],["Butter","1","EL"],["Salz & Muskat","1","Prise"]],
+    steps:["Brötchen in Scheiben schneiden, mit warmer Milch übergießen, 15 Minuten ziehen lassen.","Zwiebel in Butter glasig dünsten.","Eier, Zwiebel und Petersilie zur Brötchenmasse geben, kneten.","Mit nassen Händen Knödel formen.","In leicht köchelndem Salzwasser 18-20 Minuten gar ziehen lassen."]},
+  {id:"r5",name:"Raclette-Abend",cat:"hauptgericht",servings:6,prep:30,cook:0,diff:"Einfach",cost:14,storage:"Zutaten roh, am selben Tag verwenden.",
+    ing:[["Raclettekäse","900","g"],["Kartoffeln, klein","1","kg"],["Diverses Gemüse","600","g"],["Schinken & Wurst","400","g"],["Essiggurken & Silberzwiebeln","200","g"],["Pfefferrahmsauce","200","ml"]],
+    steps:["Kartoffeln vorgaren, Gemüse in mundgerechte Stücke schneiden.","Käse in Scheiben schneiden, alles dekorativ anrichten.","Racletteofen vorheizen.","Jeder Gast belegt sein eigenes Pfännchen nach Belieben.","Mit Dips und Baguette servieren."]},
+  {id:"r6",name:"Käsefondue",cat:"hauptgericht",servings:6,prep:20,cook:15,diff:"Mittel",cost:16,storage:"Reste am selben Tag verzehren.",
+    ing:[["Gruyère, gerieben","300","g"],["Emmentaler, gerieben","300","g"],["Weißwein","300","ml"],["Knoblauchzehe","1","Stk"],["Speisestärke","1","EL"],["Kirschwasser","2","cl"],["Baguette","1","Stk"]],
+    steps:["Fonduetopf mit Knoblauch ausreiben.","Weißwein erhitzen, Käse esslöffelweise unter Rühren schmelzen.","Stärke mit Kirschwasser anrühren, zum Binden einrühren.","Mit Pfeffer und Muskat abschmecken.","Auf Rechaud warmhalten, Brotwürfel dippen."]},
+  {id:"r7",name:"Weihnachtliche Linsensuppe",cat:"vorspeisen",servings:6,prep:15,cook:35,diff:"Einfach",cost:7,storage:"3 Tage gekühlt, friert gut ein.",
+    ing:[["Linsen","300","g"],["Karotten","2","Stk"],["Sellerie","1","Stk"],["Zwiebel","1","Stk"],["Gemüsebrühe","1.2","l"],["Lorbeerblatt","1","Stk"],["Essig","1","EL"]],
+    steps:["Gemüse fein würfeln, in Öl andünsten.","Linsen zugeben, mit Brühe auffüllen.","Mit Lorbeer 30 Minuten köcheln lassen.","Mit Essig, Salz und Pfeffer abschmecken."]},
+  {id:"r8",name:"Flammkuchen mit Lachs",cat:"vorspeisen",servings:4,prep:20,cook:12,diff:"Einfach",cost:11,storage:"Am besten frisch servieren.",
+    ing:[["Flammkuchenteig","2","Stk"],["Crème fraîche","200","g"],["Räucherlachs","150","g"],["Rote Zwiebel","1","Stk"],["Dill","2","EL"],["Zitrone","0.5","Stk"]],
+    steps:["Teig ausrollen, mit Crème fraîche bestreichen.","Zwiebelringe verteilen, bei 220°C 10-12 Minuten backen.","Nach dem Backen mit Lachs, Dill und Zitronenabrieb belegen."]},
+  {id:"r9",name:"Wildschweinbraten",cat:"hauptgericht",servings:8,prep:35,cook:150,diff:"Anspruchsvoll",cost:48,storage:"2 Tage gekühlt, gut durcherhitzen.",
+    ing:[["Wildschweinbraten","2","kg"],["Wurzelgemüse","500","g"],["Rotwein","300","ml"],["Wacholderbeeren","6","Stk"],["Preiselbeeren","2","EL"],["Lorbeer","2","Stk"]],
+    steps:["Fleisch scharf anbraten, herausnehmen.","Gemüse im Bratfett anrösten.","Fleisch zurücklegen, mit Rotwein ablöschen.","Gewürze zugeben, zugedeckt bei 160°C ca. 2,5 Stunden schmoren.","Sauce passieren, mit Preiselbeeren abschmecken."]},
+  {id:"r10",name:"Vegetarischer Nussbraten",cat:"hauptgericht",servings:6,prep:30,cook:45,diff:"Mittel",cost:12,storage:"2 Tage gekühlt haltbar, auch kalt lecker.",
+    ing:[["Gemischte Nüsse, gemahlen","300","g"],["Champignons","250","g"],["Zwiebel","1","Stk"],["Haferflocken","80","g"],["Eier","2","Stk"],["Gemüsebrühe","150","ml"],["Kräuter","2","EL"]],
+    steps:["Zwiebel und Champignons fein hacken, anbraten.","Mit Nüssen, Haferflocken, Eiern und Brühe vermengen.","In eine Kastenform füllen, glattstreichen.","Bei 180°C ca. 45 Minuten backen.","Vor dem Anschneiden 10 Minuten ruhen lassen."]},
+  {id:"r11",name:"Vanillekipferl",cat:"desserts",servings:40,prep:40,cook:12,diff:"Mittel",cost:9,storage:"In Dose bis zu 3 Wochen haltbar.",
+    ing:[["Mehl","250","g"],["Gemahlene Mandeln","100","g"],["Butter, kalt","180","g"],["Zucker","80","g"],["Vanillezucker","2","Pck"],["Puderzucker","100","g"]],
+    steps:["Mehl, Mandeln, Butter und Zucker rasch zu einem Teig verkneten.","1 Stunde kühl stellen.","Kipferl formen, bei 170°C 10-12 Minuten backen.","Noch warm in Vanillezucker-Puderzucker-Mischung wälzen."]},
+  {id:"r12",name:"Lebkuchen",cat:"desserts",servings:20,prep:30,cook:15,diff:"Mittel",cost:8,storage:"In Dose mit Apfelstück 2-3 Wochen haltbar, wird weicher.",
+    ing:[["Honig","250","g"],["Mehl","400","g"],["Lebkuchengewürz","2","EL"],["Eier","2","Stk"],["Zucker","100","g"],["Backpulver","1","TL"],["Kuvertüre","200","g"]],
+    steps:["Honig erwärmen, mit Zucker und Eiern verrühren.","Mehl, Gewürz und Backpulver einarbeiten.","Teig ausrollen, Formen ausstechen.","Bei 180°C 12-15 Minuten backen.","Nach dem Abkühlen mit Kuvertüre überziehen."]},
+  {id:"r13",name:"Bratapfel mit Marzipan",cat:"desserts",servings:6,prep:15,cook:30,diff:"Einfach",cost:7,storage:"Am besten warm frisch servieren.",
+    ing:[["Äpfel","6","Stk"],["Marzipanrohmasse","150","g"],["Rosinen","50","g"],["Zimt","1","TL"],["Butter","30","g"],["Apfelsaft","100","ml"]],
+    steps:["Äpfel entkernen, Gehäuse etwas vergrößern.","Marzipan mit Rosinen und Zimt vermengen, Äpfel damit füllen.","Butterflöckchen aufsetzen, mit Apfelsaft in die Form geben.","Bei 180°C ca. 30 Minuten backen."]},
+  {id:"r14",name:"Zimtsterne",cat:"desserts",servings:30,prep:45,cook:15,diff:"Mittel",cost:9,storage:"Luftdicht bis 3 Wochen haltbar.",
+    ing:[["Gemahlene Mandeln","400","g"],["Puderzucker","300","g"],["Eiweiß","3","Stk"],["Zimt","1","EL"],["Zitronensaft","1","TL"]],
+    steps:["Eiweiß steif schlagen, Puderzucker einrieseln lassen.","Ein Drittel der Masse für den Guss beiseitestellen.","Mandeln und Zimt unterheben, Teig kühl ruhen lassen.","Ausrollen, Sterne ausstechen, mit Guss bestreichen.","Bei 150°C ca. 12-15 Minuten trocknen lassen."]},
+  {id:"r15",name:"Glühwein",cat:"getraenke",servings:8,prep:5,cook:15,diff:"Einfach",cost:10,storage:"Am besten frisch, nicht länger warmhalten als nötig.",
+    ing:[["Rotwein","1","l"],["Orange","1","Stk"],["Zimtstange","2","Stk"],["Nelken","4","Stk"],["Zucker","3","EL"],["Sternanis","2","Stk"]],
+    steps:["Alle Zutaten in einen Topf geben.","Langsam erwärmen, nicht kochen lassen.","15 Minuten ziehen lassen, abschmecken und servieren."]},
+  {id:"r16",name:"Alkoholfreier Punsch",cat:"getraenke",servings:8,prep:10,cook:10,diff:"Einfach",cost:8,storage:"Gekühlt 2 Tage haltbar.",
+    ing:[["Roter Traubensaft","1","l"],["Orangensaft","300","ml"],["Zimtstange","1","Stk"],["Nelken","3","Stk"],["Ingwer","1","Stück"]],
+    steps:["Säfte mit Gewürzen erwärmen.","10 Minuten ziehen lassen.","Vor dem Servieren Gewürze entfernen."]},
+  {id:"r17",name:"Spekulatius-Tiramisu",cat:"desserts",servings:8,prep:30,cook:0,diff:"Mittel",cost:13,storage:"1-2 Tage gekühlt, am nächsten Tag am besten.",
+    ing:[["Mascarpone","500","g"],["Sahne","200","ml"],["Eier","3","Stk"],["Zucker","80","g"],["Spekulatius","250","g"],["Kaffee, stark","200","ml"],["Kakaopulver","2","EL"]],
+    steps:["Eigelb mit Zucker schaumig schlagen, Mascarpone unterrühren.","Sahne steif schlagen, Eiweiß steif schlagen, beides unterheben.","Spekulatius in Kaffee tunken, Schicht in Form legen.","Creme daraufstreichen, Schichten wiederholen.","Mit Kakao bestäuben, mindestens 4 Stunden kühlen."]},
+  {id:"r18",name:"Entenbrust mit Orangensauce",cat:"hauptgericht",servings:4,prep:20,cook:30,diff:"Mittel",cost:28,storage:"Am besten frisch servieren.",
+    ing:[["Entenbrust","4","Stk"],["Orangen","2","Stk"],["Honig","2","EL"],["Rotwein","100","ml"],["Butter","20","g"],["Thymian","2","Zweige"]],
+    steps:["Entenbrust auf der Hautseite einritzen, scharf anbraten.","Bei 180°C ca. 12-15 Minuten fertig garen.","Für die Sauce Orangensaft, Honig und Rotwein einkochen.","Mit Butter montieren, Entenbrust in Scheiben mit Sauce servieren."]},
+  {id:"r19",name:"Rote-Bete-Carpaccio",cat:"vorspeisen",servings:4,prep:20,cook:0,diff:"Einfach",cost:9,storage:"Am Tag der Zubereitung genießen.",
+    ing:[["Rote Bete, gekocht","3","Stk"],["Ziegenkäse","100","g"],["Walnüsse","40","g"],["Rucola","1","Hand voll"],["Olivenöl","3","EL"],["Balsamico","1","EL"]],
+    steps:["Rote Bete in dünne Scheiben hobeln, auf Tellern anrichten.","Ziegenkäse zerbröckeln, Walnüsse grob hacken.","Mit Rucola, Öl und Balsamico beträufeln und servieren."]},
+  {id:"r20",name:"Kartoffelgratin",cat:"beilagen",servings:6,prep:20,cook:50,diff:"Einfach",cost:9,storage:"2 Tage gekühlt, gut durcherhitzen.",
+    ing:[["Kartoffeln","1.2","kg"],["Sahne","300","ml"],["Milch","200","ml"],["Knoblauch","1","Zehe"],["Gruyère, gerieben","150","g"],["Muskat","1","Prise"]],
+    steps:["Kartoffeln in dünne Scheiben hobeln.","Sahne, Milch, Knoblauch und Muskat erwärmen.","Kartoffeln schichtweise in Auflaufform legen, mit Sahnemischung übergießen.","Mit Käse bestreuen, bei 180°C ca. 50 Minuten backen."]},
+  {id:"r21",name:"Winterlicher Feldsalat mit Granatapfel",cat:"vorspeisen",servings:4,prep:15,cook:0,diff:"Einfach",cost:7,storage:"Am Tag der Zubereitung genießen.",
+    ing:[["Feldsalat","200","g"],["Granatapfelkerne","80","g"],["Walnüsse","40","g"],["Ziegenkäse","80","g"],["Honig-Senf-Dressing","4","EL"]],
+    steps:["Feldsalat waschen und trocknen.","Mit Granatapfelkernen, Walnüssen und Ziegenkäse anrichten.","Mit Dressing beträufeln und sofort servieren."]},
+  {id:"r22",name:"Glühwein-Gelee mit Vanillesauce",cat:"desserts",servings:6,prep:20,cook:10,diff:"Mittel",cost:9,storage:"2 Tage gekühlt haltbar.",
+    ing:[["Glühwein","500","ml"],["Gelatine","6","Blatt"],["Zucker","2","EL"],["Vanillesauce","300","ml"]],
+    steps:["Gelatine in kaltem Wasser einweichen.","Glühwein leicht erwärmen, Zucker auflösen.","Ausgedrückte Gelatine darin auflösen.","In Gläser füllen, mindestens 4 Stunden kühl stellen.","Mit Vanillesauce servieren."]},
+];
+
+function defaultState(){
+  return {
+    name:"Weihnachtsessen",
+    date: new Date().getFullYear()+"-12-24",
+    currency:"EUR",
+    guests:[],
+    menu: Object.fromEntries(CATS.map(c=>[c.id,[]])),
+    customRecipes:[],
+    customShopItems:[],
+    purchased:{},
+    budget:{total:0, expenses:[]},
+    timeline:[],
+    table:{menuTitle:"Unser Weihnachtsmenü", decoChecklist:[], settingChecklist:[], seats:[]},
+    seedLoaded:false,
+  };
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return defaultState();
+    const d = JSON.parse(raw);
+    return Object.assign(defaultState(), d);
+  }catch(e){ return defaultState(); }
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+
+let S = load();
+let TAB = "dashboard";
+
+/* ================= UTIL ================= */
+function fmt(n){
+  n = Number(n)||0;
+  const sym = S.currency === "CHF" ? "CHF" : "€";
+  const s = n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2});
+  return S.currency === "CHF" ? (s+" "+sym) : (s+" "+sym);
+}
+function fmtDate(d){
+  try{ return new Date(d+"T00:00:00").toLocaleDateString("de-DE",{day:"2-digit",month:"long",year:"numeric"}); }catch(e){ return d; }
+}
+function daysUntil(d){
+  const target = new Date(d+"T00:00:00");
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.ceil((target-now)/86400000);
+}
+function allRecipes(){ return RECIPES.concat(S.customRecipes); }
+function recipeById(id){ return allRecipes().find(r=>r.id===id); }
+function toast(msg){
+  const wrap = document.getElementById("toasts");
+  const el = document.createElement("div");
+  el.className="toast"; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), 2800);
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+
+function guestCount(){ return S.guests.length || 1; }
+function adultCount(){ return S.guests.filter(g=>g.type!=="child").length; }
+function childCount(){ return S.guests.filter(g=>g.type==="child").length; }
+
+function menuRecipeIds(){
+  let ids = [];
+  CATS.forEach(c => ids = ids.concat(S.menu[c.id]||[]));
+  return ids;
+}
+function estimatedMenuCost(){
+  return menuRecipeIds().reduce((sum,id)=>{
+    const r = recipeById(id); if(!r) return sum;
+    const factor = Math.max(1, guestCount())/r.servings;
+    return sum + r.cost*factor;
+  },0);
+}
+function spentSoFar(){ return S.budget.expenses.reduce((s,e)=>s+Number(e.amount||0),0); }
+
+function shoppingList(){
+  // group by (name, unit) only — never mix units to avoid wrong conversions
+  const map = {};
+  menuRecipeIds().forEach(id=>{
+    const r = recipeById(id); if(!r) return;
+    const factor = Math.max(1, guestCount())/r.servings;
+    r.ing.forEach(([name, amount, unit])=>{
+      const key = name+"||"+unit;
+      const amt = (parseFloat(amount)||0) * factor;
+      if(!map[key]) map[key] = {name, unit, amount:0, recipes:new Set()};
+      map[key].amount += amt;
+      map[key].recipes.add(r.name);
+    });
+  });
+  let items = Object.values(map).map(it=>({
+    key: it.name+"||"+it.unit, name:it.name, unit:it.unit,
+    amount: Math.round(it.amount*10)/10, recipes:[...it.recipes]
+  }));
+  S.customShopItems.forEach(it=> items.push({key:"custom-"+it.id, name:it.name, unit:it.unit||"", amount:it.amount||"", recipes:[], custom:true, id:it.id}) );
+  return items;
+}
+const CATEGORY_GUESS = {
+  "Kartoffeln":"Gemüse & Obst","Äpfel":"Gemüse & Obst","Orangen":"Gemüse & Obst","Orange":"Gemüse & Obst",
+  "Zwiebel":"Gemüse & Obst","Zwiebeln":"Gemüse & Obst","Karotten":"Gemüse & Obst","Sellerie":"Gemüse & Obst",
+  "Champignons":"Gemüse & Obst","Rotkohl":"Gemüse & Obst","Feldsalat":"Gemüse & Obst","Rucola":"Gemüse & Obst",
+  "Gans, bratfertig":"Fleisch & Fisch","Wildschweinbraten":"Fleisch & Fisch","Entenbrust":"Fleisch & Fisch",
+  "Räucherlachs":"Fleisch & Fisch","Schinken & Wurst":"Fleisch & Fisch",
+  "Milch":"Kühlregal","Sahne":"Kühlregal","Butter":"Kühlregal","Eier":"Kühlregal","Mascarpone":"Kühlregal",
+  "Gruyère, gerieben":"Kühlregal","Emmentaler, gerieben":"Kühlregal","Raclettekäse":"Kühlregal","Ziegenkäse":"Kühlregal",
+  "Mehl":"Vorrat","Zucker":"Vorrat","Honig":"Vorrat","Gemüsebrühe":"Vorrat","Rotwein":"Getränke","Weißwein":"Getränke",
+  "Roter Traubensaft":"Getränke","Orangensaft":"Getränke","Kaffee, stark":"Getränke",
+};
+function guessCategory(name){
+  for(const k in CATEGORY_GUESS) if(name.indexOf(k)===0 || name===k) return CATEGORY_GUESS[k];
+  return "Sonstiges";
+}
+
+/* ================= RENDER SHELL ================= */
+const TABS = [
+  {id:"dashboard", label:"Dashboard"},
+  {id:"gaeste", label:"Gäste"},
+  {id:"menue", label:"Menüplaner"},
+  {id:"rezepte", label:"Rezepte"},
+  {id:"einkauf", label:"Einkaufsliste"},
+  {id:"budget", label:"Budget"},
+  {id:"zeitplan", label:"Zeitplan"},
+  {id:"tisch", label:"Tischplanung"},
+  {id:"druck", label:"Druckvorlagen"},
+  {id:"einstellungen", label:"Einstellungen"},
+];
+
+function render(){
+  const root = document.getElementById("root");
+  root.innerHTML = `
+    <div class="topbar">
+      <div class="lg"><small>Weihnachtszauber</small>Mein perfektes Weihnachtsessen</div>
+      <div class="status"><span class="dot"></span> Gespeichert in deinem Browser</div>
+    </div>
+    <nav class="tabs">${TABS.map(t=>`<button data-tab="${t.id}" class="${TAB===t.id?'on':''}">${t.label}</button>`).join("")}</nav>
+    <div class="app"><div class="view" id="view"></div>
+    <footer class="appfoot">Weihnachtszauber · Alle Daten bleiben lokal in deinem Browser gespeichert.</footer>
+    </div>
+  `;
+  root.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{ TAB=b.dataset.tab; render(); });
+  document.getElementById("view").innerHTML = viewHtml();
+  bindView();
+}
+
+function viewHtml(){
+  switch(TAB){
+    case "dashboard": return viewDashboard();
+    case "gaeste": return viewGaeste();
+    case "menue": return viewMenue();
+    case "rezepte": return viewRezepte();
+    case "einkauf": return viewEinkauf();
+    case "budget": return viewBudget();
+    case "zeitplan": return viewZeitplan();
+    case "tisch": return viewTisch();
+    case "druck": return viewDruck();
+    case "einstellungen": return viewEinstellungen();
+  }
+}
+
+/* ============ DASHBOARD ============ */
+function ring(pct, color, label, sub){
+  pct = Math.max(0,Math.min(100,pct));
+  const r=36, c=2*Math.PI*r;
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div class="ring"><svg width="84" height="84">
+      <circle cx="42" cy="42" r="${r}" stroke="#ece2cc" stroke-width="8" fill="none"></circle>
+      <circle cx="42" cy="42" r="${r}" stroke="${color}" stroke-width="8" fill="none" stroke-linecap="round"
+        stroke-dasharray="${c}" stroke-dashoffset="${c - c*pct/100}"></circle>
+    </svg><div class="n">${Math.round(pct)}%</div></div>
+    <div style="text-align:center"><div style="font-weight:700;font-size:13px">${label}</div><div class="muted small">${sub}</div></div>
+  </div>`;
+}
+
+function viewDashboard(){
+  const dleft = daysUntil(S.date);
+  const menuCount = menuRecipeIds().length;
+  const budgetPct = S.budget.total>0 ? (spentSoFar()/S.budget.total*100) : 0;
+  const shop = shoppingList();
+  const shopDone = shop.filter(i=>S.purchased[i.key]).length;
+  const shopPct = shop.length? shopDone/shop.length*100 : 0;
+  const tasksLeft = S.timeline.filter(t=>!t.done).length;
+  const nextTask = S.timeline.filter(t=>!t.done).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0];
+
+  return `
+  <div class="hero">
+    <div class="gar"><i></i><span style="font-size:11px;letter-spacing:2px">FESTTAGSPLANUNG</span><i></i></div>
+    <h1>${dleft>=0? dleft+" Tage bis Weihnachten" : "Frohe Weihnachten!"}</h1>
+    <div class="cd">${fmtDate(S.date)} · ${S.guests.length} ${S.guests.length===1?"Gast":"Gäste"} eingeladen</div>
+  </div>
+  <div class="grid g4">
+    <div class="kpi"><div class="lbl">Gäste gesamt</div><div class="val">${S.guests.length}</div><div class="small muted">${adultCount()} Erwachsene · ${childCount()} Kinder</div></div>
+    <div class="kpi"><div class="lbl">Menü geplant</div><div class="val">${menuCount}</div><div class="small muted">Gerichte ausgewählt</div></div>
+    <div class="kpi"><div class="lbl">Geschätztes Budget</div><div class="val">${fmt(estimatedMenuCost())}</div><div class="small muted">für ${guestCount()} Personen</div></div>
+    <div class="kpi"><div class="lbl">Aufgaben offen</div><div class="val">${tasksLeft}</div><div class="small muted">${nextTask? "Nächstes: "+esc(nextTask.title) : "Alles erledigt"}</div></div>
+  </div>
+  <div class="card">
+    <div class="sectitle"><h2>Fortschritt</h2></div>
+    <div class="grid g3">
+      ${ring(shopPct,"#5c1a26","Einkaufsliste", shopDone+" von "+shop.length+" erledigt")}
+      ${ring(S.budget.total>0?budgetPct:0,"#c9a86a","Budget genutzt", fmt(spentSoFar())+" von "+fmt(S.budget.total))}
+      ${ring(S.timeline.length? (S.timeline.length-tasksLeft)/S.timeline.length*100:0,"#1f3d2b","Vorbereitung", (S.timeline.length-tasksLeft)+" von "+S.timeline.length+" Aufgaben")}
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="sectitle"><h2>Nächste Termine</h2></div>
+      ${S.timeline.filter(t=>!t.done).slice(0,4).map(t=>`<div class="chk"><div><strong>${esc(t.title)}</strong><div class="small muted">${fmtDate(t.date)} ${t.time?("· "+t.time+" Uhr"):""}</div></div></div>`).join("") || '<div class="empty">Noch keine Aufgaben geplant. Lege welche im Zeitplan an.</div>'}
+    </div>
+    <div class="card">
+      <div class="sectitle"><h2>Dein Menü</h2></div>
+      ${menuCount? CATS.map(c=> (S.menu[c.id]||[]).map(id=>{const r=recipeById(id); return r? `<div class="chk"><div><strong>${esc(r.name)}</strong><div class="small muted">${c.label}</div></div></div>`:"";}).join("")).join("") : '<div class="empty">Noch keine Gerichte ausgewählt. Starte im Menüplaner.</div>'}
+    </div>
+  </div>`;
+}
+
+/* ============ GÄSTE ============ */
+function viewGaeste(){
+  return `
+  <div class="sectitle"><h2>Gästeliste</h2><button class="btn btn-primary" id="addGuest">+ Gast hinzufügen</button></div>
+  <div class="card">
+    ${S.guests.length===0? '<div class="empty">Noch keine Gäste eingetragen. Füge den ersten Gast hinzu.</div>' : `
+    <table><thead><tr><th>Name</th><th>Typ</th><th>Ernährung</th><th>Allergien</th><th>Status</th><th></th></tr></thead>
+    <tbody>${S.guests.map(g=>`
+      <tr>
+        <td><strong>${esc(g.name)}</strong>${g.notes?`<div class="small muted">${esc(g.notes)}</div>`:""}</td>
+        <td>${g.type==="child"?"Kind":"Erwachsen"}</td>
+        <td>${esc(g.diet)||"–"}</td>
+        <td>${g.allergies? `<span class="pill pill-warn">⚠ ${esc(g.allergies)} (von Gast angegeben)</span>` : "–"}</td>
+        <td><span class="pill ${g.status==='zugesagt'?'pill-forest':g.status==='abgesagt'?'pill-burgundy':'pill-gold'}">${g.status||"ausstehend"}</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost small" data-edit="${g.id}">Bearbeiten</button> <button class="btn btn-danger small" data-del="${g.id}">Löschen</button></td>
+      </tr>`).join("")}</tbody></table>`}
+  </div>
+  <div class="card small muted">Hinweis: Allergie- und Ernährungsangaben stammen von den Gästen selbst. Das Programm verifiziert keine Zutaten – prüfe Rezepte vor dem Servieren immer selbst sorgfältig, besonders bei Allergien.</div>
+  `;
+}
+function guestForm(g){
+  g = g || {id:null,name:"",type:"adult",diet:"",allergies:"",notes:"",status:"ausstehend"};
+  return `<div class="modal-bg" id="guestModal"><div class="modal">
+    <h3>${g.id? "Gast bearbeiten":"Neuer Gast"}</h3>
+    <div class="field"><label>Name</label><input id="gf_name" value="${esc(g.name)}" placeholder="Name des Gastes"></div>
+    <div class="field"><label>Typ</label><div class="toggle3"><button type="button" class="${g.type!=='child'?'on':''}" data-set="adult">Erwachsen</button><button type="button" class="${g.type==='child'?'on':''}" data-set="child">Kind</button></div></div>
+    <div class="field"><label>Ernährungsweise</label><input id="gf_diet" value="${esc(g.diet)}" placeholder="z.B. vegetarisch, vegan, keine Angabe"></div>
+    <div class="field"><label>Allergien / Unverträglichkeiten</label><input id="gf_all" value="${esc(g.allergies)}" placeholder="z.B. Nüsse, Laktose"></div>
+    <div class="field"><label>Einladungsstatus</label><select id="gf_status">
+      ${["ausstehend","eingeladen","zugesagt","abgesagt"].map(s=>`<option ${g.status===s?"selected":""}>${s}</option>`).join("")}
+    </select></div>
+    <div class="field"><label>Notizen</label><textarea id="gf_notes" rows="2" placeholder="Optional">${esc(g.notes)}</textarea></div>
+    <input type="hidden" id="gf_type" value="${g.type}">
+    <input type="hidden" id="gf_id" value="${g.id||''}">
+    <div class="rowend"><button class="btn btn-ghost" id="gf_cancel">Abbrechen</button><button class="btn btn-primary" id="gf_save">Speichern</button></div>
+  </div></div>`;
+}
+function bindGaeste(){
+  document.getElementById("addGuest")?.addEventListener("click",()=>openGuestModal(null));
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openGuestModal(S.guests.find(g=>g.id===b.dataset.edit)));
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(confirm("Diesen Gast wirklich löschen?")){ S.guests = S.guests.filter(g=>g.id!==b.dataset.del); save(); render(); toast("Gast gelöscht"); }
+  });
+}
+function openGuestModal(g){
+  document.body.insertAdjacentHTML("beforeend", guestForm(g));
+  const modal = document.getElementById("guestModal");
+  modal.querySelectorAll("[data-set]").forEach(btn=>btn.onclick=()=>{
+    modal.querySelectorAll("[data-set]").forEach(b2=>b2.classList.remove("on"));
+    btn.classList.add("on"); document.getElementById("gf_type").value = btn.dataset.set;
+  });
+  document.getElementById("gf_cancel").onclick=()=>modal.remove();
+  document.getElementById("gf_save").onclick=()=>{
+    const name = document.getElementById("gf_name").value.trim();
+    if(!name){ toast("Bitte einen Namen eingeben"); return; }
+    const id = document.getElementById("gf_id").value || uid();
+    const data = {
+      id, name, type: document.getElementById("gf_type").value,
+      diet: document.getElementById("gf_diet").value.trim(),
+      allergies: document.getElementById("gf_all").value.trim(),
+      status: document.getElementById("gf_status").value,
+      notes: document.getElementById("gf_notes").value.trim(),
+    };
+    const idx = S.guests.findIndex(x=>x.id===id);
+    if(idx>=0) S.guests[idx]=data; else S.guests.push(data);
+    save(); modal.remove(); render(); toast("Gast gespeichert");
+  };
+}
+
+/* ============ MENÜPLANER ============ */
+function viewMenue(){
+  return `
+  <div class="sectitle"><h2>Menüplaner</h2><div class="small muted">Für ${guestCount()} Personen · geschätzt ${fmt(estimatedMenuCost())}</div></div>
+  ${CATS.map(c=>`
+    <div class="card">
+      <div class="sectitle"><h2 style="font-size:16px">${c.label}</h2></div>
+      <div class="grid g3">
+        ${allRecipes().filter(r=>r.cat===c.id).map(r=>`
+          <label class="chk" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+            <input type="checkbox" data-cat="${c.id}" data-rid="${r.id}" ${(S.menu[c.id]||[]).includes(r.id)?"checked":""}>
+            <div><strong style="font-size:13.5px">${esc(r.name)}</strong><div class="small muted">${fmt(r.cost)} · ${r.prep+r.cook} Min.</div></div>
+          </label>`).join("") || '<div class="empty">Keine Rezepte in dieser Kategorie.</div>'}
+      </div>
+    </div>`).join("")}
+  `;
+}
+function bindMenue(){
+  document.querySelectorAll("[data-rid]").forEach(cb=>cb.onchange=()=>{
+    const cat = cb.dataset.cat, rid = cb.dataset.rid;
+    const arr = S.menu[cat] = S.menu[cat]||[];
+    if(cb.checked){ if(!arr.includes(rid)) arr.push(rid); } else { S.menu[cat]=arr.filter(x=>x!==rid); }
+    save(); render();
+  });
+}
+
+/* ============ REZEPTE ============ */
+function viewRezepte(){
+  return `
+  <div class="sectitle"><h2>Rezeptsammlung</h2><button class="btn btn-primary" id="addRecipe">+ Eigenes Rezept</button></div>
+  ${CATS.map(c=>{
+    const list = allRecipes().filter(r=>r.cat===c.id);
+    if(!list.length) return "";
+    return `<div class="card"><div class="sectitle"><h2 style="font-size:16px">${c.label}</h2></div>
+    <div class="grid g3">${list.map(r=>`
+      <div class="recipe-card">
+        <span class="badge-cat">${c.label}</span>
+        <h4>${esc(r.name)}</h4>
+        <div class="recipe-meta"><span>⏱ ${r.prep+r.cook} Min.</span><span>👥 ${r.servings} Port.</span><span>${r.diff}</span><span>${fmt(r.cost)}</span></div>
+        <div style="display:flex;gap:6px;margin-top:6px"><button class="btn btn-ghost small" data-view="${r.id}">Details</button></div>
+      </div>`).join("")}</div></div>`;
+  }).join("")}
+  `;
+}
+function recipeModal(r){
+  return `<div class="modal-bg" id="recipeModal"><div class="modal" style="max-width:600px">
+    <span class="badge-cat">${(CATS.find(c=>c.id===r.cat)||{}).label||""}</span>
+    <h3>${esc(r.name)}</h3>
+    <div class="recipe-meta" style="margin-bottom:12px">
+      <span class="pill pill-forest">Vorbereitung ${r.prep} Min.</span>
+      <span class="pill pill-gold">Kochzeit ${r.cook} Min.</span>
+      <span class="pill pill-burgundy">${r.diff}</span>
+      <span class="pill pill-burgundy">${r.servings} Portionen</span>
+    </div>
+    <h4 class="small" style="text-transform:uppercase;color:var(--muted)">Zutaten (für ${r.servings} Portionen)</h4>
+    ${r.ing.map(([n,a,u])=>`<div class="ing-row"><span>${esc(n)}</span><span class="muted">${a} ${u}</span></div>`).join("")}
+    <h4 class="small" style="text-transform:uppercase;color:var(--muted);margin-top:14px">Zubereitung</h4>
+    <ol>${r.steps.map(s=>`<li style="margin-bottom:6px">${esc(s)}</li>`).join("")}</ol>
+    ${r.storage? `<div class="small muted" style="margin-top:10px">🧊 Aufbewahrung: ${esc(r.storage)}</div>`:""}
+    <div class="small muted" style="margin-top:6px">Geschätzte Kosten: ${fmt(r.cost)} gesamt</div>
+    <div class="rowend"><button class="btn btn-ghost" id="rm_close">Schließen</button></div>
+  </div></div>`;
+}
+function customRecipeForm(){
+  return `<div class="modal-bg" id="crModal"><div class="modal">
+    <h3>Eigenes Rezept hinzufügen</h3>
+    <div class="field"><label>Name</label><input id="cr_name" placeholder="z.B. Omas Plätzchen"></div>
+    <div class="field"><label>Kategorie</label><select id="cr_cat">${CATS.map(c=>`<option value="${c.id}">${c.label}</option>`).join("")}</select></div>
+    <div class="grid g2">
+      <div class="field"><label>Portionen</label><input id="cr_serv" type="number" value="4"></div>
+      <div class="field"><label>Geschätzte Kosten (${S.currency})</label><input id="cr_cost" type="number" value="10"></div>
+    </div>
+    <div class="grid g2">
+      <div class="field"><label>Vorbereitung (Min.)</label><input id="cr_prep" type="number" value="15"></div>
+      <div class="field"><label>Kochzeit (Min.)</label><input id="cr_cook" type="number" value="20"></div>
+    </div>
+    <div class="field"><label>Zutaten (eine pro Zeile: Name, Menge, Einheit)</label><textarea id="cr_ing" rows="4" placeholder="Mehl, 200, g"></textarea></div>
+    <div class="field"><label>Zubereitung (ein Schritt pro Zeile)</label><textarea id="cr_steps" rows="4" placeholder="Zutaten vermengen..."></textarea></div>
+    <div class="rowend"><button class="btn btn-ghost" id="cr_cancel">Abbrechen</button><button class="btn btn-primary" id="cr_save">Speichern</button></div>
+  </div></div>`;
+}
+function bindRezepte(){
+  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{
+    document.body.insertAdjacentHTML("beforeend", recipeModal(recipeById(b.dataset.view)));
+    document.getElementById("rm_close").onclick=()=>document.getElementById("recipeModal").remove();
+  });
+  document.getElementById("addRecipe")?.addEventListener("click",()=>{
+    document.body.insertAdjacentHTML("beforeend", customRecipeForm());
+    document.getElementById("cr_cancel").onclick=()=>document.getElementById("crModal").remove();
+    document.getElementById("cr_save").onclick=()=>{
+      const name = document.getElementById("cr_name").value.trim();
+      if(!name){ toast("Bitte einen Namen eingeben"); return; }
+      const ing = document.getElementById("cr_ing").value.split("\n").filter(Boolean).map(line=>{
+        const parts = line.split(",").map(s=>s.trim());
+        return [parts[0]||"Zutat", parts[1]||"1", parts[2]||"Stk"];
+      });
+      const steps = document.getElementById("cr_steps").value.split("\n").filter(Boolean);
+      S.customRecipes.push({
+        id:"c"+uid(), name, cat:document.getElementById("cr_cat").value,
+        servings: Number(document.getElementById("cr_serv").value)||4,
+        prep: Number(document.getElementById("cr_prep").value)||0,
+        cook: Number(document.getElementById("cr_cook").value)||0,
+        diff:"Eigenes Rezept", cost: Number(document.getElementById("cr_cost").value)||0,
+        storage:"", ing, steps,
+      });
+      save(); document.getElementById("crModal").remove(); render(); toast("Rezept gespeichert");
+    };
+  });
+}
+
+/* ============ EINKAUFSLISTE ============ */
+function viewEinkauf(){
+  const items = shoppingList();
+  const groups = {};
+  items.forEach(it=>{ const g = it.custom? "Eigene Artikel" : guessCategory(it.name); (groups[g]=groups[g]||[]).push(it); });
+  const total = estimatedMenuCost();
+  return `
+  <div class="sectitle"><h2>Einkaufsliste</h2><div style="display:flex;gap:8px"><button class="btn btn-ghost" id="addCustomItem">+ Artikel</button><button class="btn btn-gold" onclick="window.print()">Drucken</button></div></div>
+  <div class="grid g3" style="margin-bottom:16px">
+    <div class="kpi"><div class="lbl">Artikel gesamt</div><div class="val">${items.length}</div></div>
+    <div class="kpi"><div class="lbl">Bereits erledigt</div><div class="val">${items.filter(i=>S.purchased[i.key]).length}</div></div>
+    <div class="kpi"><div class="lbl">Geschätzte Kosten</div><div class="val">${fmt(total)}</div></div>
+  </div>
+  ${items.length===0? '<div class="card empty">Wähle zuerst Gerichte im Menüplaner aus, um eine Einkaufsliste zu erzeugen.</div>' :
+    Object.keys(groups).sort().map(g=>`
+    <div class="card"><div class="catgroup"><h5>${g}</h5>
+      ${groups[g].map(it=>`
+        <div class="chk">
+          <input type="checkbox" data-shop="${it.key}" ${S.purchased[it.key]?"checked":""}>
+          <div style="flex:1;${S.purchased[it.key]?'text-decoration:line-through;color:var(--muted)':''}">
+            <strong>${esc(it.name)}</strong> <span class="muted small">${it.amount} ${it.unit}</span>
+            ${it.recipes&&it.recipes.length? `<div class="small muted">für: ${it.recipes.map(esc).join(", ")}</div>`:""}
+          </div>
+          ${it.custom? `<button class="btn btn-danger small" data-delitem="${it.id}">×</button>`:""}
+        </div>`).join("")}
+    </div></div>`).join("")}
+  `;
+}
+function bindEinkauf(){
+  document.querySelectorAll("[data-shop]").forEach(cb=>cb.onchange=()=>{
+    S.purchased[cb.dataset.shop] = cb.checked; save(); render();
+  });
+  document.querySelectorAll("[data-delitem]").forEach(b=>b.onclick=()=>{
+    S.customShopItems = S.customShopItems.filter(i=>i.id!==b.dataset.delitem); save(); render();
+  });
+  document.getElementById("addCustomItem")?.addEventListener("click",()=>{
+    const name = prompt("Artikelname:"); if(!name) return;
+    const amount = prompt("Menge:","1")||"1";
+    const unit = prompt("Einheit:","Stk")||"Stk";
+    S.customShopItems.push({id:uid(), name, amount, unit});
+    save(); render(); toast("Artikel hinzugefügt");
+  });
+}
+
+/* ============ BUDGET ============ */
+function viewBudget(){
+  const spent = spentSoFar();
+  const remaining = S.budget.total - spent;
+  return `
+  <div class="sectitle"><h2>Budgetplaner</h2></div>
+  <div class="grid g3" style="margin-bottom:16px">
+    <div class="kpi"><div class="lbl">Gesamtbudget</div><div class="val">${fmt(S.budget.total)}</div></div>
+    <div class="kpi"><div class="lbl">Ausgegeben</div><div class="val">${fmt(spent)}</div></div>
+    <div class="kpi"><div class="lbl">${remaining>=0?"Verbleibend":"Überschritten"}</div><div class="val" style="color:${remaining<0?'#a6333f':'inherit'}">${fmt(Math.abs(remaining))}</div></div>
+  </div>
+  <div class="card">
+    <div class="sectitle"><h2 style="font-size:16px">Gesamtbudget festlegen</h2></div>
+    <div class="grid g2">
+      <div class="field"><label>Budget</label><input id="bud_total" type="number" value="${S.budget.total}"></div>
+      <div class="field"><label>Währung</label><select id="bud_cur">
+        <option value="EUR" ${S.currency==="EUR"?"selected":""}>EUR (€)</option>
+        <option value="CHF" ${S.currency==="CHF"?"selected":""}>CHF</option>
+      </select></div>
+    </div>
+    <button class="btn btn-primary" id="bud_save">Speichern</button>
+  </div>
+  <div class="card">
+    <div class="sectitle"><h2 style="font-size:16px">Ausgaben</h2><button class="btn btn-ghost" id="addExpense">+ Ausgabe</button></div>
+    ${S.budget.expenses.length===0? '<div class="empty">Noch keine Ausgaben erfasst.</div>' : `
+    <table><thead><tr><th>Beschreibung</th><th>Kategorie</th><th>Betrag</th><th></th></tr></thead>
+    <tbody>${S.budget.expenses.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(e.category)}</td><td>${fmt(e.amount)}</td>
+      <td style="text-align:right"><button class="btn btn-danger small" data-delexp="${e.id}">Löschen</button></td></tr>`).join("")}</tbody></table>`}
+  </div>
+  <div class="card">
+    <div class="sectitle"><h2 style="font-size:16px">Plan vs. tatsächlich</h2></div>
+    <div class="ing-row"><span>Geschätzte Menükosten</span><strong>${fmt(estimatedMenuCost())}</strong></div>
+    <div class="ing-row"><span>Tatsächlich ausgegeben</span><strong>${fmt(spent)}</strong></div>
+    <div class="ing-row"><span>Differenz</span><strong style="color:${spent>estimatedMenuCost()?'#a6333f':'#1f3d2b'}">${fmt(Math.abs(spent-estimatedMenuCost()))} ${spent>estimatedMenuCost()?"mehr":"weniger"}</strong></div>
+  </div>
+  `;
+}
+function expenseForm(){
+  return `<div class="modal-bg" id="expModal"><div class="modal">
+    <h3>Neue Ausgabe</h3>
+    <div class="field"><label>Beschreibung</label><input id="ex_name" placeholder="z.B. Supermarkt-Einkauf"></div>
+    <div class="field"><label>Kategorie</label><input id="ex_cat" placeholder="z.B. Lebensmittel, Deko"></div>
+    <div class="field"><label>Betrag</label><input id="ex_amount" type="number"></div>
+    <div class="rowend"><button class="btn btn-ghost" id="ex_cancel">Abbrechen</button><button class="btn btn-primary" id="ex_save">Speichern</button></div>
+  </div></div>`;
+}
+function bindBudget(){
+  document.getElementById("bud_save")?.addEventListener("click",()=>{
+    S.budget.total = Number(document.getElementById("bud_total").value)||0;
+    S.currency = document.getElementById("bud_cur").value;
+    save(); render(); toast("Budget gespeichert");
+  });
+  document.querySelectorAll("[data-delexp]").forEach(b=>b.onclick=()=>{
+    S.budget.expenses = S.budget.expenses.filter(e=>e.id!==b.dataset.delexp); save(); render();
+  });
+  document.getElementById("addExpense")?.addEventListener("click",()=>{
+    document.body.insertAdjacentHTML("beforeend", expenseForm());
+    document.getElementById("ex_cancel").onclick=()=>document.getElementById("expModal").remove();
+    document.getElementById("ex_save").onclick=()=>{
+      const name = document.getElementById("ex_name").value.trim();
+      const amount = Number(document.getElementById("ex_amount").value);
+      if(!name || !amount){ toast("Bitte Name und Betrag angeben"); return; }
+      S.budget.expenses.push({id:uid(), name, category:document.getElementById("ex_cat").value.trim()||"Sonstiges", amount});
+      save(); document.getElementById("expModal").remove(); render(); toast("Ausgabe erfasst");
+    };
+  });
+}
+
+/* ============ ZEITPLAN ============ */
+function seedTimelineIfEmpty(){
+  if(S.timeline.length) return;
+  const y = new Date(S.date+"T00:00:00").getFullYear();
+  S.timeline = [
+    {id:uid(),date:y+"-12-23",time:"10:00",title:"Einkäufe für Heiligabend erledigen",note:"Frische Zutaten einkaufen",done:false},
+    {id:uid(),date:y+"-12-23",time:"16:00",title:"Dessert und Gebäck vorbereiten",note:"Kann 1 Tag im Voraus gemacht werden",done:false},
+    {id:uid(),date:y+"-12-23",time:"19:00",title:"Tisch eindecken",note:"Dekoration und Platzkarten vorbereiten",done:false},
+    {id:uid(),date:y+"-12-24",time:"09:00",title:"Braten vorbereiten und würzen",note:"",done:false},
+    {id:uid(),date:y+"-12-24",time:"12:00",title:"Beilagen vorkochen",note:"Rotkohl & Klöße können vorbereitet werden",done:false},
+    {id:uid(),date:y+"-12-24",time:"16:00",title:"Hauptgericht in den Ofen",note:"",done:false},
+    {id:uid(),date:y+"-12-24",time:"18:30",title:"Tisch final herrichten & Gäste empfangen",note:"",done:false},
+  ];
+  save();
+}
+function viewZeitplan(){
+  seedTimelineIfEmpty();
+  const byDate = {};
+  S.timeline.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(t=>(byDate[t.date]=byDate[t.date]||[]).push(t));
+  return `
+  <div class="sectitle"><h2>Vorbereitungszeitplan</h2><button class="btn btn-primary" id="addTask">+ Aufgabe</button></div>
+  ${Object.keys(byDate).sort().map(d=>`
+    <div class="card"><div class="sectitle"><h2 style="font-size:16px">${fmtDate(d)}</h2></div>
+    ${byDate[d].map(t=>`
+      <div class="chk">
+        <input type="checkbox" data-task="${t.id}" ${t.done?"checked":""}>
+        <div style="flex:1;${t.done?'text-decoration:line-through;color:var(--muted)':''}">
+          <strong>${t.time? t.time+" Uhr · ":""}${esc(t.title)}</strong>
+          ${t.note? `<div class="small muted">${esc(t.note)}</div>`:""}
+        </div>
+        <button class="btn btn-danger small" data-deltask="${t.id}">×</button>
+      </div>`).join("")}
+    </div>`).join("") || '<div class="card empty">Noch keine Aufgaben geplant.</div>'}
+  `;
+}
+function taskForm(){
+  return `<div class="modal-bg" id="taskModal"><div class="modal">
+    <h3>Neue Aufgabe</h3>
+    <div class="field"><label>Titel</label><input id="tk_title" placeholder="z.B. Gans einkaufen"></div>
+    <div class="grid g2">
+      <div class="field"><label>Datum</label><input id="tk_date" type="date" value="${S.date}"></div>
+      <div class="field"><label>Uhrzeit</label><input id="tk_time" type="time"></div>
+    </div>
+    <div class="field"><label>Notiz</label><textarea id="tk_note" rows="2"></textarea></div>
+    <div class="rowend"><button class="btn btn-ghost" id="tk_cancel">Abbrechen</button><button class="btn btn-primary" id="tk_save">Speichern</button></div>
+  </div></div>`;
+}
+function bindZeitplan(){
+  document.querySelectorAll("[data-task]").forEach(cb=>cb.onchange=()=>{
+    const t = S.timeline.find(x=>x.id===cb.dataset.task); if(t) t.done = cb.checked; save(); render();
+  });
+  document.querySelectorAll("[data-deltask]").forEach(b=>b.onclick=()=>{
+    S.timeline = S.timeline.filter(t=>t.id!==b.dataset.deltask); save(); render();
+  });
+  document.getElementById("addTask")?.addEventListener("click",()=>{
+    document.body.insertAdjacentHTML("beforeend", taskForm());
+    document.getElementById("tk_cancel").onclick=()=>document.getElementById("taskModal").remove();
+    document.getElementById("tk_save").onclick=()=>{
+      const title = document.getElementById("tk_title").value.trim();
+      if(!title){ toast("Bitte einen Titel eingeben"); return; }
+      S.timeline.push({id:uid(), title, date:document.getElementById("tk_date").value||S.date,
+        time:document.getElementById("tk_time").value, note:document.getElementById("tk_note").value.trim(), done:false});
+      save(); document.getElementById("taskModal").remove(); render(); toast("Aufgabe hinzugefügt");
+    };
+  });
+}
+
+/* ============ TISCHPLANUNG ============ */
+function viewTisch(){
+  const deco = S.table.decoChecklist.length? S.table.decoChecklist : (S.table.decoChecklist = [
+    {id:uid(),text:"Tischdecke und Läufer",done:false},{id:uid(),text:"Kerzen & Kerzenständer",done:false},
+    {id:uid(),text:"Weihnachtliches Mittelstück",done:false},{id:uid(),text:"Servietten falten",done:false},
+  ]) && S.table.decoChecklist;
+  const setting = S.table.settingChecklist.length? S.table.settingChecklist : (S.table.settingChecklist = [
+    {id:uid(),text:"Teller & Unterteller",done:false},{id:uid(),text:"Besteck vollständig",done:false},
+    {id:uid(),text:"Gläser für Wasser & Wein",done:false},{id:uid(),text:"Platzkarten aufgestellt",done:false},
+  ]) && S.table.settingChecklist;
+  save();
+  return `
+  <div class="sectitle"><h2>Tischplanung</h2></div>
+  <div class="grid g2">
+    <div class="card"><div class="sectitle"><h2 style="font-size:16px">Deko-Checkliste</h2></div>
+      ${deco.map(d=>`<div class="chk"><input type="checkbox" data-deco="${d.id}" ${d.done?"checked":""}><div style="${d.done?'text-decoration:line-through;color:var(--muted)':''}">${esc(d.text)}</div></div>`).join("")}
+    </div>
+    <div class="card"><div class="sectitle"><h2 style="font-size:16px">Gedeck-Checkliste</h2></div>
+      ${setting.map(d=>`<div class="chk"><input type="checkbox" data-setting="${d.id}" ${d.done?"checked":""}><div style="${d.done?'text-decoration:line-through;color:var(--muted)':''}">${esc(d.text)}</div></div>`).join("")}
+    </div>
+  </div>
+  <div class="card">
+    <div class="sectitle"><h2 style="font-size:16px">Menütitel für Karten</h2></div>
+    <div class="field"><input id="menuTitle" value="${esc(S.table.menuTitle)}"></div>
+    <button class="btn btn-primary" id="saveMenuTitle">Speichern</button>
+  </div>
+  <div class="card">
+    <div class="sectitle"><h2 style="font-size:16px">Sitzordnung</h2></div>
+    ${S.guests.length? S.guests.map(g=>`
+      <div class="chk"><div style="flex:1">${esc(g.name)}</div>
+      <input style="width:160px" placeholder="Tisch / Platz" data-seat="${g.id}" value="${esc((S.table.seats.find(s=>s.guestId===g.id)||{}).seat||'')}">
+      </div>`).join("") : '<div class="empty">Füge zuerst Gäste hinzu.</div>'}
+  </div>
+  `;
+}
+function bindTisch(){
+  document.querySelectorAll("[data-deco]").forEach(cb=>cb.onchange=()=>{
+    const d = S.table.decoChecklist.find(x=>x.id===cb.dataset.deco); if(d) d.done=cb.checked; save();
+  });
+  document.querySelectorAll("[data-setting]").forEach(cb=>cb.onchange=()=>{
+    const d = S.table.settingChecklist.find(x=>x.id===cb.dataset.setting); if(d) d.done=cb.checked; save();
+  });
+  document.getElementById("saveMenuTitle")?.addEventListener("click",()=>{
+    S.table.menuTitle = document.getElementById("menuTitle").value.trim(); save(); toast("Gespeichert");
+  });
+  document.querySelectorAll("[data-seat]").forEach(inp=>inp.onchange=()=>{
+    let s = S.table.seats.find(x=>x.guestId===inp.dataset.seat);
+    if(!s){ s={guestId:inp.dataset.seat, seat:""}; S.table.seats.push(s); }
+    s.seat = inp.value; save();
+  });
+}
+
+/* ============ DRUCKVORLAGEN ============ */
+function viewDruck(){
+  return `
+  <div class="sectitle"><h2>Druckvorlagen</h2></div>
+  <div class="grid g2">
+    <div class="card"><h3 style="margin-top:0">Einkaufsliste</h3><p class="small muted">Druckt deine aktuelle Einkaufsliste, gruppiert nach Kategorie.</p><button class="btn btn-primary" id="pr_shop">Drucken</button></div>
+    <div class="card"><h3 style="margin-top:0">Menükarten</h3><p class="small muted">Eine Karte pro Gang, mit deinem Menütitel.</p><button class="btn btn-primary" id="pr_menu">Drucken</button></div>
+    <div class="card"><h3 style="margin-top:0">Platzkarten</h3><p class="small muted">Eine Karte pro Gast aus deiner Gästeliste.</p><button class="btn btn-primary" id="pr_place">Drucken</button></div>
+    <div class="card"><h3 style="margin-top:0">Vorbereitungscheckliste</h3><p class="small muted">Alle Aufgaben aus deinem Zeitplan zum Abhaken auf Papier.</p><button class="btn btn-primary" id="pr_prep">Drucken</button></div>
+    <div class="card"><h3 style="margin-top:0">Alle Rezepte</h3><p class="small muted">Komplette Rezeptkarten für dein ausgewähltes Menü.</p><button class="btn btn-primary" id="pr_recipes">Drucken</button></div>
+  </div>
+  `;
+}
+function doPrint(html){
+  document.getElementById("printarea").innerHTML = html;
+  window.print();
+}
+function bindDruck(){
+  document.getElementById("pr_shop")?.addEventListener("click",()=>{
+    const items = shoppingList();
+    const groups = {}; items.forEach(it=>{ const g = it.custom?"Eigene Artikel":guessCategory(it.name); (groups[g]=groups[g]||[]).push(it); });
+    doPrint(`<div class="print-page"><h1>Einkaufsliste – ${esc(S.name)}</h1>
+      ${Object.keys(groups).sort().map(g=>`<h3>${g}</h3><ul>${groups[g].map(it=>`<li>☐ ${esc(it.name)} – ${it.amount} ${it.unit}</li>`).join("")}</ul>`).join("")}
+      </div>`);
+  });
+  document.getElementById("pr_menu")?.addEventListener("click",()=>{
+    doPrint(`<div class="print-page" style="text-align:center"><h1>${esc(S.table.menuTitle||"Unser Weihnachtsmenü")}</h1><p>${fmtDate(S.date)}</p>
+      ${CATS.map(c=>{const list=(S.menu[c.id]||[]).map(id=>recipeById(id)).filter(Boolean); if(!list.length) return ""; return `<h3>${c.label}</h3>${list.map(r=>`<p>${esc(r.name)}</p>`).join("")}`;}).join("")}
+      </div>`);
+  });
+  document.getElementById("pr_place")?.addEventListener("click",()=>{
+    doPrint(S.guests.map(g=>`<div class="print-page" style="text-align:center;padding-top:150px"><h1 style="font-size:40px">${esc(g.name)}</h1>${g.allergies?`<p>⚠ ${esc(g.allergies)}</p>`:""}</div>`).join("") || "<p>Keine Gäste erfasst.</p>");
+  });
+  document.getElementById("pr_prep")?.addEventListener("click",()=>{
+    doPrint(`<div class="print-page"><h1>Vorbereitungscheckliste</h1>${S.timeline.map(t=>`<p>☐ ${fmtDate(t.date)} ${t.time||""} – ${esc(t.title)}${t.note?" ("+esc(t.note)+")":""}</p>`).join("") || "<p>Keine Aufgaben geplant.</p>"}</div>`);
+  });
+  document.getElementById("pr_recipes")?.addEventListener("click",()=>{
+    const ids = menuRecipeIds();
+    const list = ids.map(recipeById).filter(Boolean);
+    doPrint(list.map(r=>`<div class="print-page"><h1>${esc(r.name)}</h1>
+      <p>${r.servings} Portionen · Vorbereitung ${r.prep} Min. · Kochzeit ${r.cook} Min. · ${r.diff}</p>
+      <h3>Zutaten</h3><ul>${r.ing.map(([n,a,u])=>`<li>${esc(n)} – ${a} ${u}</li>`).join("")}</ul>
+      <h3>Zubereitung</h3><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>`).join("") || "<p>Noch kein Menü ausgewählt.</p>");
+  });
+}
+
+/* ============ EINSTELLUNGEN ============ */
+function viewEinstellungen(){
+  return `
+  <div class="sectitle"><h2>Einstellungen</h2></div>
+  <div class="card">
+    <div class="field"><label>Name der Feier</label><input id="set_name" value="${esc(S.name)}"></div>
+    <div class="grid g2">
+      <div class="field"><label>Datum</label><input id="set_date" type="date" value="${S.date}"></div>
+      <div class="field"><label>Währung</label><select id="set_cur">
+        <option value="EUR" ${S.currency==="EUR"?"selected":""}>EUR (€)</option>
+        <option value="CHF" ${S.currency==="CHF"?"selected":""}>CHF</option>
+      </select></div>
+    </div>
+    <button class="btn btn-primary" id="set_save">Speichern</button>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Daten sichern</h3>
+    <p class="small muted">Exportiere deine Daten als JSON-Datei – zum Sichern oder Übertragen auf ein anderes Gerät.</p>
+    <button class="btn btn-gold" id="exportJson">JSON exportieren</button>
+    <div style="height:10px"></div>
+    <p class="small muted">Backup wiederherstellen:</p>
+    <input type="file" id="importJson" accept="application/json">
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Daten zurücksetzen</h3>
+    <p class="small muted">Löscht alle Gäste, Menüs, Budgets und Zeitpläne unwiderruflich.</p>
+    <button class="btn btn-danger" id="resetAll">Alles zurücksetzen</button>
+  </div>
+  <div class="card small muted">Weihnachtszauber Planner · Version 1.0 · Funktioniert offline nach dem ersten Laden · Alle Daten bleiben ausschließlich lokal in deinem Browser.</div>
+  `;
+}
+function bindEinstellungen(){
+  document.getElementById("set_save")?.addEventListener("click",()=>{
+    S.name = document.getElementById("set_name").value.trim()||"Weihnachtsessen";
+    S.date = document.getElementById("set_date").value||S.date;
+    S.currency = document.getElementById("set_cur").value;
+    save(); render(); toast("Gespeichert");
+  });
+  document.getElementById("exportJson")?.addEventListener("click",()=>{
+    const blob = new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "weihnachtsessen-backup.json"; a.click();
+  });
+  document.getElementById("importJson")?.addEventListener("change",(e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const data = JSON.parse(reader.result);
+        if(confirm("Backup importieren? Deine aktuellen Daten werden überschrieben.")){
+          S = Object.assign(defaultState(), data); save(); render(); toast("Backup importiert");
+        }
+      }catch(err){ toast("Datei konnte nicht gelesen werden"); }
+    };
+    reader.readAsText(file);
+  });
+  document.getElementById("resetAll")?.addEventListener("click",()=>{
+    if(confirm("Wirklich ALLE Daten löschen? Dies kann nicht rückgängig gemacht werden.")){
+      if(confirm("Letzte Bestätigung: Alle Gäste, Menüs und Pläne werden gelöscht.")){
+        S = defaultState(); save(); render(); toast("Alle Daten wurden zurückgesetzt");
+      }
+    }
+  });
+}
+
+function bindView(){
+  if(TAB==="gaeste") bindGaeste();
+  if(TAB==="menue") bindMenue();
+  if(TAB==="rezepte") bindRezepte();
+  if(TAB==="einkauf") bindEinkauf();
+  if(TAB==="budget") bindBudget();
+  if(TAB==="zeitplan") bindZeitplan();
+  if(TAB==="tisch") bindTisch();
+  if(TAB==="druck") bindDruck();
+  if(TAB==="einstellungen") bindEinstellungen();
+}
+
+render();
+</script>
+</body>
+</html>
