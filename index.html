@@ -692,6 +692,29 @@
 
     <section class="stats" id="statsEtsy"></section>
 
+    <details class="panel" id="modelarPanel">
+      <summary>✨ Começar a criar produto (modelar a partir de uma referência)</summary>
+      <div class="panel-body">
+        <form class="add-form" id="modelarForm">
+          <label class="full">Link do anúncio Etsy que você está modelando (opcional)
+            <input type="url" name="referenceLink" id="modRefLink" placeholder="https://www.etsy.com/listing/...">
+          </label>
+          <label class="full">Imagens desse anúncio (prints/fotos)
+            <input type="file" id="modRefFiles" accept="image/*" multiple required>
+          </label>
+          <label class="full">O que você quer diferente dessa referência? (opcional)
+            <textarea name="notes" id="modNotes" rows="2" placeholder="ex: mais minimalista, cores pastel, focar em família grande..."></textarea>
+          </label>
+          <div class="full">
+            <button class="btn btn-accent" type="submit" id="btnModelar">🚀 Modelar oferta com IA</button>
+            <span id="modelarStatus" class="hint"></span>
+          </div>
+          <div class="full hint">A IA cria o conceito, o título/tags SEO, salva a oferta como rascunho, escreve o briefing (prompt) pra você levar em outra IA, e gera 2 imagens A4 de referência do layout. Ela NÃO cria o PDF final.</div>
+        </form>
+        <div id="modelarResult" style="display:none; margin-top:16px"></div>
+      </div>
+    </details>
+
     <section>
       <h3 class="section-title">🎯 Hoje — o que falta publicar</h3>
       <div class="section-sub">produtos do nicho Etsy que ainda não estão com status "ativa"</div>
@@ -2252,6 +2275,74 @@
   }
   var btnReloadEtsy = document.getElementById("btnReloadEtsy");
   if (btnReloadEtsy) btnReloadEtsy.addEventListener("click", reloadData);
+
+  function fileToBase64(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result).split(",")[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function modelarResultHtml(data){
+    var imgs = (data.mockup_urls||[]).map(function(u){
+      return '<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" style="width:100%;max-width:220px;border-radius:8px;border:1px solid var(--border,#ccc)"></a>';
+    }).join(" ");
+    return (
+      '<div class="panel" style="padding:14px;border:1px solid var(--border,#ccc);border-radius:10px">' +
+      '<div style="font-weight:600;margin-bottom:6px">✅ Oferta modelada: '+ (data.title_de||"") +'</div>' +
+      '<div class="hint" style="margin-bottom:10px">'+ (data.concept_note||"") +'</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+ imgs +'</div>' +
+      '<label class="full">Prompt pra criar o entregável (copie e leve pra outra IA)' +
+      '<textarea readonly rows="10" style="width:100%;font-family:monospace;font-size:12px" onclick="this.select()">'+
+        (data.vorlage_prompt||"") + "\n\n--- Prompt de imagem de referência ---\n" + (data.image_prompt||"") +
+      '</textarea></label>' +
+      '<div class="hint" style="margin-top:8px">Salvo como rascunho em "Hoje — o que falta publicar" (id: '+data.offer_id+'). O mesmo texto já está salvo na aba Produto dessa oferta.</div>' +
+      '</div>'
+    );
+  }
+  var modelarForm = document.getElementById("modelarForm");
+  if (modelarForm){
+    modelarForm.addEventListener("submit", async function(e){
+      e.preventDefault();
+      var filesInput = document.getElementById("modRefFiles");
+      var files = filesInput && filesInput.files ? Array.from(filesInput.files) : [];
+      var statusEl = document.getElementById("modelarStatus");
+      var resultEl = document.getElementById("modelarResult");
+      var btn = document.getElementById("btnModelar");
+      if (!files.length){ alert("Escolha pelo menos uma imagem da referência."); return; }
+      btn.disabled = true;
+      statusEl.textContent = "Analisando referência e gerando o pacote (pode levar até 1 minuto)…";
+      resultEl.style.display = "none";
+      try {
+        var referenceImages = await Promise.all(files.map(async function(f){
+          return { name: f.name, mimeType: f.type || "image/jpeg", base64: await fileToBase64(f) };
+        }));
+        var resp = await fetch(SUPABASE_URL + "/functions/v1/modelar-oferta-etsy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
+          body: JSON.stringify({
+            referenceLink: document.getElementById("modRefLink").value.trim(),
+            referenceImages: referenceImages,
+            notes: document.getElementById("modNotes").value.trim()
+          })
+        });
+        var data = await resp.json();
+        if (!resp.ok || data.error) throw new Error(data.error || "Falha ao modelar a oferta.");
+        resultEl.innerHTML = modelarResultHtml(data);
+        resultEl.style.display = "block";
+        statusEl.textContent = "";
+        await reloadData();
+      } catch(err){
+        console.error("modelar oferta falhou", err);
+        statusEl.textContent = "";
+        alert("Não consegui modelar a oferta: " + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
   function onEtsyClick(e){
     var btn = e.target.closest("button[data-act]"); if (!btn) return;
     if (btn.dataset.act === "saveetsyurl"){
