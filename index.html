@@ -3009,24 +3009,34 @@
     }
     var refBase64 = pane._pdfCoverBase64 || null;
     status.textContent = refBase64
-      ? "Gerando as 3 fotos (capa fiel ao PDF real)… (pode levar 1-2 minutos)"
-      : "Gerando as 3 fotos… sem o PDF como referência, a capa pode sair menos fiel ao design real. (pode levar 1-2 minutos)";
+      ? "Gerando as 3 fotos em paralelo (capa fiel ao PDF real)… (pode levar ~1 minuto)"
+      : "Gerando as 3 fotos em paralelo… sem o PDF como referência, a capa pode sair menos fiel ao design real. (pode levar ~1 minuto)";
+    var jobs = [
+      { kind: "capa", label: "Capa", body: { kind: "capa", titleLine: titleLine, promiseLine: promiseLine, coverScene: coverScene, referenceImageBase64: refBase64 || undefined } },
+      { kind: "conteudo", label: "O que você recebe", body: { kind: "conteudo", contentsScene: contentsScene } },
+      { kind: "passo", label: "Passo a passo", body: { kind: "passo", stepsScene: stepsScene } }
+    ];
     try{
-      var resp = await fetch(PRODUCT_PHOTOS_FUNCTION_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
-        body: JSON.stringify({
-          titleLine: titleLine, promiseLine: promiseLine,
-          coverScene: coverScene, contentsScene: contentsScene, stepsScene: stepsScene,
-          referenceImageBase64: refBase64 || undefined
-        }),
-      });
-      var data = await resp.json();
-      if (!resp.ok || data.error){ status.textContent = ""; alert("Erro ao gerar fotos: " + (data.error || resp.status)); return; }
+      var results = await Promise.allSettled(jobs.map(function(job){
+        return fetch(PRODUCT_PHOTOS_FUNCTION_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
+          body: JSON.stringify(job.body),
+        }).then(function(r){ return r.json().then(function(d){ return { resp: r, data: d }; }); });
+      }));
 
       status.textContent = "Redimensionando e salvando em " + size + "x" + size + "…";
-      for (var i=0;i<data.images.length;i++){
-        var img = data.images[i];
+      var okCount = 0, failMsgs = [];
+      for (var i=0;i<results.length;i++){
+        var job = jobs[i];
+        var settled = results[i];
+        if (settled.status !== "fulfilled" || !settled.value.resp.ok || settled.value.data.error){
+          var msg = settled.status === "fulfilled" ? (settled.value.data.error || settled.value.resp.status) : settled.reason;
+          console.error("gerar imagem falhou", job.kind, msg);
+          failMsgs.push(job.label + ": " + msg);
+          continue;
+        }
+        var img = settled.value.data;
         var rawBlob = base64ToBlob(img.base64, "image/png");
         var finalBlob = await resizeBlobToSquare(rawBlob, size);
         var path = "produto/" + offerId + "/" + img.kind + "-" + Date.now() + "-" + i + ".png";
@@ -3035,17 +3045,23 @@
           headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "image/png" },
           body: finalBlob
         });
-        if (!up.ok){ console.error("upload falhou", img.kind, await up.text()); continue; }
+        if (!up.ok){ console.error("upload falhou", img.kind, await up.text()); failMsgs.push(job.label + ": falha no upload"); continue; }
         var publicUrl = SUPABASE_URL + "/storage/v1/object/public/ai-creatives/" + path;
         await sbInsertRow("my_offer_creatives", {
           offer_id: offerId, type: "imagem", url: publicUrl,
-          label: (img.label||img.kind) + " — " + (offerTitle||titleLine),
+          label: job.label + " — " + (offerTitle||titleLine),
           tags: ["ia", "gpt-image-2", "etsy-listing", size+"x"+size],
           is_active: true, source: "ia-produto-v2"
         });
+        okCount++;
       }
-      status.textContent = "3 fotos geradas em " + size + "x" + size + " ✓";
-      setTimeout(function(){ status.textContent = ""; }, 3000);
+      if (failMsgs.length){
+        status.textContent = "";
+        alert((okCount ? okCount + " de 3 fotos geradas.\n\n" : "Nenhuma foto gerada.\n\n") + "Falharam:\n" + failMsgs.join("\n"));
+      } else {
+        status.textContent = "3 fotos geradas em " + size + "x" + size + " ✓";
+        setTimeout(function(){ status.textContent = ""; }, 3000);
+      }
       if (onDone) onDone();
     }catch(err){ console.error(err); status.textContent = ""; alert("Não consegui gerar o set de fotos."); }
   }
