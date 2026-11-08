@@ -2899,6 +2899,10 @@
         '<label class="full">Cena da capa (produto em uso) <textarea id="setCoverScene" rows="2" placeholder="cole aqui o prompt de CAPA"></textarea></label>' +
         '<label class="full">Cena do "o que você recebe" <textarea id="setContentsScene" rows="2" placeholder="cole aqui o prompt de O QUE VOCÊ RECEBE"></textarea></label>' +
         '<label class="full">Cena do passo a passo <textarea id="setStepsScene" rows="2" placeholder="cole aqui o prompt de PASSO A PASSO"></textarea></label>' +
+        '<div class="full hint"><strong>Fotos reais extras (opcional, mas melhora muito a fidelidade):</strong> suba capturas de tela do design real — capa, miolo/flatlay, página de instruções — e a IA usa elas como referência em vez de inventar o estilo.</div>' +
+        '<label class="full">📸 Referência da CAPA (capa real do PDF, foto do produto embalado...) <input type="file" id="setRefCapaFiles" accept="image/*" multiple></label>' +
+        '<label class="full">📸 Referência do "O QUE VOCÊ RECEBE" (flatlay, miolo do PDF...) <input type="file" id="setRefConteudoFiles" accept="image/*" multiple></label>' +
+        '<label class="full">📸 Referência do PASSO A PASSO (foto do processo, página de instruções...) <input type="file" id="setRefPassoFiles" accept="image/*" multiple></label>' +
         '<div class="full"><button class="btn btn-accent" data-act="gerar-set-fotos">Gerar as 3 fotos (2000x2000)</button> <span id="setFotosStatus" class="hint"></span></div>' +
         '<div class="full hint">Sempre sai em 2000x2000px (padrão Etsy) e a capa já vem com o título e a promessa escritos na imagem.</div>' +
       '</div></details>' +
@@ -2996,6 +3000,20 @@
       img.src = URL.createObjectURL(blob);
     });
   }
+  function fileToBase64(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result).split(",")[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  async function filesToBase64Array(fileList){
+    var files = fileList ? Array.from(fileList) : [];
+    var out = [];
+    for (var i=0;i<files.length;i++){ out.push(await fileToBase64(files[i])); }
+    return out;
+  }
   async function runGerarSetFotos(pane, offerId, offerTitle, onDone){
     var titleLine = pane.querySelector("#setTitleLine").value.trim();
     var promiseLine = pane.querySelector("#setPromiseLine").value.trim();
@@ -3007,14 +3025,21 @@
     if (!titleLine || !promiseLine || !coverScene || !contentsScene || !stepsScene){
       alert("Preenche título, promessa e as 3 cenas (capa, conteúdo, passo a passo)."); return;
     }
-    var refBase64 = pane._pdfCoverBase64 || null;
-    status.textContent = refBase64
-      ? "Gerando as 3 fotos em paralelo (capa fiel ao PDF real)… (pode levar ~1 minuto)"
-      : "Gerando as 3 fotos em paralelo… sem o PDF como referência, a capa pode sair menos fiel ao design real. (pode levar ~1 minuto)";
+    status.textContent = "Lendo as fotos de referência…";
+    var refCapaFiles = await filesToBase64Array(pane.querySelector("#setRefCapaFiles") && pane.querySelector("#setRefCapaFiles").files);
+    var refConteudoFiles = await filesToBase64Array(pane.querySelector("#setRefConteudoFiles") && pane.querySelector("#setRefConteudoFiles").files);
+    var refPassoFiles = await filesToBase64Array(pane.querySelector("#setRefPassoFiles") && pane.querySelector("#setRefPassoFiles").files);
+    var refsCapa = refCapaFiles.length ? refCapaFiles : (pane._pdfCoverBase64 ? [pane._pdfCoverBase64] : []);
+    var refsConteudo = refConteudoFiles;
+    var refsPasso = refPassoFiles;
+    var anyRef = refsCapa.length || refsConteudo.length || refsPasso.length;
+    status.textContent = anyRef
+      ? "Gerando as 3 fotos em paralelo (com fotos reais como referência)… (pode levar ~1 minuto)"
+      : "Gerando as 3 fotos em paralelo… sem referência real, o resultado pode sair menos fiel ao design original. (pode levar ~1 minuto)";
     var jobs = [
-      { kind: "capa", label: "Capa", body: { kind: "capa", titleLine: titleLine, promiseLine: promiseLine, coverScene: coverScene, referenceImageBase64: refBase64 || undefined } },
-      { kind: "conteudo", label: "O que você recebe", body: { kind: "conteudo", contentsScene: contentsScene } },
-      { kind: "passo", label: "Passo a passo", body: { kind: "passo", stepsScene: stepsScene } }
+      { kind: "capa", label: "Capa", body: { kind: "capa", titleLine: titleLine, promiseLine: promiseLine, coverScene: coverScene, referenceImagesBase64: refsCapa.length ? refsCapa : undefined } },
+      { kind: "conteudo", label: "O que você recebe", body: { kind: "conteudo", contentsScene: contentsScene, referenceImagesBase64: refsConteudo.length ? refsConteudo : undefined } },
+      { kind: "passo", label: "Passo a passo", body: { kind: "passo", stepsScene: stepsScene, referenceImagesBase64: refsPasso.length ? refsPasso : undefined } }
     ];
     try{
       var results = await Promise.allSettled(jobs.map(function(job){
