@@ -1,0 +1,17 @@
+{
+  "name": "Geschenkplanner",
+  "short_name": "Geschenkplanner",
+  "description": "Geschenke, Budget & Einkaufsliste für Weihnachten – alles in deinem Browser gespeichert.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf5ea",
+  "theme_color": "#1f4a36",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
