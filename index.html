@@ -2891,6 +2891,9 @@
         '<div class="full"><button class="btn btn-accent" data-act="gerar-criativo-ia">Gerar imagem</button> <span id="aiImgStatus" class="hint"></span></div>' +
       '</div></details>' +
       '<details class="panel"><summary>📸 Gerar set de fotos de listing (capa + conteúdo + passo a passo, 2000x2000)</summary><div class="panel-body drawer-row">' +
+        '<label class="full">📄 Subir o PDF do produto — a IA lê e preenche tudo abaixo sozinha <input type="file" id="setPdfFile" accept="application/pdf"></label>' +
+        '<div class="full"><button class="btn" id="btnAnalisarPdf" data-act="analisar-pdf-produto" type="button">🧠 Ler PDF e preencher com IA</button> <span id="setPdfStatus" class="hint"></span></div>' +
+        '<div class="full hint">Ela atua como copywriter + diretor de arte: lê o PDF real do produto e escreve título, promessa e as 3 cenas fiéis ao conteúdo. Revise antes de gerar as fotos.</div>' +
         '<label>Título de venda (aparece na capa) <input id="setTitleLine" placeholder="ex: Wichtel-Post"></label>' +
         '<label>Promessa curta (aparece na capa) <input id="setPromiseLine" placeholder="ex: Zum Ausdrucken & Verschenken — in 5 Minuten gebastelt"></label>' +
         '<label class="full">Cena da capa (produto em uso) <textarea id="setCoverScene" rows="2" placeholder="cole aqui o prompt de CAPA"></textarea></label>' +
@@ -2948,6 +2951,7 @@
   }
   var IMAGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/gerar-criativo";
   var PRODUCT_PHOTOS_FUNCTION_URL = SUPABASE_URL + "/functions/v1/gerar-fotos-produto-etsy";
+  var ANALISAR_PDF_FUNCTION_URL = SUPABASE_URL + "/functions/v1/analisar-pdf-produto";
   async function runGerarCriativoIA(pane, offerId, onDone){
     var prompt = pane.querySelector("#aiImgPrompt").value.trim();
     var size = pane.querySelector("#aiImgSize").value;
@@ -2996,6 +3000,47 @@
       setTimeout(function(){ status.textContent = ""; }, 3000);
       if (onDone) onDone();
     }catch(err){ console.error(err); status.textContent = ""; alert("Não consegui gerar o set de fotos."); }
+  }
+  function pdfFileToBase64(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result).split(",")[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  async function runAnalisarPdfProduto(pane, offerId, onFilled){
+    var input = pane.querySelector("#setPdfFile");
+    var file = input && input.files && input.files[0];
+    var status = pane.querySelector("#setPdfStatus");
+    var btn = document.getElementById("btnAnalisarPdf");
+    if (!file){ alert("Escolha o PDF do produto primeiro."); return; }
+    btn.disabled = true;
+    status.textContent = "Lendo o PDF e escrevendo tudo… (pode levar até 1 minuto)";
+    try{
+      var base64 = await pdfFileToBase64(file);
+      var resp = await fetch(ANALISAR_PDF_FUNCTION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
+        body: JSON.stringify({ name: file.name, base64: base64 }),
+      });
+      var data = await resp.json();
+      if (!resp.ok || data.error){ status.textContent = ""; alert("Erro ao ler o PDF: " + (data.error || resp.status)); return; }
+      pane.querySelector("#setTitleLine").value = data.titleLine || "";
+      pane.querySelector("#setPromiseLine").value = data.promiseLine || "";
+      pane.querySelector("#setCoverScene").value = data.coverScene || "";
+      pane.querySelector("#setContentsScene").value = data.contentsScene || "";
+      pane.querySelector("#setStepsScene").value = data.stepsScene || "";
+      status.textContent = "Preenchido ✓ — revise e clique em \"Gerar as 3 fotos\"";
+      if (data.offerTitle && offerId){
+        var copyFinal = (data.offerTitle||"") + "\n\n" + (data.descriptionIntroDe||"") +
+          "\n\nDas ist enthalten:\n" + (data.highlightsDe||[]).map(function(h){ return "• " + h; }).join("\n") +
+          "\n\nTags: " + (data.tagsDe||[]).join(", ");
+        await updateMyOffer(offerId, { copy: copyFinal });
+      }
+      if (onFilled) onFilled();
+    }catch(err){ console.error(err); status.textContent = ""; alert("Não consegui ler o PDF."); }
+    finally{ btn.disabled = false; }
   }
   function campaignItemHtml(c){
     var roas = c.roas != null ? c.roas : (c.investment ? (Number(c.sales||0)/Math.max(Number(c.investment),0.01)).toFixed(2) : "—");
@@ -3105,6 +3150,10 @@
         await runGerarSetFotos(e.target.closest(".drawer-pane"), offerId, offerTitleNow, async function(){
           state.drawer.creatives = await sbFetchByOffer("my_offer_creatives", offerId);
           renderDrawerBody(); switchDrawerTab("criativos");
+        });
+      } else if (act === "analisar-pdf-produto"){
+        await runAnalisarPdfProduto(e.target.closest(".drawer-pane"), offerId, async function(){
+          await reloadData();
         });
       } else if (act === "upload-criativos"){
         await uploadCriativosFiles(e.target.closest(".drawer-pane"), offerId, async function(){
