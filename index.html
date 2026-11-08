@@ -3007,14 +3007,18 @@
     if (!titleLine || !promiseLine || !coverScene || !contentsScene || !stepsScene){
       alert("Preenche título, promessa e as 3 cenas (capa, conteúdo, passo a passo)."); return;
     }
-    status.textContent = "Gerando as 3 fotos… (pode levar 1-2 minutos)";
+    var refBase64 = pane._pdfCoverBase64 || null;
+    status.textContent = refBase64
+      ? "Gerando as 3 fotos (capa fiel ao PDF real)… (pode levar 1-2 minutos)"
+      : "Gerando as 3 fotos… sem o PDF como referência, a capa pode sair menos fiel ao design real. (pode levar 1-2 minutos)";
     try{
       var resp = await fetch(PRODUCT_PHOTOS_FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY },
         body: JSON.stringify({
           titleLine: titleLine, promiseLine: promiseLine,
-          coverScene: coverScene, contentsScene: contentsScene, stepsScene: stepsScene
+          coverScene: coverScene, contentsScene: contentsScene, stepsScene: stepsScene,
+          referenceImageBase64: refBase64 || undefined
         }),
       });
       var data = await resp.json();
@@ -3053,6 +3057,42 @@
       reader.readAsDataURL(file);
     });
   }
+  var PDFJS_READY = null;
+  function ensurePdfJs(){
+    if (PDFJS_READY) return PDFJS_READY;
+    PDFJS_READY = new Promise(function(resolve, reject){
+      if (window.pdfjsLib){ resolve(window.pdfjsLib); return; }
+      var s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js";
+      s.onload = function(){
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js";
+        resolve(window.pdfjsLib);
+      };
+      s.onerror = function(){ reject(new Error("Não consegui carregar o leitor de PDF.")); };
+      document.head.appendChild(s);
+    });
+    return PDFJS_READY;
+  }
+  async function renderPdfFirstPageToPngBase64(file){
+    var pdfjsLib = await ensurePdfJs();
+    var buf = await file.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    var page = await pdf.getPage(1);
+    var viewport = page.getViewport({ scale: 2 });
+    var canvas = document.createElement("canvas");
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    var ctx = canvas.getContext("2d");
+    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+    return new Promise(function(resolve, reject){
+      canvas.toBlob(function(blob){
+        if (!blob){ reject(new Error("Falha ao exportar a página do PDF.")); return; }
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(String(reader.result).split(",")[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }, "image/png");
+    });
+  }
   async function runAnalisarPdfProduto(pane, offerId, onFilled){
     var input = pane.querySelector("#setPdfFile");
     var file = input && input.files && input.files[0];
@@ -3075,6 +3115,8 @@
       pane.querySelector("#setCoverScene").value = data.coverScene || "";
       pane.querySelector("#setContentsScene").value = data.contentsScene || "";
       pane.querySelector("#setStepsScene").value = data.stepsScene || "";
+      try{ pane._pdfCoverBase64 = await renderPdfFirstPageToPngBase64(file); }
+      catch(renderErr){ console.error("render pdf cover failed", renderErr); pane._pdfCoverBase64 = null; }
       status.textContent = "Preenchido ✓ — revise e clique em \"Gerar as 3 fotos\"";
       if (data.offerTitle && offerId){
         var copyFinal = (data.offerTitle||"") + "\n\n" + (data.descriptionIntroDe||"") +
