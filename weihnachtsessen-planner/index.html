@@ -2,16 +2,16 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Weihnachtszauber – Weihnachtsessen Planner</title>
+<title>Weihnachtszauber – Weihnachtsmenü</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Weihnachtsessen">
+<meta name="apple-mobile-web-app-title" content="Weihnachtsmenü">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Weihnachtsessen Planner">
+<meta name="application-name" content="Weihnachtsmenü">
 <meta name="theme-color" content="#5c1a26">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="Gäste, Menü, Einkaufsliste, Budget, Zeitplan und Tischplanung für dein perfektes Weihnachtsessen – alles in deinem Browser gespeichert.">
@@ -350,7 +350,7 @@ function render(){
   const root = document.getElementById("root");
   root.innerHTML = `
     <div class="topbar">
-      <div class="lg"><small>Weihnachtszauber</small>Weihnachtsessen<em>Planner</em></div>
+      <div class="lg"><small>Weihnachtszauber</small>Weihnachtsmenü</div>
       <div class="status"><span class="dot"></span> Gespeichert in deinem Browser</div>
     </div>
     <nav class="tabs">${TABS.map(t=>`<button data-tab="${t.id}" class="${TAB===t.id?'on':''}">${t.label}</button>`).join("")}</nav>
