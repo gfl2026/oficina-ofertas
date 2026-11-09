@@ -1,6 +1,6 @@
 {
-  "name": "Weihnachtszauber – Mein perfektes Weihnachtsessen",
-  "short_name": "Weihnachtsessen",
+  "name": "Weihnachtszauber – Weihnachtsessen Planner",
+  "short_name": "Weihnachtsessen Planner",
   "description": "Gäste, Menü, Einkaufsliste, Budget, Zeitplan und Tischplanung für dein perfektes Weihnachtsessen.",
   "start_url": "./index.html",
   "scope": "./",

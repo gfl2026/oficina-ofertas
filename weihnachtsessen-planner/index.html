@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Weihnachtszauber – Mein perfektes Weihnachtsessen</title>
+<title>Weihnachtszauber – Weihnachtsessen Planner</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -31,6 +31,7 @@ button{font-family:inherit;cursor:pointer}
 .topbar{background:var(--burgundy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.12)}
 .lg{font-family:Georgia,serif;font-weight:700;font-size:20px;letter-spacing:.3px}
 .lg small{display:block;font-family:-apple-system,sans-serif;font-weight:400;font-size:11px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-top:-2px}
+.lg em{font-style:italic;font-weight:400;color:var(--gold);letter-spacing:.4px;margin-left:5px}
 .status{font-size:12px;color:#e8c98e;display:flex;align-items:center;gap:6px}
 .dot{width:7px;height:7px;border-radius:50%;background:#7fbf7f;display:inline-block}
 nav.tabs{display:flex;gap:4px;overflow-x:auto;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:58px;z-index:40;padding:6px 10px;scrollbar-width:thin}
@@ -349,7 +350,7 @@ function render(){
   const root = document.getElementById("root");
   root.innerHTML = `
     <div class="topbar">
-      <div class="lg"><small>Weihnachtszauber</small>Mein perfektes Weihnachtsessen</div>
+      <div class="lg"><small>Weihnachtszauber</small>Weihnachtsessen<em>Planner</em></div>
       <div class="status"><span class="dot"></span> Gespeichert in deinem Browser</div>
     </div>
     <nav class="tabs">${TABS.map(t=>`<button data-tab="${t.id}" class="${TAB===t.id?'on':''}">${t.label}</button>`).join("")}</nav>
